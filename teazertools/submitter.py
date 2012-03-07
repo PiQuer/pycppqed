@@ -281,7 +281,7 @@ class GenericSubmitter(object):
                                      parameters=dict(pars), matlab=self.matlab, average=self.average)
             self.CppqedObjects = [myjob]
             return 
-        expand = lambda x: [(x[0],i) for i in x[1].split(',')]
+        expand = lambda x: [(x[0],i) for i in x[1].split(';')]
         # expand: ('parname','val1,val2,val3') -> [('parname',val1),('parname',val2),('parname',val3)]
         rangepars = map(expand,rangepars)
         self.CppqedObjects = []
