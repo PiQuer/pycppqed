@@ -9,7 +9,7 @@ def main():
     parser = OptionParser(usage)
     
     parser.add_option("--testrun", action="store_true", dest="testrun", default=False,
-                      help="Submit test arrays to the cluster (only two seeds, T=1)")
+                      help="Submit test arrays to the cluster (only two seeds per ensemble, T=1 by default)")
     parser.add_option("--dryrun", action="store_true", dest="dryrun", default=False,
                       help="Don't submit anything, only print out the commands that are executed on the nodes")
     parser.add_option("--debug", action="store_true", dest="debug", default=False,

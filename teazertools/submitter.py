@@ -69,6 +69,9 @@ class JobArray(object):
         self.matlab = matlab
         self.average = average
         
+        self.testrun_t = 1
+        self.testrun_dt = 0.1
+        
         self.default_sub_pars = ['-b','y', '-v','PYTHONPATH','-v','PATH', '-q','all.q','-m','n','-j','yes']
     
     def _prepare_exec(self,seed,dryrun):
@@ -189,7 +192,8 @@ class JobArray(object):
         logfile = os.path.join(self.logdir,'$JOB_NAME.$JOB_ID.$TASK_ID.log')
         if testrun:
             seedspec = "1-%s" % min(2,len(self.seeds))
-            self.parameters['T'] = 1
+            self.parameters['T'] = self.testrun_t
+            self.parameters['Dt'] = self.testrun_dt
         else:
             seedspec = "1-%s" % len(self.seeds)
         
@@ -256,6 +260,8 @@ class GenericSubmitter(object):
         self.average = self.c.getboolean('Config', 'average')
         self.numericsubdirs = self.c.getboolean('Config', 'numericsubdirs')
         self.combine = self.c.getboolean('Config', 'combine')
+        self.testrun_t = self.c.getfloat('Config', 'testrun_t')
+        self.testrun_dt = self.c.getfloat('Config', 'testrun_dt')
         
         if self.average and self.c.has_section('Averages'):
             self.averageids = dict(self.c.items('Averages'))
@@ -272,14 +278,20 @@ class GenericSubmitter(object):
             raise ValueError('Could not evaluate seeds specification %s.' %self.seeds)
         
             
+    def _jobarray_maker(self, basedir, parameters):
+        myjob = JobArray(self.script,basedir=basedir,seeds=self.seeds,averageids=self.averageids,
+                         parameters=parameters, matlab=self.matlab, average=self.average)
+        myjob.testrun_t = self.testrun_t
+        myjob.testrun_dt = self.testrun_dt
+        return myjob
+        
+    
     def _generate_objects(self):
         pars = self.c.items('Parameters')
         singlepars = [i for i in pars if not i[1].count(';')]
         rangepars = [i for i in pars if i[1].count(';')]
         if not rangepars:
-            myjob = JobArray(self.script,basedir=self.basedir,seeds=self.seeds,averageids=self.averageids,
-                                     parameters=dict(pars), matlab=self.matlab, average=self.average)
-            self.CppqedObjects = [myjob]
+            self.CppqedObjects = [self._jobarray_maker(self.basedir,dict(pars))]
             return 
         expand = lambda x: [(x[0],i) for i in x[1].split(';')]
         # expand: ('parname','val1,val2,val3') -> [('parname',val1),('parname',val2),('parname',val3)]
@@ -295,9 +307,7 @@ class GenericSubmitter(object):
                 subdir = "%02d"%counter
             else: 
                 subdir = '_'.join(["%s=%s"%i for i in parset])
-            myjob = JobArray(self.script,basedir=os.path.join(self.basedir,subdir),seeds=self.seeds,
-                                     averageids=self.averageids,parameters=localpars, matlab=self.matlab,
-                                     average=self.average)
+            myjob = self._jobarray_maker(os.path.join(self.basedir,subdir), localpars)
             self.CppqedObjects.append(myjob)
             counter += 1
             

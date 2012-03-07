@@ -116,6 +116,8 @@ The keywords in this section are (optional keywords italic)
 * *combine*: If `True`, simulate all possible combinations of parameters with a range. If `False`, simulate
   one ensemble with the first value of all range parameters, one with the second value and so on until one
   of the ranges is exhausted (default `True`).
+* *testrun_t*: Use this value as `-T` parameter in testruns (default 1)
+* *testrun_dt*: Use this value as `-Dt` parameter in testruns (default 0.1) 
   
 [Averages]
 __________
@@ -156,8 +158,9 @@ the `$PATH` so that the scripts can be found on the nodes. Calling the submitter
 The options can be:
 
 * ``--testrun``: The testrun flag will cause the submitter to use only two seeds for each ensemble and to 
-  integrate up to `T=1` (this will be configurable in a future release).
+  integrate up to `T=1` (if not set otherwise with the *testrun_t* option).
 * ``--dryrun``: Don't actually submit anything to the teazer, instead print the commands that will be executed
   on the nodes (with the difference that the actual command will output data to a temporary directory first).
   This can be used to test if the command line is correct and the program will run properly.
-* ``--debug``: Very verbose debugging output.  
+* ``--debug``: Very verbose debugging output.
+* ``-h`` or ``--help``: Print help message.
