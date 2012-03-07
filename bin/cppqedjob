@@ -1,0 +1,20 @@
+#!/bin/env python
+
+import logging
+import sys
+import os
+import base64
+import cPickle as pickle
+
+def main():
+    if not os.environ.has_key('JobArray'):
+        logging.error("Need a JobArray object as environment variable. Note that this script is not intended to be called manually.")
+        sys.exit(1)
+    logging.debug("in main:")
+    logging.debug(os.environ['JobArray'])
+    job = pickle.loads(base64.decodestring(os.environ['JobArray']))
+    job.run()
+
+
+if __name__ == '__main__':
+    main()

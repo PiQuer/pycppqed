@@ -1,0 +1,30 @@
+#!/bin/env python
+
+from optparse import OptionParser
+import teazertools.submitter as submitter
+import logging
+
+def main():    
+    usage = "usage: %prog [options] configfile"
+    parser = OptionParser(usage)
+    
+    parser.add_option("--testrun", action="store_true", dest="testrun", default=False,
+                      help="Submit test arrays to the cluster (only two seeds, T=1)")
+    parser.add_option("--dryrun", action="store_true", dest="dryrun", default=False,
+                      help="Don't submit anything, only print out the commands that are executed on the nodes")
+    parser.add_option("--debug", action="store_true", dest="debug", default=False,
+                      help="Print a lot of ugly verbose output")
+
+    (options,args) = parser.parse_args()
+    
+    if len(args) != 1:
+        parser.error("incorrect number of arguments")
+    if options.debug: logging.getLogger().setLevel(logging.DEBUG)
+    
+    configfile = args[0]
+    
+    gs = submitter.GenericSubmitter(configfile)
+    gs.submit(testrun=options.testrun, dryrun=options.dryrun)
+
+if __name__ == '__main__':
+    main()

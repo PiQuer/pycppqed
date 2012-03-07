@@ -1,0 +1,39 @@
+#!/usr/bin/env python
+
+import teazertools.mean as mean
+import getopt, sys
+
+def usage():
+    print "Usage: " + sys.argv[0] + " [--outputdir|--datadir|--expvals|--variances|--varmeans|--stdevs|--stdevmeans] basename"
+
+def main():
+    try:
+        opts, args = getopt.getopt(sys.argv[1:], "h", ["outputdir=", "datadir=", "expvals=", "variances=", "varmeans=",
+                                                      "stdevs=", "stdevmeans="])
+    except getopt.GetoptError, err:
+        # print help information and exit:
+        print str(err) # will print something like "option -a not recognized"
+        sys.exit(2)
+    if len(args)<1:
+        usage()
+        sys.exit(2)
+    kwargs = {}
+    for o, a in opts:
+        if o == "-h":
+            usage()
+            sys.exit(0)
+        elif o == "--outputdir":
+            kwargs['outputdir'] = a
+        elif o == "--datadir":
+            kwargs['datadir'] = a
+        elif o in ("--expvals","--variances","--varmeans","--stdevs","--stdevmeans"):
+            kwargs[o[2:]] = map(int,a.split(','))  
+        else:
+            assert False, "unhandled option"
+    basename = args[0]
+    
+    mean.calculateMeans(basename, **kwargs)
+
+
+if __name__ == '__main__':
+    main()

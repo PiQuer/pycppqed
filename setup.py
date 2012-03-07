@@ -29,7 +29,9 @@ setup(
     author_email = "basti.kr@gmail.com",
     url = "http://github.com/bastikr/pycppqed",
     license = "BSD",
-    packages = ('pycppqed',),
+    packages = ('pycppqed','teazertools'),
+    package_data={'teazertools':['generic_submitter_defaults.conf']},
+    scripts=('bin/calculate_mean','bin/cppqedjob','bin/submitter'),
     ext_modules = [cio],
     cmdclass = {
         "test": test,

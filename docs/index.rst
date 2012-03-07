@@ -8,5 +8,7 @@ PyCppQED's documentation
    :maxdepth: 3
 
    user_guide
+   teazertools
    reference
+   reference_teazertools
 
