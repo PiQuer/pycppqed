@@ -152,7 +152,7 @@ class JobArray(object):
         :param dryrun: If `True`, don't simulate anything, but print a log message which contains the command that would
             have been run.
         """
-        self._prepare_exec(seed)
+        self._prepare_exec(seed,dryrun)
         if dryrun:
             logging.info("This is the command executed on a node (except the output goes to a temp directory first):\n"
                          + ' '.join(self.command) + "\n")
