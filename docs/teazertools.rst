@@ -92,9 +92,9 @@ Configuration File Syntax
 -------------------------
 
 The user has to provide a configuration file for the submitter on the command line. Values specified
-here have highest priority. In addition, if the script to run is named `scriptname`, the file `~/.scriptname.conf`
+here have highest priority. In addition, if the script to run is named `scriptname`, the file `~/.submitter/scriptname.conf`
 is parsed if it exists. This is a convenient place to specify parameters and configuration values which are always
-the same for a specific script. Finally, with lowest priority, the file `~/.generic_submitter.conf` is parsed if 
+the same for a specific script. Finally, with lowest priority, the file `~/.submitter/generic_submitter.conf` is parsed if 
 it exists.
 
 The configuration files can contain consists of the following sections.
@@ -126,7 +126,7 @@ In order to calculate the averaged expectation values correctly, the script has 
 correspond to regular expectation values, variations and standard deviations, respectively. Column numbering
 starts with 1.
 
-Typically, the `[Averages]`-section will be in the file `~/.scriptname.conf`, as this is always the same for a script,
+Typically, the `[Averages]`-section will be in the file `~/.submitter/scriptname.conf`, as this is always the same for a script,
 independent from the other parameters.
 
 * *expvals*: Comma separated list of columns which contain expectation values.

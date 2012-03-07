@@ -253,8 +253,8 @@ class GenericSubmitter(object):
     def _parse_config(self):
         self.c.read(self.config)
         self.script = os.path.expanduser(self.c.get('Config','script'))
-        self.c.read([self.defaultconfig,os.path.expanduser('~/.generic_submitter.conf'),
-                     os.path.expanduser('~/.'+os.path.basename(self.script)+'.conf'), self.config])
+        self.c.read([self.defaultconfig,os.path.expanduser('~/.submitter/generic_submitter.conf'),
+                     os.path.expanduser('~/.submitter/'+os.path.basename(self.script)+'.conf'), self.config])
         self.basedir = os.path.expanduser(self.c.get('Config', 'basedir'))
         self.matlab = self.c.getboolean('Config', 'matlab')
         self.average = self.c.getboolean('Config', 'average')
