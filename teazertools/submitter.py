@@ -154,7 +154,7 @@ class JobArray(object):
         """
         self._prepare_exec(seed,dryrun)
         if dryrun:
-            logging.info("This is the command executed on a node (except the output goes to a temp directory first):\n"
+            logging.info("This is the command executed on a node (with an additional appropriate -o flag):\n"
                          + ' '.join(self.command) + "\n")
             return
         if os.path.exists(self.output): os.remove(self.output)
