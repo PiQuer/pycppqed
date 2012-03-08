@@ -117,7 +117,7 @@ The keywords in this section are (optional keywords italic)
   one ensemble with the first value of all range parameters, one with the second value and so on until one
   of the ranges is exhausted (default `True`).
 * *testrun_t*: Use this value as `-T` parameter in testruns (default 1)
-* *testrun_dt*: Use this value as `-Dt` parameter in testruns (default 0.1) 
+* *testrun_dt*: Use this value as `-Dt` parameter in testruns (default: don't modify -Dt) 
   
 [Averages]
 __________

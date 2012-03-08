@@ -70,7 +70,7 @@ class JobArray(object):
         self.average = average
         
         self.testrun_t = 1
-        self.testrun_dt = 0.1
+        self.testrun_dt = None
         
         self.default_sub_pars = ['-b','y', '-v','PYTHONPATH','-v','PATH', '-q','all.q','-m','n','-j','yes']
     
@@ -193,7 +193,7 @@ class JobArray(object):
         if testrun:
             seedspec = "1-%s" % min(2,len(self.seeds))
             self.parameters['T'] = self.testrun_t
-            self.parameters['Dt'] = self.testrun_dt
+            if self.testrun_dt: self.parameters['Dt'] = self.testrun_dt
         else:
             seedspec = "1-%s" % len(self.seeds)
         
@@ -261,7 +261,10 @@ class GenericSubmitter(object):
         self.numericsubdirs = self.c.getboolean('Config', 'numericsubdirs')
         self.combine = self.c.getboolean('Config', 'combine')
         self.testrun_t = self.c.getfloat('Config', 'testrun_t')
-        self.testrun_dt = self.c.getfloat('Config', 'testrun_dt')
+        if self.c.has_option('Config', 'testrun_dt'):
+            self.testrun_dt = self.c.getfloat('Config', 'testrun_dt')
+        else:
+            self.testrun_dt = None
         
         if self.average and self.c.has_section('Averages'):
             self.averageids = dict(self.c.items('Averages'))
