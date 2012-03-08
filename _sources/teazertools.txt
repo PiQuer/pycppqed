@@ -150,7 +150,7 @@ Installation and Usage
 ----------------------
 
 The users `$PYTHONPATH` has to include the package directory, e.g. 
-`/home/c705283/pycppqed`, and the directory `pycppqed/bin` has to be added 
+`/home/c705283/pycppqed`, and the directory `pycppqed/bin` has to be added to
 the `$PATH` so that the scripts can be found on the nodes. Calling the submitter is done by::
 
 	   submitter [options] configfile
