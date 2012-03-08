@@ -163,7 +163,7 @@ class JobArray(object):
         if os.path.exists(self.output): os.remove(self.output)
         if os.path.exists(self.sv): os.remove(self.sv)
         try:
-            if not os.path.exists(self.datadir): os.makedirs(self.datadir)
+            if not os.path.exists(self.datadir): helpers.mkdir_p(self.datadir)
         except OSError: pass
         self._write_parameters()
         if self.diagnostics: self.diagnostics_before()
@@ -186,7 +186,7 @@ class JobArray(object):
         :type testrun: bool
         """
         try:
-            if not os.path.exists(self.logdir): os.makedirs(self.logdir)
+            if not os.path.exists(self.logdir): helpers.mkdir_p(self.logdir)
         except OSError: pass
         jobname = "Job"+self.basename
         logfile = os.path.join(self.logdir,'$JOB_NAME.$JOB_ID.$TASK_ID.log')

@@ -2,6 +2,18 @@
 """
 
 import os
+import errno
+
+def mkdir_p(path):
+    """http://stackoverflow.com/questions/600268/mkdir-p-functionality-in-python
+    """
+    try:
+        os.makedirs(path)
+    except OSError as exc: # Python >2.5
+        if exc.errno == errno.EEXIST:
+            pass
+        else: raise
+
 
 def generate_filelist(basename,dirname):
     """ This function generates a list of files which start with `basename` and either end with a digit (possibly with an `.bz2` extension)
