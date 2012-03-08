@@ -26,7 +26,6 @@ class TestSubmitter(unittest.TestCase):
         self.popen.returncode = 0
         self.popen.communicate = Mock(return_value=('574599.1-2:1',''))
         self.popen_patch = patch('subprocess.Popen',new=Mock(return_value=self.popen))
-        self.call_patch = patch('subprocess.call',new=Mock(return_value=0))
         self.expected_args_regular = []
         self.expected_args_averaging = []
         for i in range(4):
@@ -36,16 +35,21 @@ class TestSubmitter(unittest.TestCase):
             self.expected_args_averaging.append(['qsub', '-terse','-o', 'test/output/%02d/log/1particle1mode_mean.log'%(i+1), '-hold_jid', '574599', '-b', 'y', '-v', 'PYTHONPATH', 
                                            '-v', 'PATH', '-q', 'all.q', '-m', 'n', '-j', 'yes', 'calculate_mean', '--variances=4,8', '--expvals=5,6', 
                                            '--stdevs=10', '--datadir=test/output/%02d/traj'%(i+1), '--outputdir=test/output/%02d/mean'%(i+1), '1particle1mode'],)
+        self.p = self.popen_patch.start()
+    
+    def tearDown(self):
+        self.popen_patch.stop()
         
     def test01_submit(self):
         s = submitter.GenericSubmitter('test/test.conf')
-        with self.popen_patch as p:
-            s.submit()
-            for i in range(4):
-                self.assertEqual(((self.expected_args_regular[i],),{'stdout':subprocess.PIPE,'stderr':subprocess.PIPE}),p.call_args_list[2*i])
-                self.assertEqual(((self.expected_args_averaging[i],),{'stdout':subprocess.PIPE,'stderr':subprocess.PIPE}),p.call_args_list[2*i+1])
+        s.submit()
+        for i in range(4):
+            self.assertEqual(((self.expected_args_regular[i],),{'stdout':subprocess.PIPE,'stderr':subprocess.PIPE}),self.p.call_args_list[2*i])
+            self.assertEqual(((self.expected_args_averaging[i],),{'stdout':subprocess.PIPE,'stderr':subprocess.PIPE}),self.p.call_args_list[2*i+1])
+
+class TestRun(unittest.TestCase):
     
-    def test02_run(self):
+    def test01_run(self):
         s = submitter.GenericSubmitter('test/test.conf')
         s.CppqedObjects[0].run()
         f = open('test/output/01/parameters.pkl')
