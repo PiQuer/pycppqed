@@ -176,23 +176,43 @@ the environment variable $JobArray and calling the helper script <cite>cppqedjob
 <dl class="function">
 <dt id="teazertools.helpers.generate_filelist">
 <tt class="descclassname">teazertools.helpers.</tt><tt class="descname">generate_filelist</tt><big>(</big><em>basename</em>, <em>dirname</em><big>)</big><a class="headerlink" href="#teazertools.helpers.generate_filelist" title="Permalink to this definition">¶</a></dt>
-<dd><p>This function generates a list of files which start with <cite>basename</cite> and either end with a digit (possibly with an <cite>.bz2</cite> extension)
-:param basename: The files have to begin with this string.
-:type basename: str
-:param dirname: Search in this directory.
-:type dirname: str
-:returns: A list of matching filenames.
-:retval: list</p>
+<dd><p>This function generates a list of files which start with <cite>basename</cite> and either end with a digit (possibly with an <cite>.bz2</cite> extension)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>basename</strong> (<em>str</em>) &#8211; The files have to begin with this string.</li>
+<li><strong>dirname</strong> (<em>str</em>) &#8211; Search in this directory.</li>
+</ul>
+</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A list of matching filenames.</p>
+</td>
+</tr>
+<tr class="field"><th class="field-name">Retval :</th><td class="field-body"><p class="first last">list</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
 <dt id="teazertools.helpers.matlab_range_to_list">
 <tt class="descclassname">teazertools.helpers.</tt><tt class="descname">matlab_range_to_list</tt><big>(</big><em>s</em><big>)</big><a class="headerlink" href="#teazertools.helpers.matlab_range_to_list" title="Permalink to this definition">¶</a></dt>
-<dd><p>Generate a list from a matlab-style range definition.
-:param s: A range definition of the form <cite>start:[step:]stop</cite>. Only integers are supported, and <cite>stop</cite> is included.
-:type s: str
-:returns: A list <cite>[start,...,stop]</cite>
-:retval: list</p>
+<dd><p>Generate a list from a matlab-style range definition.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>s</strong> (<em>str</em>) &#8211; A range definition of the form <cite>start:[step:]stop</cite>. Only integers are supported, and <cite>stop</cite> is included.</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body">A list <cite>[start,...,stop]</cite></td>
+</tr>
+<tr class="field"><th class="field-name">Retval :</th><td class="field-body">list</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
