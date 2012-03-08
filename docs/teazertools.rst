@@ -1,7 +1,7 @@
 
-============
-TeazerTools
-============
+======================
+TeazerTools User Guide
+======================
 
 This is the documentation of additional tools which aim to simplify C++QED usage on the teazer cluster
 of the Institute for Theoretical Physics (University of Innsbruck).
