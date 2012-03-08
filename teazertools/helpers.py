@@ -5,6 +5,7 @@ import os
 
 def generate_filelist(basename,dirname):
     """ This function generates a list of files which start with `basename` and either end with a digit (possibly with an `.bz2` extension)
+    
     :param basename: The files have to begin with this string.
     :type basename: str
     :param dirname: Search in this directory.
@@ -33,6 +34,7 @@ def product(*args, **kwds):
         
 def matlab_range_to_list(s):
     """ Generate a list from a matlab-style range definition.
+    
     :param s: A range definition of the form `start:[step:]stop`. Only integers are supported, and `stop` is included.
     :type s: str
     :returns: A list `[start,...,stop]`
