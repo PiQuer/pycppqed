@@ -1,4 +1,4 @@
-#!/bin/env python
+#!/bin/env python -W ignore::FutureWarning -W ignore::DeprecationWarning
 
 import logging
 import sys
