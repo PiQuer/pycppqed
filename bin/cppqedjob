@@ -1,4 +1,4 @@
-#!/bin/env python -W ignore::FutureWarning -W ignore::DeprecationWarning
+#!/usr/bin/python
 
 import logging
 import sys
@@ -6,8 +6,11 @@ import os
 import base64
 import cPickle as pickle
 import teazertools.submitter as submitter
+import warnings
 
 def main():
+    warnings.simplefilter("ignore",FutureWarning)
+    warnings.simplefilter("ignore",DeprecationWarning)
     if not os.environ.has_key('JobArray'):
         logging.error("Need a JobArray object as environment variable. Note that this script is not intended to be called manually.")
         sys.exit(1)
