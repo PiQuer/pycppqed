@@ -205,10 +205,10 @@ class JobArray(object):
         command.extend(self.default_sub_pars)
         command.append('cppqedjob')
         logging.debug(repr(command))
-        p = subprocess.Popen(command, stdout=subprocess.PIPE)
-        (jobid,_) = p.communicate()
+        p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        (jobid,err) = p.communicate()
         if not p.returncode == 0:
-            logging.error("Submit script failed.")
+            logging.error("Submit script failed.\n%s"%err)
             sys.exit(1)
         else:
             logging.info("Successfully submitted job id %s." %jobid.rstrip())
@@ -218,7 +218,7 @@ class JobArray(object):
     
     def _submit_average(self,holdid):
         logfile = os.path.join(self.logdir,self.basename+'_mean.log')
-        command = ['qsub','-o', logfile, '-hold_jid', holdid]
+        command = ['qsub','-terse', '-o', logfile, '-hold_jid', holdid]
         command.extend(self.default_sub_pars)
         command.append('calculate_mean')
         for item in self.averageids.items():
@@ -227,11 +227,12 @@ class JobArray(object):
         command.append('--outputdir='+self.averagedir)
         command.append(self.basename)
         logging.debug(repr(command))
-        retcode = subprocess.call(command)
-        if retcode == 0:
-            logging.info("Submitted averaging script.")
+        p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        (jobid,err) = p.communicate()
+        if p.returncode == 0:
+            logging.info("Submitted averaging script with job id %s."%jobid.rstrip())
         else:
-            logging.error("Submit avarage failed.")
+            logging.error("Submit avarage failed.\n%s"%err)
             sys.exit(1)
 
 

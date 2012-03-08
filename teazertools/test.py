@@ -27,24 +27,23 @@ class TestSubmitter(unittest.TestCase):
         self.popen.communicate = Mock(return_value=('574599.1-2:1',''))
         self.popen_patch = patch('subprocess.Popen',new=Mock(return_value=self.popen))
         self.call_patch = patch('subprocess.call',new=Mock(return_value=0))
-        self.expected_args_popen = []
-        self.expected_args_call = []
+        self.expected_args_regular = []
+        self.expected_args_averaging = []
         for i in range(4):
-            self.expected_args_popen.append(['qsub', '-terse', '-v', 'JobArray', '-o', 'test/output/%02d/log/$JOB_NAME.$JOB_ID.$TASK_ID.log'%(i+1), 
+            self.expected_args_regular.append(['qsub', '-terse', '-v', 'JobArray', '-o', 'test/output/%02d/log/$JOB_NAME.$JOB_ID.$TASK_ID.log'%(i+1), 
                                             '-N', 'Job1particle1mode', '-t', '1-10', '-b', 'y', '-v', 'PYTHONPATH', '-v', 'PATH', '-q', 'all.q', 
                                             '-m', 'n', '-j', 'yes', 'cppqedjob'],)
-            self.expected_args_call.append(['qsub', '-o', 'test/output/%02d/log/1particle1mode_mean.log'%(i+1), '-hold_jid', '574599', '-b', 'y', '-v', 'PYTHONPATH', 
+            self.expected_args_averaging.append(['qsub', '-terse','-o', 'test/output/%02d/log/1particle1mode_mean.log'%(i+1), '-hold_jid', '574599', '-b', 'y', '-v', 'PYTHONPATH', 
                                            '-v', 'PATH', '-q', 'all.q', '-m', 'n', '-j', 'yes', 'calculate_mean', '--variances=4,8', '--expvals=5,6', 
                                            '--stdevs=10', '--datadir=test/output/%02d/traj'%(i+1), '--outputdir=test/output/%02d/mean'%(i+1), '1particle1mode'],)
         
     def test01_submit(self):
         s = submitter.GenericSubmitter('test/test.conf')
         with self.popen_patch as p:
-            with self.call_patch as c:
-                s.submit()
-                for i in range(4):
-                    self.assertEqual(((self.expected_args_popen[i],),{'stdout':subprocess.PIPE}),p.call_args_list[i])
-                    self.assertEqual(((self.expected_args_call[i],),{}),c.call_args_list[i])
+            s.submit()
+            for i in range(4):
+                self.assertEqual(((self.expected_args_regular[i],),{'stdout':subprocess.PIPE,'stderr':subprocess.PIPE}),p.call_args_list[2*i])
+                self.assertEqual(((self.expected_args_averaging[i],),{'stdout':subprocess.PIPE,'stderr':subprocess.PIPE}),p.call_args_list[2*i+1])
     
     def test02_run(self):
         s = submitter.GenericSubmitter('test/test.conf')
