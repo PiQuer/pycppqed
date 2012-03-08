@@ -6,3 +6,4 @@ MANIFEST
 *.dat
 .*
 *.so
+teazertools/test/output/
