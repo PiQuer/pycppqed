@@ -5,6 +5,7 @@ import sys
 import os
 import base64
 import cPickle as pickle
+import teazertools.submitter as submitter
 
 def main():
     if not os.environ.has_key('JobArray'):
