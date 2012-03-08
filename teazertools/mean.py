@@ -1,4 +1,4 @@
-""" This module calculates provides functions to average a C++QED MCWF trajectory and to save
+""" This module provides functions to average a C++QED MCWF trajectory and to save
 the results to a file. It is also possible to convert the results to a format readable by matlab. The main
 function is :func:`calculateMeans`.
 """
