@@ -1,0 +1,281 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>TeazerTools &mdash; PyCppQED v0.1.1 documentation</title>
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.1.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="PyCppQED v0.1.1 documentation" href="index.html" />
+    <link rel="next" title="PyCppQED Reference" href="reference.html" />
+    <link rel="prev" title="PyCppQED User Guide" href="user_guide.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="reference.html" title="PyCppQED Reference"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="user_guide.html" title="PyCppQED User Guide"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">PyCppQED v0.1.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="teazertools">
+<h1>TeazerTools<a class="headerlink" href="#teazertools" title="Permalink to this headline">¶</a></h1>
+<p>This is the documentation of additional tools which aim to simplify C++QED usage on the teazer cluster
+of the Institute for Theoretical Physics (University of Innsbruck).</p>
+<div class="section" id="submitter">
+<span id="submitter-documentation"></span><h2>Submitter<a class="headerlink" href="#submitter" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="summary">
+<h3>Summary<a class="headerlink" href="#summary" title="Permalink to this headline">¶</a></h3>
+<p>The submitter framework aims to offer an easy to use interface to generic tasks of
+sending one or several job arrays of C++QED trajectories to the teazer cluster and collecting the results. A configuration
+file defines the name of the script to run, a set of seeds, the location where to save the results and all
+the relevant parameters for the script. From this information, a job array is created and
+submitted to the teazer cluster.  The job array simulates all the trajectories corresponding to the set of seeds.
+Optionally, an additional job is submitted, which averages the expectation
+values over all trajectories. This job depends on the job array, which means it is only executed when the last trajectory
+has finished.</p>
+<p>For the physical parameters, it is also possible do define a <strong>range</strong> in the configuration file, e.g.
+<cite>omegac=1;2;3;4</cite>. If one or several parameters have such a range, a job array together with the averaging job
+is submitted for each possible combination of values within the ranges. In this case, the results are stored in
+sub-directories named after the parameter combinations (or plain numbers, depending on configuration).</p>
+<p>The behavior of the submitter is controlled by the class <tt class="xref py py-class docutils literal"><span class="pre">cppqedtools.GenericSubmitter</span></tt>. This aims to be as
+generic as possible and can be subclassed for more specific features, e.g. some parameters depending on some others.</p>
+</div>
+<div class="section" id="example">
+<h3>Example<a class="headerlink" href="#example" title="Permalink to this headline">¶</a></h3>
+<p>Take for example the following configuration file <cite>example.conf</cite>:</p>
+<div class="highlight-python"><pre>[Config]
+script=1particle1mode
+basedir=/scratch/c705283/Data
+seeds=1001:1010
+
+[Averages]
+expvals=5;6
+variances=4;8
+stdevs=10
+
+[Parameters]
+dc=0
+Dt=0.1
+T=5
+deltaC=-10;-8
+kappa=5;6;7</pre>
+</div>
+<p>This will generate the following directory structure:</p>
+<div class="highlight-python"><pre>/scratch/c705283/Data/deltaC=-10_kappa=5/parameters.{txt,pkl,mat}
+                                        /log/...
+                                        /mean/...
+                                        /traj/...
+/scratch/c705283/Data/deltaC=-8_kappa=5/parameters.{txt,pkl,mat}
+                                       /log/...
+                                       /mean/...
+                                       /traj/...
+/scratch/c705283/Data/deltaC=-10_kappa=6/parameters.{txt,pkl,mat}
+                                        /log/...
+                                        /mean/...
+                                        /traj/...
+/scratch/c705283/Data/deltaC=-8_kappa=6/parameters.{txt,pkl,mat}
+                                       /log/...
+                                       /mean/...
+                                       /traj/...
+/scratch/c705283/Data/deltaC=-10_kappa=7/parameters.{txt,pkl,mat}
+                                       /log/...
+                                       /mean/...
+                                       /traj/...
+/scratch/c705283/Data/deltaC=-8_kappa=7/parameters.{txt,pkl,mat}
+                                       /log/...
+                                       /mean/...
+                                       /traj/...</pre>
+</div>
+<p>Each of the <cite>traj</cite> directories will contain the trajectories (C++QED output and matlab format)
+and the final statevectors. The <cite>log</cite> directories
+will contain log messages and diagnostics of the jobs. The <cite>mean</cite> directories will each contain two files
+<cite>1particle1mode_mean.npz</cite> and <cite>1particle1mode_mean.mat</cite> with the averaged expectation values suitable to
+load into python and matlab, respectively. The files <cite>parameters.{txt,pkl,mat}</cite> contain all the parameters
+with which the script was called in a human readable- python- and matlab format, respectively. These
+parameters can be used in further data processing, e.g. plots.</p>
+</div>
+<div class="section" id="configuration-file-syntax">
+<h3>Configuration File Syntax<a class="headerlink" href="#configuration-file-syntax" title="Permalink to this headline">¶</a></h3>
+<p>The user has to provide a configuration file for the submitter on the command line. Values specified
+here have highest priority. In addition, if the script to run is named <cite>scriptname</cite>, the file <cite>~/.submitter/scriptname.conf</cite>
+is parsed if it exists. This is a convenient place to specify parameters and configuration values which are always
+the same for a specific script. Finally, with lowest priority, the file <cite>~/.submitter/generic_submitter.conf</cite> is parsed if
+it exists.</p>
+<p>The configuration files can contain consists of the following sections.</p>
+<div class="section" id="config">
+<h4>[Config]<a class="headerlink" href="#config" title="Permalink to this headline">¶</a></h4>
+<p>The keywords in this section are (optional keywords italic)</p>
+<ul class="simple">
+<li><strong>script</strong>: The C++QED binary to be called. This has to be in the <cite>$PATH</cite>, or an absolute path must
+be provided. The scriptname (with directory path stripped if provided) also serves as basename for
+trajectory and log files.</li>
+<li><strong>basedir</strong>: The output data directory structure will be created relative to this path.</li>
+<li><strong>seeds</strong>: This specifies the sets of seeds for each trajectory ensemble. This can be single seed number,
+a comma separated list of seeds or a range in matlab syntax (<cite>start:step:stop</cite>).</li>
+<li><em>matlab</em>: Convert output trajectories and statevectors to matlab format (default <cite>True</cite>)</li>
+<li><em>numericsubdirs</em>: Instead of descriptive sub-directories which involve the values of the varied parameters,
+use numeric sub-directories 01/, 02/ etc. This can be convenient for further data procession. (default <cite>False</cite>)</li>
+<li><em>combine</em>: If <cite>True</cite>, simulate all possible combinations of parameters with a range. If <cite>False</cite>, simulate
+one ensemble with the first value of all range parameters, one with the second value and so on until one
+of the ranges is exhausted (default <cite>True</cite>).</li>
+<li><em>testrun_t</em>: Use this value as <cite>-T</cite> parameter in testruns (default 1)</li>
+<li><em>testrun_dt</em>: Use this value as <cite>-Dt</cite> parameter in testruns (default 0.1)</li>
+</ul>
+</div>
+<div class="section" id="averages">
+<h4>[Averages]<a class="headerlink" href="#averages" title="Permalink to this headline">¶</a></h4>
+<p>In order to calculate the averaged expectation values correctly, the script has to know which columns
+correspond to regular expectation values, variations and standard deviations, respectively. Column numbering
+starts with 1.</p>
+<p>Typically, the <cite>[Averages]</cite>-section will be in the file <cite>~/.submitter/scriptname.conf</cite>, as this is always the same for a script,
+independent from the other parameters.</p>
+<ul class="simple">
+<li><em>expvals</em>: Comma separated list of columns which contain expectation values.</li>
+<li><em>variances</em>: Comma separated list of columns which contain variances.</li>
+<li><em>stdevs</em>: Comma separated list of columns which contain standard deviations.</li>
+</ul>
+<p>In order to calculate the averaged variances and standard deviations, the regular expectation values of
+the observable has to be known. If not specified otherwise, this will be picked from the column
+just in front of the corresponding variance or standard deviation and need not to be specified in <cite>expvals</cite>.
+In case this is not correct, the user can supply the additional keywords <cite>varmeans</cite> and <cite>stdevmeans</cite> with a
+list of the correct positions.</p>
+</div>
+<div class="section" id="parameters">
+<h4>[Parameters]<a class="headerlink" href="#parameters" title="Permalink to this headline">¶</a></h4>
+<p>Every <cite>key=value</cite> pair in this section will be passed on to the C++QED script as a <tt class="docutils literal"><span class="pre">--key</span> <span class="pre">value</span></tt> command line
+parameter. The <cite>value</cite> can also be a range (a semicolon separated list of values). In this case, a trajectory ensemble
+will be submitted for each value (or combination of values if several parameters have a range).</p>
+</div>
+</div>
+<div class="section" id="installation-and-usage">
+<h3>Installation and Usage<a class="headerlink" href="#installation-and-usage" title="Permalink to this headline">¶</a></h3>
+<p>The users <cite>$PYTHONPATH</cite> has to include the package directory, e.g.
+<cite>/home/c705283/pycppqed</cite>, and the directory <cite>pycppqed/bin</cite> has to be added
+the <cite>$PATH</cite> so that the scripts can be found on the nodes. Calling the submitter is done by:</p>
+<div class="highlight-python"><pre>submitter [options] configfile</pre>
+</div>
+<p>The options can be:</p>
+<ul class="simple">
+<li><tt class="docutils literal"><span class="pre">--testrun</span></tt>: The testrun flag will cause the submitter to use only two seeds for each ensemble and to
+integrate up to <cite>T=1</cite> (if not set otherwise with the <em>testrun_t</em> option).</li>
+<li><tt class="docutils literal"><span class="pre">--dryrun</span></tt>: Don&#8217;t actually submit anything to the teazer, instead print the commands that will be executed
+on the nodes (with the difference that the actual command will output data to a temporary directory first).
+This can be used to test if the command line is correct and the program will run properly.</li>
+<li><tt class="docutils literal"><span class="pre">--debug</span></tt>: Very verbose debugging output.</li>
+<li><tt class="docutils literal"><span class="pre">-h</span></tt> or <tt class="docutils literal"><span class="pre">--help</span></tt>: Print help message.</li>
+</ul>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">TeazerTools</a><ul>
+<li><a class="reference internal" href="#submitter">Submitter</a><ul>
+<li><a class="reference internal" href="#summary">Summary</a></li>
+<li><a class="reference internal" href="#example">Example</a></li>
+<li><a class="reference internal" href="#configuration-file-syntax">Configuration File Syntax</a><ul>
+<li><a class="reference internal" href="#config">[Config]</a></li>
+<li><a class="reference internal" href="#averages">[Averages]</a></li>
+<li><a class="reference internal" href="#parameters">[Parameters]</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#installation-and-usage">Installation and Usage</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="user_guide.html"
+                        title="previous chapter">PyCppQED User Guide</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="reference.html"
+                        title="next chapter">PyCppQED Reference</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/teazertools.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="reference.html" title="PyCppQED Reference"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="user_guide.html" title="PyCppQED User Guide"
+             >previous</a> |</li>
+        <li><a href="index.html">PyCppQED v0.1.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2009, Sebastian Krämer.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+    </div>
+  </body>
+</html>
