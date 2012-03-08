@@ -71,7 +71,7 @@ def calculateMeans(basename,expvals=[],variances=[],varmeans=[],stdevs=[],stdevm
     :type stdevmeans: list
     :param datadir: Directory name from which files are loaded.
     :type datadir: str
-    :param outputdir: Directory name where output is written to.
+    :param outputdir: Directory name where output is written to. If this is `None`, don't write anny output.
     :type outputdir: str
     :param usesaved: If true, only calculate the results if they have not been calculated before, otherwise try to load
         results from the output directory. Previously calculated results are only used if all trajectory files are
@@ -92,17 +92,18 @@ def calculateMeans(basename,expvals=[],variances=[],varmeans=[],stdevs=[],stdevm
     
     # First check if we need to do anything
     filelist = helpers.generate_filelist(basename,datadir)
-    datafile = os.path.join(outputdir,basename+".mean.npz")
-    matlabfile = os.path.join(outputdir,basename+".mean.mat")
-    if os.path.exists(datafile) and usesaved:
-        if max(map(os.path.getmtime,filelist))<os.path.getmtime(datafile):
-            saved = np.load(datafile)
-            if np.array_equal(np.array(expvals),saved['expvals']) \
-                and np.array_equal(np.array(variances),saved['variances']) \
-                and np.array_equal(np.array(varmeans),saved['varmeans']) \
-                and np.array_equal(np.array(stdevs),saved['stdevs']) \
-                and np.array_equal(np.array(stdevmeans),saved['stdevmeans']):
-                    return saved['result']
+    if outputdir:
+        datafile = os.path.join(outputdir,basename+".mean.npz")
+        matlabfile = os.path.join(outputdir,basename+".mean.mat")
+        if os.path.exists(datafile) and usesaved:
+            if max(map(os.path.getmtime,filelist))<os.path.getmtime(datafile):
+                saved = np.load(datafile)
+                if np.array_equal(np.array(expvals),saved['expvals']) \
+                    and np.array_equal(np.array(variances),saved['variances']) \
+                    and np.array_equal(np.array(varmeans),saved['varmeans']) \
+                    and np.array_equal(np.array(stdevs),saved['stdevs']) \
+                    and np.array_equal(np.array(stdevmeans),saved['stdevmeans']):
+                        return saved['result']
 
     # initialize result with the zero and the correct shape, the times in the first row
     (evs,_)= load_cppqed(filelist[0])
@@ -122,12 +123,13 @@ def calculateMeans(basename,expvals=[],variances=[],varmeans=[],stdevs=[],stdevm
     result[stdevs] = result[stdevs]-result[stdevmeans]**2
     result[variances] = np.sqrt(result[variances]-result[varmeans]**2)
     result = np.transpose(result)
-    if not os.path.exists(outputdir):
-        os.makedirs(outputdir)
-    np.savez(datafile,result=result,expvals=np.array(expvals),variances=np.array(variances),
-             varmeans=np.array(varmeans),stdevs=np.array(stdevs),stdevmeans=np.array(stdevmeans))
-    if matlab:
-        scipy.io.savemat(matlabfile,{"result":result,"means":means,"expvals":np.array(expvals)+1,"variances":np.array(variances)+1,
-                                        "varmeans":np.array(varmeans)+1,"stdevs":np.array(stdevs)+1,"stdevmeans":np.array(stdevmeans)+1})
+    if outputdir:
+        if not os.path.exists(outputdir):
+            os.makedirs(outputdir)
+            np.savez(datafile,result=result,expvals=np.array(expvals),variances=np.array(variances),
+                     varmeans=np.array(varmeans),stdevs=np.array(stdevs),stdevmeans=np.array(stdevmeans))
+        if matlab:
+            scipy.io.savemat(matlabfile,{"result":result,"means":means,"expvals":np.array(expvals)+1,"variances":np.array(variances)+1,
+                                         "varmeans":np.array(varmeans)+1,"stdevs":np.array(stdevs)+1,"stdevmeans":np.array(stdevmeans)+1})
     return result
 
