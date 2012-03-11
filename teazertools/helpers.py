@@ -4,6 +4,18 @@
 import os
 import errno
 
+def import_class(s):
+    r"""Import a class specified by the string s.
+
+    :param s: The name of the class to import, e.g. 'mypackage.mymodule.myclass'
+    :returns: The class.
+    """
+    components = s.split('.')
+    modulename = '.'.join(components[:-1])
+    classname = components[-1]
+    module = __import__(modulename, fromlist=[classname])
+    return getattr(module,classname)
+
 def mkdir_p(path):
     """http://stackoverflow.com/questions/600268/mkdir-p-functionality-in-python
     """

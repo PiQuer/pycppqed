@@ -1,7 +1,7 @@
-#!/bin/env python
+#!/usr/bin/env python
 
 from optparse import OptionParser
-import teazertools.submitter as submitter
+import teazertools.helpers as helpers
 import logging
 
 def main():    
@@ -12,6 +12,9 @@ def main():
                       help="Submit test arrays to the cluster (only two seeds per ensemble, T=1 by default)")
     parser.add_option("--dryrun", action="store_true", dest="dryrun", default=False,
                       help="Don't submit anything, only print out the commands that are executed on the nodes")
+    parser.add_option("--class", dest="classname", metavar="CLASS",
+                      default='teazertools.submitter.GenericSubmitter',
+                      help="Use CLASS instead of teazertools.submitter.GenericSubmitter, typically CLASS is a subclass of GenericSubmitter")
     parser.add_option("--debug", action="store_true", dest="debug", default=False,
                       help="Print a lot of ugly verbose output")
 
@@ -23,7 +26,8 @@ def main():
     
     configfile = args[0]
     
-    gs = submitter.GenericSubmitter(configfile)
+    SubmitterClass = helpers.import_class(options.classname)
+    gs = SubmitterClass(configfile)
     gs.submit(testrun=options.testrun, dryrun=options.dryrun)
 
 if __name__ == '__main__':
