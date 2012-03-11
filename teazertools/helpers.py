@@ -13,7 +13,7 @@ def import_class(s):
     components = s.split('.')
     modulename = '.'.join(components[:-1])
     classname = components[-1]
-    module = __import__(modulename, fromlist=[classname])
+    module = __import__(modulename, globals(), locals(), [classname])
     return getattr(module,classname)
 
 def mkdir_p(path):
