@@ -15,6 +15,8 @@ def main():
     parser.add_option("--class", dest="classname", metavar="CLASS",
                       default='teazertools.submitter.GenericSubmitter',
                       help="Use CLASS instead of teazertools.submitter.GenericSubmitter, typically CLASS is a subclass of GenericSubmitter")
+    parser.add_option("--averageonly", action="store_true", dest="averageonly", default=False,
+                      help="Only submit the job to compute the average expectation values")
     parser.add_option("--debug", action="store_true", dest="debug", default=False,
                       help="Print a lot of ugly verbose output")
 

@@ -42,7 +42,7 @@ class TestSubmitter(unittest.TestCase):
         
     def test01_submit(self):
         s = submitter.GenericSubmitter('test/test.conf')
-        s.submit()
+        s.act()
         for i in range(4):
             self.assertEqual(((self.expected_args_regular[i],),{'stdout':subprocess.PIPE,'stderr':subprocess.PIPE}),self.p.call_args_list[2*i])
             self.assertEqual(((self.expected_args_averaging[i],),{'stdout':subprocess.PIPE,'stderr':subprocess.PIPE}),self.p.call_args_list[2*i+1])

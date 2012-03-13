@@ -157,8 +157,7 @@ class JobArray(object):
         """
         self._prepare_exec(seed,dryrun)
         if dryrun:
-            logging.info("This is the command executed on a node (with an additional appropriate -o flag):\n"
-                         + subprocess.list2cmdline(self.command) + "\n")
+            self._execute(self.command, dryrun, dryrunmessage="Executed on a node (with an additional appropriate -o flag):")
             return
         if os.path.exists(self.output): os.remove(self.output)
         if os.path.exists(self.sv): os.remove(self.sv)
@@ -167,17 +166,32 @@ class JobArray(object):
         except OSError: pass
         self._write_parameters()
         if self.diagnostics: self.diagnostics_before()
-        retcode = subprocess.call(self.command)
+        (std,err,retcode) = self._execute(self.command)
         if not retcode == 0:
-            logging.error("C++QED script failed with exitcode %s" % retcode)
+            logging.error("C++QED script failed with exitcode %s:\n%s" % (retcode,err))
             sys.exit(1)
         if self.diagnostics: self.diagnostics_after()
+        if self.compress:
+            self._compress()
         if self.matlab:
             self._convert_matlab()
         if self.teazer:
             self._move_data()
- 
-    def submit(self, testrun=False):
+            
+    def _execute(self, command, dryrun=False, dryrunmessage="Would run command:", dryrunresult=("","")):
+        logging.debug(subprocess.list2cmdline(command))
+        if dryrun:
+            logging.info(dryrunmessage)
+            logging.info(subprocess.list2cmdline(command))
+            (std,err) = dryrunresult
+            returncode = 0
+        else:
+            p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            (std,err) = p.communicate()
+            returncode = p.returncode
+        return (std,err,returncode)
+        
+    def submit(self, testrun=False, dryrun=False):
         """Submit the job array to teazer. Technically this is done by serializing the object, storing it in
         the environment variable $JobArray and calling the helper script `cppqedjob`. The helper script
         (running on a node) restores the object from the environment variable and calls :func:`run`.
@@ -186,7 +200,7 @@ class JobArray(object):
         :type testrun: bool
         """
         try:
-            if not os.path.exists(self.logdir): helpers.mkdir_p(self.logdir)
+            if not os.path.exists(self.logdir) and not dryrun: helpers.mkdir_p(self.logdir)
         except OSError: pass
         jobname = "Job"+self.basename
         logfile = os.path.join(self.logdir,'$JOB_NAME.$JOB_ID.$TASK_ID.log')
@@ -204,21 +218,32 @@ class JobArray(object):
         command = ['qsub','-terse','-v','JobArray', '-o', logfile, '-N', jobname, '-t', seedspec]
         command.extend(self.default_sub_pars)
         command.append('cppqedjob')
-        logging.debug(repr(command))
-        p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        (jobid,err) = p.communicate()
-        if not p.returncode == 0:
+        (jobid,err,returncode) = self._execute(command, dryrun, dryrunresult=("100.0",""),
+                                               dryrunmessage="Submit command on teazer:")
+        if not returncode == 0:
             logging.error("Submit script failed.\n%s"%err)
             sys.exit(1)
-        else:
+        elif not dryrun:
             logging.info("Successfully submitted job id %s." %jobid.rstrip())
         jobid = jobid.split('.')[0]
         if self.average:
-            self._submit_average(jobid)
+            self.submit_average(holdid=jobid,dryrun=dryrun)
     
-    def _submit_average(self,holdid):
+    def submit_average(self,holdid=None,dryrun=False):
+        r"""Submit a job to teazer to compute the average expectation values.
+        
+        :param holdid: Make this job depend on the job array with id `holdid`.
+        :type holdid: int
+        :param dryrun: If `True`, don't submit anything, instead print the command that would
+            have been called.
+        :type dryrun: bool
+        :returns returncode: qsub return value
+        :retval: int
+        """
         logfile = os.path.join(self.logdir,self.basename+'_mean.log')
-        command = ['qsub','-terse', '-o', logfile, '-hold_jid', holdid]
+        command = ['qsub','-terse', '-o', logfile]
+        if holdid:
+            command.extend(('-hold_jid',holdid))
         command.extend(self.default_sub_pars)
         command.append('calculate_mean')
         for item in self.averageids.items():
@@ -226,14 +251,13 @@ class JobArray(object):
         command.append('--datadir='+self.datadir)
         command.append('--outputdir='+self.averagedir)
         command.append(self.basename)
-        logging.debug(repr(command))
-        p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        (jobid,err) = p.communicate()
-        if p.returncode == 0:
+        (jobid,err,returncode) = self._execute(command, dryrun, dryrunmessage="Submit command on teazer:")
+        if returncode == 0 and not dryrun:
             logging.info("Submitted averaging script with job id %s."%jobid.rstrip())
         else:
             logging.error("Submit avarage failed.\n%s"%err)
             sys.exit(1)
+        return returncode
 
 
 class GenericSubmitter(object):
@@ -315,15 +339,23 @@ class GenericSubmitter(object):
             self.CppqedObjects.append(myjob)
             counter += 1
             
-    def submit(self, testrun=False, dryrun=False):
+    def act(self, testrun=False, dryrun=False, averageonly=False, config=None):
         """Submit all job arrays to the teazer cluster.
         
         :param testrun: Perform a test run with only two seeds and `T=1`.
         :type testrun: bool
         :param dryrun: Don't submit anything, instead print what would be run on the nodes.
+        :param config: An object for further configuration of the behaviour.
+        :type config: :class:`optparse.OptionParse`
         :type dryrun: bool
         """
         for c in self.CppqedObjects:
-            if dryrun: c.run(dryrun=True)
-            else: c.submit(testrun)
+            if averageonly:
+                c.submit_average(dryrun=dryrun)
+            else: 
+                c.submit(testrun=testrun,dryrun=dryrun)
+                if dryrun: c.run(dryrun=dryrun)
+            
+    def submit_average(self, dryrun=False):
+        pass
 

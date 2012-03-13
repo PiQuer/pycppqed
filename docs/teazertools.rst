@@ -162,5 +162,7 @@ The options can be:
 * ``--dryrun``: Don't actually submit anything to the teazer, instead print the commands that will be executed
   on the nodes (with the difference that the actual command will output data to a temporary directory first).
   This can be used to test if the command line is correct and the program will run properly.
+* ``--class=CLASS``: Use CLASS as submitter class. This defaults to :class:`teazertools.submitter.GenericSubmitter`,
+  and typically CLASS is a subclass of this to extend functionality.
 * ``--debug``: Very verbose debugging output.
 * ``-h`` or ``--help``: Print help message.
