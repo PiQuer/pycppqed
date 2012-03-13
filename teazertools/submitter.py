@@ -68,9 +68,12 @@ class JobArray(object):
         self.averageids = averageids
         self.matlab = matlab
         self.average = average
+        self.compress = False
         
         self.testrun_t = 1
         self.testrun_dt = None
+        
+        self.datafiles = []
         
         self.default_sub_pars = ['-b','y', '-v','PYTHONPATH','-v','PATH', '-q','all.q','-m','n','-j','yes']
     
@@ -92,6 +95,7 @@ class JobArray(object):
             suffix = ''
         self.output = os.path.join(self.outputdir,self.basename+'.out'+suffix)
         self.sv = self.output+'.sv'
+        self.datafiles.extend((self.output, self.sv))
         if not dryrun:
             self.command.extend(('--o',self.output))
         
@@ -130,21 +134,23 @@ class JobArray(object):
         pickle.dump(numeric, f, protocol=-1)
         f.close()
         scipy.io.savemat(self.parameterfilebase+".mat", numeric)
-        
+    
+    def _compress(self):
+        for f in self.datafiles:
+            os.system('bzip2 %s'%f)
+        self.datafiles = [f+'.bz2' for f in self.datafiles]
     
     def _move_data(self):
-        shutil.move(self.output, self.datadir)
-        shutil.move(self.sv, self.datadir)
-        if self.matlab:
-            shutil.move(self.output+".mat", self.datadir)
-            shutil.move(self.output+".sv.mat", self.datadir)
+        for f in self.datafiles:
+            shutil.move(f, self.datadir)
         shutil.rmtree(self.outputdir, ignore_errors=True)
     
     def _convert_matlab(self):
         evs, svs = qed.load_cppqed(self.output)
-        finalsv = qed.load_statevector(self.output+".sv")
-        scipy.io.savemat(self.output+".mat", {"evs":evs, "svs":svs})
-        scipy.io.savemat(self.output+".sv.mat",{"sv":finalsv})
+        finalsv = qed.load_statevector(self.sv)
+        scipy.io.savemat(self.output+".mat", {"evs":evs, "svs":svs}, do_compression=self.compress)
+        scipy.io.savemat(self.sv+".mat",{"sv":finalsv}, do_compression=self.compress)
+        self.datafiles.extend((self.output+".mat",self.sv+".mat"))
     
     def run(self, seed=0, dryrun=False):
         """If the environment variable `$SGE_TASK_ID` is set (i.e. we are on a node), simulate the trajectory
@@ -286,6 +292,7 @@ class GenericSubmitter(object):
         self.numericsubdirs = self.c.getboolean('Config', 'numericsubdirs')
         self.combine = self.c.getboolean('Config', 'combine')
         self.testrun_t = self.c.getfloat('Config', 'testrun_t')
+        self.compress = self.c.getboolean('Config', 'compress')
         if self.c.has_option('Config', 'testrun_dt'):
             self.testrun_dt = self.c.getfloat('Config', 'testrun_dt')
         else:
