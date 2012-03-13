@@ -318,8 +318,13 @@ class GenericSubmitter(object):
                          parameters=parameters, matlab=self.matlab, average=self.average)
         myjob.testrun_t = self.testrun_t
         myjob.testrun_dt = self.testrun_dt
+        myjob.compress = self.compress
         return myjob
         
+    def _combine_pars(self, rangepars):
+        if self.combine: generator = helpers.product(*rangepars)
+        else: generator = itertools.izip(*rangepars)
+        return generator
     
     def _generate_objects(self):
         pars = self.c.items('Parameters')
@@ -332,9 +337,8 @@ class GenericSubmitter(object):
         # expand: ('parname','val1,val2,val3') -> [('parname',val1),('parname',val2),('parname',val3)]
         rangepars = map(expand,rangepars)
         self.CppqedObjects = []
+        generator = self._combine_pars(rangepars)
         counter = 1
-        if self.combine: generator = helpers.product(*rangepars)
-        else: generator = itertools.izip(*rangepars)
         for parset in generator:
             localpars=dict(singlepars)
             localpars.update(dict(parset))
