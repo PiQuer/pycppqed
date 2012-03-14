@@ -258,8 +258,8 @@ class JobArray(object):
         command.append('--outputdir='+self.averagedir)
         command.append(self.basename)
         (jobid,err,returncode) = self._execute(command, dryrun, dryrunmessage="Submit command on teazer:")
-        if returncode == 0 and not dryrun:
-            logging.info("Submitted averaging script with job id %s."%jobid.rstrip())
+        if returncode == 0:
+            if not dryrun: logging.info("Submitted averaging script with job id %s."%jobid.rstrip())
         else:
             logging.error("Submit avarage failed.\n%s"%err)
             sys.exit(1)
