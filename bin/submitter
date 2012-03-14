@@ -30,7 +30,7 @@ def main():
     
     SubmitterClass = helpers.import_class(options.classname)
     gs = SubmitterClass(configfile)
-    gs.act(testrun=options.testrun, dryrun=options.dryrun)
+    gs.act(testrun=options.testrun, dryrun=options.dryrun, averageonly=options.averageonly)
 
 if __name__ == '__main__':
     main()
