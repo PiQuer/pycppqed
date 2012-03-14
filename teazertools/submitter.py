@@ -15,6 +15,7 @@ import subprocess
 import sys
 import base64
 import pycppqed as qed
+import numpy as np
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 
@@ -69,6 +70,7 @@ class JobArray(object):
         self.matlab = matlab
         self.average = average
         self.compress = False
+        self.resume = False
         
         self.testrun_t = 1
         self.testrun_dt = None
@@ -95,6 +97,8 @@ class JobArray(object):
             suffix = ''
         self.output = os.path.join(self.outputdir,self.basename+'.out'+suffix)
         self.sv = self.output+'.sv'
+        self.targetoutput = os.path.join(self.datadir,self.basename+'.out'+suffix)
+        self.targetsv = self.targetoutput+'.sv'
         self.datafiles.extend((self.output, self.sv))
         if not dryrun:
             self.command.extend(('--o',self.output))
@@ -152,6 +156,39 @@ class JobArray(object):
         scipy.io.savemat(self.sv+".mat",{"sv":finalsv}, do_compression=self.compress)
         self.datafiles.extend((self.output+".mat",self.sv+".mat"))
     
+    def _prepare_resume(self):
+        if not self.resume:
+            return False
+        if os.path.exists(self.targetoutput):
+            lastT = helpers.cppqed_t(self.targetoutput)
+            target_traj_compressed = False
+        elif os.path.exists(self.targetoutput+'.bz2'):
+            lastT = helpers.cppqed_t(self.targetoutput+'.bz2')
+            target_traj_compressed = True
+            self.targetoutput = self.targetoutput+'.bz2'
+        else:
+            return False
+        if lastT == None: return False
+        if np.less_equal(self.parameters['T'],lastT):
+            return True
+        if os.path.exists(self.targetsv):
+            target_sv_compressed = False
+        elif os.path.exists(self.targetsv+'.bz2'):
+            target_sv_compressed = True
+            self.targetsv = self.targetsv+'.bz2'
+        if self.teazer:
+            logging.debug('Moving %s to %s.'%(self.targetoutput,self.outputdir))
+            shutil.copy(self.targetoutput, self.outputdir)
+            logging.debug('Moving %s to %s.'%(self.targetsv,self.outputdir))
+            shutil.copy(self.targetsv, self.outputdir)
+        if target_traj_compressed:
+            logging.debug('Uncompressing %s.'%self.output+'.bz2')
+            os.system('bunzip2 %s'%self.output+'.bz2')
+        if target_sv_compressed:
+            logging.debug('Uncompressing %s.'%self.sv+'.bz2')
+            os.system('bunzip2 %s'%self.sv+'.bz2')
+        return False
+    
     def run(self, seed=0, dryrun=False):
         """If the environment variable `$SGE_TASK_ID` is set (i.e. we are on a node), simulate the trajectory
         `self.seeds[$SGE_TASK_ID]`. Otherwise, simulate the trajectory `self.seeds[seed]` locally.
@@ -165,8 +202,8 @@ class JobArray(object):
         if dryrun:
             self._execute(self.command, dryrun, dryrunmessage="Executed on a node (with an additional appropriate -o flag):")
             return
-        if os.path.exists(self.output): os.remove(self.output)
-        if os.path.exists(self.sv): os.remove(self.sv)
+        if self._prepare_resume():
+            return
         try:
             if not os.path.exists(self.datadir): helpers.mkdir_p(self.datadir)
         except OSError: pass
@@ -264,7 +301,6 @@ class JobArray(object):
             sys.exit(1)
         return returncode
 
-
 class GenericSubmitter(object):
     """ This class generates various :class:`JobArray` objects from a configuration file. For the syntax and usage, see
     :ref:`submitter_documentation`.
@@ -292,6 +328,7 @@ class GenericSubmitter(object):
         self.combine = self.c.getboolean('Config', 'combine')
         self.testrun_t = self.c.getfloat('Config', 'testrun_t')
         self.compress = self.c.getboolean('Config', 'compress')
+        self.resume = self.c.getboolean('Config','resume')
         if self.c.has_option('Config', 'testrun_dt'):
             self.testrun_dt = self.c.getfloat('Config', 'testrun_dt')
         else:
@@ -318,6 +355,7 @@ class GenericSubmitter(object):
         myjob.testrun_t = self.testrun_t
         myjob.testrun_dt = self.testrun_dt
         myjob.compress = self.compress
+        myjob.resume = self.resume
         return myjob
         
     def _combine_pars(self, rangepars):
@@ -349,14 +387,12 @@ class GenericSubmitter(object):
             self.CppqedObjects.append(myjob)
             counter += 1
             
-    def act(self, testrun=False, dryrun=False, averageonly=False, config=None):
+    def act(self, testrun=False, dryrun=False, averageonly=False):
         """Submit all job arrays to the teazer cluster.
         
         :param testrun: Perform a test run with only two seeds and `T=1`.
         :type testrun: bool
         :param dryrun: Don't submit anything, instead print what would be run on the nodes.
-        :param config: An object for further configuration of the behaviour.
-        :type config: :class:`optparse.OptionParse`
         :type dryrun: bool
         """
         for c in self.CppqedObjects:
@@ -365,7 +401,5 @@ class GenericSubmitter(object):
             else: 
                 c.submit(testrun=testrun,dryrun=dryrun)
                 if dryrun: c.run(dryrun=dryrun)
-            
-    def submit_average(self, dryrun=False):
-        pass
+
 
