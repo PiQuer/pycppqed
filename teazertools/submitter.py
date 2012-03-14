@@ -71,15 +71,14 @@ class JobArray(object):
         self.average = average
         self.compress = False
         self.resume = False
-        
         self.testrun_t = 1
         self.testrun_dt = None
-        
         self.datafiles = []
-        
         self.default_sub_pars = ['-b','y', '-v','PYTHONPATH','-v','PATH', '-q','all.q','-m','n','-j','yes']
+        self.loglevel = logging.getLogger().getEffectiveLevel() 
     
     def _prepare_exec(self,seed,dryrun):
+        logging.debug("Entering _prepare_exec.")
         if os.environ.has_key('SGE_TASK_ID'):
             self.teazer = True
             logging.debug("SGE_TASK_ID: "+os.environ['SGE_TASK_ID'])
@@ -150,13 +149,18 @@ class JobArray(object):
         shutil.rmtree(self.outputdir, ignore_errors=True)
     
     def _convert_matlab(self):
-        evs, svs = qed.load_cppqed(self.output)
-        finalsv = qed.load_statevector(self.sv)
+        if self.compress:
+            suffix = '.bz2'
+        else:
+            suffix = ''
+        evs, svs = qed.load_cppqed(self.output+suffix)
+        finalsv = qed.load_statevector(self.sv+suffix)
         scipy.io.savemat(self.output+".mat", {"evs":evs, "svs":svs}, do_compression=self.compress)
         scipy.io.savemat(self.sv+".mat",{"sv":finalsv}, do_compression=self.compress)
         self.datafiles.extend((self.output+".mat",self.sv+".mat"))
     
     def _prepare_resume(self):
+        logging.debug("Entering _prepare_resume")
         if not self.resume:
             return False
         if os.path.exists(self.targetoutput):
@@ -169,7 +173,9 @@ class JobArray(object):
         else:
             return False
         if lastT == None: return False
-        if np.less_equal(self.parameters['T'],lastT):
+        logging.debug("Found a trajectory with T=%f"%lastT)
+        if np.less_equal(float(self.parameters['T']),float(lastT)):
+            logging.debug("Don't need to calculate anything, T=%f."%float(self.parameters['T']))
             return True
         if os.path.exists(self.targetsv):
             target_sv_compressed = False
@@ -198,6 +204,7 @@ class JobArray(object):
         :param dryrun: If `True`, don't simulate anything, but print a log message which contains the command that would
             have been run.
         """
+        logging.debug("Entering run.")
         self._prepare_exec(seed,dryrun)
         if dryrun:
             self._execute(self.command, dryrun, dryrunmessage="Executed on a node (with an additional appropriate -o flag):")
