@@ -187,8 +187,7 @@ class JobArray(object):
     def _execute(self, command, dryrun=False, dryrunmessage="Would run command:", dryrunresult=("","")):
         logging.debug(subprocess.list2cmdline(command))
         if dryrun:
-            logging.info(dryrunmessage)
-            logging.info(subprocess.list2cmdline(command))
+            logging.info(dryrunmessage + "\n" + subprocess.list2cmdline(command))
             (std,err) = dryrunresult
             returncode = 0
         else:
