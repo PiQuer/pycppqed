@@ -146,7 +146,10 @@ class JobArray(object):
     def _move_data(self):
         for f in self.datafiles:
             shutil.move(f, self.datadir)
-        shutil.rmtree(self.outputdir, ignore_errors=True)
+    
+    def _cleanup(self):
+        if self.teazer:
+            shutil.rmtree(self.outputdir, ignore_errors=True)
     
     def _convert_matlab(self):
         if self.compress:
@@ -205,28 +208,31 @@ class JobArray(object):
             have been run.
         """
         logging.debug("Entering run.")
-        self._prepare_exec(seed,dryrun)
-        if dryrun:
-            self._execute(self.command, dryrun, dryrunmessage="Executed on a node (with an additional appropriate -o flag):")
-            return
-        if self._prepare_resume():
-            return
         try:
-            if not os.path.exists(self.datadir): helpers.mkdir_p(self.datadir)
-        except OSError: pass
-        self._write_parameters()
-        if self.diagnostics: self.diagnostics_before()
-        (std,err,retcode) = self._execute(self.command)
-        if not retcode == 0:
-            logging.error("C++QED script failed with exitcode %s:\n%s" % (retcode,err))
-            sys.exit(1)
-        if self.diagnostics: self.diagnostics_after()
-        if self.compress:
-            self._compress()
-        if self.matlab:
-            self._convert_matlab()
-        if self.teazer:
-            self._move_data()
+            self._prepare_exec(seed,dryrun)
+            if dryrun:
+                self._execute(self.command, dryrun, dryrunmessage="Executed on a node (with an additional appropriate -o flag):")
+                return
+            if self._prepare_resume():
+                return
+            try:
+                if not os.path.exists(self.datadir): helpers.mkdir_p(self.datadir)
+            except OSError: pass
+            self._write_parameters()
+            if self.diagnostics: self.diagnostics_before()
+            (std,err,retcode) = self._execute(self.command)
+            if not retcode == 0:
+                logging.error("C++QED script failed with exitcode %s:\n%s" % (retcode,err))
+                sys.exit(1)
+            if self.diagnostics: self.diagnostics_after()
+            if self.compress:
+                self._compress()
+            if self.matlab:
+                self._convert_matlab()
+            if self.teazer:
+                self._move_data()
+        finally:
+            self._cleanup()
             
     def _execute(self, command, dryrun=False, dryrunmessage="Would run command:", dryrunresult=("","")):
         logging.debug(subprocess.list2cmdline(command))
