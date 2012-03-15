@@ -149,6 +149,7 @@ class JobArray(object):
     
     def _cleanup(self):
         if self.teazer:
+            logging.debug("Cleaning up on node, deleting %s."%self.outputdir)
             shutil.rmtree(self.outputdir, ignore_errors=True)
     
     def _convert_matlab(self):
