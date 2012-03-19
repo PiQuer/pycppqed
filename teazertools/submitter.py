@@ -192,10 +192,10 @@ class JobArray(object):
             logging.debug('Moving %s to %s.'%(self.targetsv,self.outputdir))
             shutil.copy(self.targetsv, self.outputdir)
         if target_traj_compressed:
-            logging.debug('Uncompressing %s.'%self.output+'.bz2')
+            logging.debug('Uncompressing %s'%self.output+'.bz2')
             os.system('bunzip2 %s'%self.output+'.bz2')
         if target_sv_compressed:
-            logging.debug('Uncompressing %s.'%self.sv+'.bz2')
+            logging.debug('Uncompressing %s'%self.sv+'.bz2')
             os.system('bunzip2 %s'%self.sv+'.bz2')
         return False
     
