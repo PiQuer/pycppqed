@@ -3,6 +3,8 @@
 
 import os
 import errno
+import pycppqed as qed
+import numpy as np
 
 def import_class(s):
     r"""Import a class specified by the string s.
@@ -72,3 +74,18 @@ def matlab_range_to_list(s):
         return range(spec[0],spec[2],spec[1])
     else:
         raise ValueError('%s: range specification has to be start:[step:]stop'%s)
+    
+def cppqed_t(filename):
+    r"""This helper function returns the last timestep t of a C++QED file.
+    
+    :param filename: The name of the file to load.
+    :type filename: str
+    :returns: The last timestep `T` of the trajectory or `None` if the file could
+        not be loaded.
+    :retval: :class:`numpy.float64`
+    """
+    try:
+        evs, svs = qed.load_cppqed(filename)
+    except:
+        return None
+    return evs[0,-1]
