@@ -333,7 +333,7 @@ class GenericSubmitter(object):
         if not rangepars:
             self.CppqedObjects = [self._jobarray_maker(self.basedir,dict(pars))]
             return 
-        expand = lambda x: [(x[0],i) for i in x[1].split(';')]
+        expand = lambda x: [(x[0],i) for i in x[1].split(';') if not i == '']
         # expand: ('parname','val1,val2,val3') -> [('parname',val1),('parname',val2),('parname',val3)]
         rangepars = map(expand,rangepars)
         self.CppqedObjects = []
