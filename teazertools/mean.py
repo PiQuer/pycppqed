@@ -124,9 +124,8 @@ def calculateMeans(basename,expvals=[],variances=[],varmeans=[],stdevs=[],stdevm
     result[variances] = np.sqrt(result[variances]-result[varmeans]**2)
     result = np.transpose(result)
     if outputdir:
-        if not os.path.exists(outputdir):
-            os.makedirs(outputdir)
-            np.savez(datafile,result=result,expvals=np.array(expvals),variances=np.array(variances),
+        helpers.mkdir_p(outputdir)
+        np.savez(datafile,result=result,expvals=np.array(expvals),variances=np.array(variances),
                      varmeans=np.array(varmeans),stdevs=np.array(stdevs),stdevmeans=np.array(stdevmeans))
         if matlab:
             scipy.io.savemat(matlabfile,{"result":result,"means":means,"expvals":np.array(expvals)+1,"variances":np.array(variances)+1,
