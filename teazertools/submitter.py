@@ -175,13 +175,13 @@ class JobArray(object):
         lastT = helpers.cppqed_t(target)
         if lastT == None: return False
         if np.less_equal(float(self.parameters['T']),float(lastT)):
-            logging.debug("Removing seed "+seed+ " from array, found trajectory with T=%f",lastT)
+            logging.info("Removing seed "+seed+ " from array, found trajectory with T=%f",lastT)
             return True
         else:
-            logging.debug("Keeping seed "+seed+ " with T=%f.",lastT)
+            logging.info("Keeping seed "+seed+ " with T=%f.",lastT)
         
     def _clean_seedlist(self):
-        logging.debug("Checking for existing trajectories...")
+        logging.info("Checking for existing trajectories... this can take a long time")
         if not self.resume:
             return False
         self.seeds[:] = [seed for seed in self.seeds if not self._check_existing(seed)]
@@ -278,9 +278,12 @@ class JobArray(object):
         :param testrun: Only simulate two seeds and set the parameter `T` to 1.
         :type testrun: bool
         """
-        try:
-            if not os.path.exists(self.logdir) and not dryrun: helpers.mkdir_p(self.logdir)
-        except OSError: pass
+        if testrun and (os.path.exists(self.datadir) or os.path.exists(self.averagedir)):
+            logging.error("The testrun potentially overwrites data in %s or %s. Will not start testrun while these directories exist."%self.datadir,self.averagedir)
+            sys.exit(1)
+        if not dryrun:
+            helpers.mkdir_p(self.logdir)
+                
         jobname = "Job"+self.basename
         logfile = os.path.join(self.logdir,'$JOB_NAME.$JOB_ID.$TASK_ID.log')
         if not dryrun: self._clean_seedlist()
