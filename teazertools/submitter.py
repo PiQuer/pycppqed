@@ -279,7 +279,7 @@ class JobArray(object):
         :type testrun: bool
         """
         if testrun and (os.path.exists(self.datadir) or os.path.exists(self.averagedir)):
-            logging.error("The testrun potentially overwrites data in %s or %s. Will not start testrun while these directories exist."%self.datadir,self.averagedir)
+            logging.error("The testrun potentially overwrites data in %s or %s. Will not start testrun while these directories exist."%(self.datadir,self.averagedir))
             sys.exit(1)
         if not dryrun:
             helpers.mkdir_p(self.logdir)
