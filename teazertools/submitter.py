@@ -181,9 +181,9 @@ class JobArray(object):
             logging.info("Keeping seed "+seed+ " with T=%f.",lastT)
         
     def _clean_seedlist(self):
-        logging.info("Checking for existing trajectories... this can take a long time")
         if not self.resume:
             return False
+        logging.info("Checking for existing trajectories... this can take a long time")
         self.seeds[:] = [seed for seed in self.seeds if not self._check_existing(seed)]
     
     def _prepare_resume(self):
