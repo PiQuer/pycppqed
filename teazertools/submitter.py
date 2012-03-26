@@ -169,7 +169,7 @@ class JobArray(object):
         seed = str(seed)
         if os.path.exists(self.targetoutputbase+'.'+seed):
             target = self.targetoutputbase+'.'+seed
-        elif os.path.exists(self.targetoutputbase+'.'+seed+self.self.compsuffix):
+        elif os.path.exists(self.targetoutputbase+'.'+seed+self.compsuffix):
             target = self.targetoutputbase+'.'+seed+self.compsuffix
         else: return False
         lastT = helpers.cppqed_t(target)
