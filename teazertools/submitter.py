@@ -178,7 +178,7 @@ class JobArray(object):
             logging.debug("Removing seed "+seed+ " from array, found trajectory with T=%f",lastT)
             return True
         else:
-            logging.debug("Keeping seed "+seed+ "with T=%f.",lastT)
+            logging.debug("Keeping seed "+seed+ " with T=%f.",lastT)
         
     def _clean_seedlist(self):
         logging.debug("Checking for existing trajectories...")
