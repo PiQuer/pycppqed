@@ -172,12 +172,13 @@ class JobArray(object):
         elif os.path.exists(self.targetoutputbase+'.'+seed+self.compsuffix):
             target = self.targetoutputbase+'.'+seed+self.compsuffix
         else: return False
-        logging.debug("Checking seed "+seed+".")
         lastT = helpers.cppqed_t(target)
         if lastT == None: return False
         if np.less_equal(float(self.parameters['T']),float(lastT)):
             logging.debug("Removing seed "+seed+ " from array, found trajectory with T=%f",lastT)
             return True
+        else:
+            logging.debug("Keeping seed "+seed+ "with T=%f.",lastT)
         
     def _clean_seedlist(self):
         logging.debug("Checking for existing trajectories...")
