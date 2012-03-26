@@ -2,8 +2,13 @@
 
 from optparse import OptionParser
 import teazertools.helpers as helpers
+import warnings
 
-def main():    
+def main():
+    
+    warnings.simplefilter("ignore",FutureWarning)
+    warnings.simplefilter("ignore",DeprecationWarning)
+    
     def empty(*args,**kwargs):
         pass
     parser = OptionParser()
