@@ -63,6 +63,7 @@ class JobArray(object):
             self.basename = os.path.basename(script)
         else:
             self.basename = basename
+        self.targetoutputbase=os.path.join(self.datadir,self.basename+'.out')
         self.seeds = seeds
         self.diagnostics = diagnostics
         self.teazer = False
@@ -70,6 +71,7 @@ class JobArray(object):
         self.matlab = matlab
         self.average = average
         self.compress = False
+        self.compsuffix='.bz2'
         self.resume = False
         self.testrun_t = 1
         self.testrun_dt = None
@@ -96,7 +98,7 @@ class JobArray(object):
             suffix = ''
         self.output = os.path.join(self.outputdir,self.basename+'.out'+suffix)
         self.sv = self.output+'.sv'
-        self.targetoutput = os.path.join(self.datadir,self.basename+'.out'+suffix)
+        self.targetoutput = self.targetoutputbase+suffix
         self.targetsv = self.targetoutput+'.sv'
         self.datafiles.extend((self.output, self.sv))
         if not dryrun:
@@ -141,7 +143,7 @@ class JobArray(object):
     def _compress(self):
         for f in self.datafiles:
             os.system('bzip2 %s'%f)
-        self.datafiles = [f+'.bz2' for f in self.datafiles]
+        self.datafiles = [f+self.compsuffix for f in self.datafiles]
     
     def _move_data(self):
         for f in self.datafiles:
@@ -163,6 +165,24 @@ class JobArray(object):
         scipy.io.savemat(self.sv+".mat",{"sv":finalsv}, do_compression=self.compress)
         self.datafiles.extend((self.output+".mat",self.sv+".mat"))
     
+    def _check_existing(self,seed):
+        seed = str(seed)
+        if os.path.exists(self.targetoutputbase+'.'+seed):
+            target = self.targetoutputbase+'.'+seed
+        elif os.path.exists(self.targetoutputbase+'.'+seed+self.self.compsuffix):
+            target = self.targetoutputbase+'.'+seed+self.compsuffix
+        else: return False
+        lastT = helpers.cppqed_t(target)
+        if lastT == None: return False
+        if np.less_equal(float(self.parameters['T']),float(lastT)):
+            logging.debug("Removing seed "+seed+ " from array, found trajectory with T=%f",lastT)
+            return True
+        
+    def _clean_seedlist(self):
+        if not self.resume:
+            return False
+        self.seeds[:] = [seed for seed in self.seeds if not self._check_existing(seed)]
+    
     def _prepare_resume(self):
         logging.debug("Entering _prepare_resume")
         if not self.resume:
@@ -170,10 +190,10 @@ class JobArray(object):
         if os.path.exists(self.targetoutput):
             lastT = helpers.cppqed_t(self.targetoutput)
             target_traj_compressed = False
-        elif os.path.exists(self.targetoutput+'.bz2'):
-            lastT = helpers.cppqed_t(self.targetoutput+'.bz2')
+        elif os.path.exists(self.targetoutput+self.compsuffix):
+            lastT = helpers.cppqed_t(self.targetoutput+self.compsuffix)
             target_traj_compressed = True
-            self.targetoutput = self.targetoutput+'.bz2'
+            self.targetoutput = self.targetoutput+self.compsuffix
         else:
             return False
         if lastT == None: return False
@@ -183,20 +203,20 @@ class JobArray(object):
             return True
         if os.path.exists(self.targetsv):
             target_sv_compressed = False
-        elif os.path.exists(self.targetsv+'.bz2'):
+        elif os.path.exists(self.targetsv+self.compsuffix):
             target_sv_compressed = True
-            self.targetsv = self.targetsv+'.bz2'
+            self.targetsv = self.targetsv+self.compsuffix
         if self.teazer:
             logging.debug('Moving %s to %s.'%(self.targetoutput,self.outputdir))
             shutil.copy(self.targetoutput, self.outputdir)
             logging.debug('Moving %s to %s.'%(self.targetsv,self.outputdir))
             shutil.copy(self.targetsv, self.outputdir)
         if target_traj_compressed:
-            logging.debug('Uncompressing %s'%self.output+'.bz2')
-            os.system('bunzip2 %s'%self.output+'.bz2')
+            logging.debug('Uncompressing %s'%self.output+self.compsuffix)
+            os.system('bunzip2 %s'%self.output+self.compsuffix)
         if target_sv_compressed:
-            logging.debug('Uncompressing %s'%self.sv+'.bz2')
-            os.system('bunzip2 %s'%self.sv+'.bz2')
+            logging.debug('Uncompressing %s'%self.sv+self.compsuffix)
+            os.system('bunzip2 %s'%self.sv+self.compsuffix)
         return False
     
     def run(self, seed=0, dryrun=False):
@@ -260,6 +280,10 @@ class JobArray(object):
         except OSError: pass
         jobname = "Job"+self.basename
         logfile = os.path.join(self.logdir,'$JOB_NAME.$JOB_ID.$TASK_ID.log')
+        if not dryrun: self._clean_seedlist()
+        if not self.seeds:
+            logging.info('No seeds left to simulate.')
+            return
         if testrun:
             seedspec = "1-%s" % min(2,len(self.seeds))
             self.parameters['T'] = self.testrun_t

@@ -18,7 +18,6 @@ class TestMean(unittest.TestCase):
         result = mean.calculateMeans("test2", expvals=[3,5], variances=[4], stdevs=[6], datadir='test/',usesaved=False,outputdir=None)
         self.assertTrue(np.allclose(result,np.load('test/test2expected.npy')))
 
-
 class TestSubmitter(unittest.TestCase):
     
     def setUp(self):
@@ -41,7 +40,7 @@ class TestSubmitter(unittest.TestCase):
         self.popen_patch.stop()
         
     def test01_submit(self):
-        s = submitter.GenericSubmitter('test/test.conf')
+        s = submitter.GenericSubmitter(argv=['submitter', 'test/test.conf'])
         s.act()
         for i in range(4):
             self.assertEqual(((self.expected_args_regular[i],),{'stdout':subprocess.PIPE,'stderr':subprocess.PIPE}),self.p.call_args_list[2*i])
@@ -50,7 +49,7 @@ class TestSubmitter(unittest.TestCase):
 class TestRun(unittest.TestCase):
     
     def test01_run(self):
-        s = submitter.GenericSubmitter('test/test.conf')
+        s = submitter.GenericSubmitter(argv=['submitter', 'test/test.conf'])
         s.CppqedObjects[0].run()
         f = open('test/output/01/parameters.pkl')
         pars = pickle.load(f)
