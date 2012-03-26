@@ -1,49 +1,25 @@
 #!/usr/bin/env python
 
-from optparse import OptionParser,OptionGroup
+from optparse import OptionParser
 import teazertools.helpers as helpers
-import logging
 
 def main():    
-    usage = "usage: %prog [options] configfile"
-    parser = OptionParser(usage)
+    def empty(*args,**kwargs):
+        pass
+    parser = OptionParser()
+    parser.error = empty
+    parser.print_help = empty
+    parser.exit = empty
     
-    parser.add_option("--testrun", action="store_true", dest="testrun", default=False,
-                      help="Submit test arrays to the cluster (only two seeds per ensemble, T=1 by default)")
-    parser.add_option("--dryrun", action="store_true", dest="dryrun", default=False,
-                      help="Don't submit anything, only print out the commands that are executed on the nodes")
     parser.add_option("--class", dest="classname", metavar="CLASS",
                       default='teazertools.submitter.GenericSubmitter',
                       help="Use CLASS instead of teazertools.submitter.GenericSubmitter, typically CLASS is a subclass of GenericSubmitter")
-    parser.add_option("--averageonly", action="store_true", dest="averageonly", default=False,
-                      help="Only submit the job to compute the average expectation values")
-    parser.add_option("--verbose", action="store_true", dest="verbose", default=False,
-                      help="Log more output to files.")
-    
-    group = OptionGroup(parser, "Debugging options",
-                    "These options are not needed for normal operation. "
-                    "They provide means to debug the submitter.")
-    group.add_option("--debug", action="store_true", help="Set breakpoint for external debugger.", default=False)
-    group.add_option("--keeptemp", action="store_true", help="Don't delete temporary files. (Not implemented yet)")
-    parser.add_option_group(group)
 
     (options,args) = parser.parse_args()
     
-    if len(args) != 1:
-        parser.error("incorrect number of arguments")
-    if options.verbose: logging.getLogger().setLevel(logging.DEBUG)
-    if options.debug: 
-        try:
-            import pydevd 
-            pydevd.settrace()
-        except ImportError:
-            logging.error("Pydevd module not found, cannot set breakpoint for external pydevd debugger.")
-    
-    configfile = args[0]
-    
     SubmitterClass = helpers.import_class(options.classname)
-    gs = SubmitterClass(configfile)
-    gs.act(testrun=options.testrun, dryrun=options.dryrun, averageonly=options.averageonly)
+    gs = SubmitterClass()
+    gs.act()
 
 if __name__ == '__main__':
     main()

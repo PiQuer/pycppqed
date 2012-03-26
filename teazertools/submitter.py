@@ -1,7 +1,7 @@
 """This module provides the infrastructure to send job arrays of C++QED trajectory ensembles to the teazer cluster.
 """
 
-
+from optparse import OptionParser,OptionGroup
 import ConfigParser
 import os
 import helpers
@@ -315,15 +315,19 @@ class JobArray(object):
             sys.exit(1)
         return returncode
 
-class GenericSubmitter(object):
+class GenericSubmitter(OptionParser, ConfigParser.RawConfigParser):
     """ This class generates various :class:`JobArray` objects from a configuration file. For the syntax and usage, see
     :ref:`submitter_documentation`.
     """
-    def __init__(self, config):
-        self.config = os.path.expanduser(config)
+    def __init__(self, argv=None):
+        usage = "usage: %prog [options] configfile"
+        ConfigParser.RawConfigParser.__init__(self)
+        OptionParser.__init__(self,usage)
+        if argv:
+            sys.argv = argv
+        self._parse_options()
     
-        self.c = ConfigParser.RawConfigParser()
-        self.c.optionxform = str
+        self.optionxform = str
         self.CppqedObjects = []
         self.defaultconfig = os.path.join(os.path.dirname(__file__),'generic_submitter_defaults.conf')
         self.averageids={}
@@ -331,28 +335,28 @@ class GenericSubmitter(object):
         self._generate_objects()
         
     def _parse_config(self):
-        self.c.read(self.config)
-        self.script = os.path.expanduser(self.c.get('Config','script'))
-        self.c.read([self.defaultconfig,os.path.expanduser('~/.submitter/generic_submitter.conf'),
+        self.read(self.config)
+        self.script = os.path.expanduser(self.get('Config','script'))
+        self.read([self.defaultconfig,os.path.expanduser('~/.submitter/generic_submitter.conf'),
                      os.path.expanduser('~/.submitter/'+os.path.basename(self.script)+'.conf'), self.config])
-        self.basedir = os.path.expanduser(self.c.get('Config', 'basedir'))
-        self.matlab = self.c.getboolean('Config', 'matlab')
-        self.average = self.c.getboolean('Config', 'average')
-        self.numericsubdirs = self.c.getboolean('Config', 'numericsubdirs')
-        self.combine = self.c.getboolean('Config', 'combine')
-        self.testrun_t = self.c.getfloat('Config', 'testrun_t')
-        self.compress = self.c.getboolean('Config', 'compress')
-        self.resume = self.c.getboolean('Config','resume')
-        if self.c.has_option('Config', 'testrun_dt'):
-            self.testrun_dt = self.c.getfloat('Config', 'testrun_dt')
+        self.basedir = os.path.expanduser(self.get('Config', 'basedir'))
+        self.matlab = self.getboolean('Config', 'matlab')
+        self.average = self.getboolean('Config', 'average')
+        self.numericsubdirs = self.getboolean('Config', 'numericsubdirs')
+        self.combine = self.getboolean('Config', 'combine')
+        self.testrun_t = self.getfloat('Config', 'testrun_t')
+        self.compress = self.getboolean('Config', 'compress')
+        self.resume = self.getboolean('Config','resume')
+        if ConfigParser.RawConfigParser.has_option(self,'Config', 'testrun_dt'):
+            self.testrun_dt = self.getfloat('Config', 'testrun_dt')
         else:
             self.testrun_dt = None
         
-        if self.average and self.c.has_section('Averages'):
-            self.averageids = dict(self.c.items('Averages'))
+        if self.average and self.has_section('Averages'):
+            self.averageids = dict(self.items('Averages'))
         else: self.average = False
 
-        self.seeds = self.c.get('Config','seeds')
+        self.seeds = self.get('Config','seeds')
         if self.seeds.isdigit():
             self.seeds = [int(self.seeds)]
         elif self.seeds.count(';'):
@@ -361,6 +365,40 @@ class GenericSubmitter(object):
             self.seeds = helpers.matlab_range_to_list(self.seeds)
         else:
             raise ValueError('Could not evaluate seeds specification %s.' %self.seeds)
+    
+    def _parse_options(self):
+        self.add_option("--testrun", action="store_true", dest="testrun", default=False,
+                          help="Submit test arrays to the cluster (only two seeds per ensemble, T=1 by default)")
+        self.add_option("--dryrun", action="store_true", dest="dryrun", default=False,
+                          help="Don't submit anything, only print out the commands that are executed on the nodes")
+        self.add_option("--class", dest="classname", metavar="CLASS",
+                          default='teazertools.submitter.GenericSubmitter',
+                          help="Use CLASS instead of teazertools.submitter.GenericSubmitter, typically CLASS is a subclass of GenericSubmitter")
+        self.add_option("--averageonly", action="store_true", dest="averageonly", default=False,
+                          help="Only submit the job to compute the average expectation values")
+        self.add_option("--verbose", action="store_true", dest="verbose", default=False,
+                          help="Log more output to files.")
+        
+        group = OptionGroup(self, "Debugging options",
+                        "These options are not needed for normal operation. "
+                        "They provide means to debug the submitter.")
+        group.add_option("--debug", action="store_true", help="Set breakpoint for external debugger.", default=False)
+        group.add_option("--keeptemp", action="store_true", help="Don't delete temporary files. (Not implemented yet)")
+        self.add_option_group(group)
+        
+        (self.options,args) = self.parse_args()
+    
+        if len(args) != 1:
+            self.error("incorrect number of arguments")
+        if self.options.verbose: logging.getLogger().setLevel(logging.DEBUG)
+        if self.options.debug: 
+            try:
+                import pydevd 
+                pydevd.settrace()
+            except ImportError:
+                logging.error("Pydevd module not found, cannot set breakpoint for external pydevd debugger.")
+        
+        self.config = os.path.expanduser(args[0])
         
             
     def _jobarray_maker(self, basedir, parameters):
@@ -378,7 +416,7 @@ class GenericSubmitter(object):
         return generator
     
     def _generate_objects(self):
-        pars = self.c.items('Parameters')
+        pars = self.items('Parameters')
         singlepars = [i for i in pars if not i[1].count(';')]
         rangepars = [i for i in pars if i[1].count(';')]
         if not rangepars:
@@ -401,7 +439,7 @@ class GenericSubmitter(object):
             self.CppqedObjects.append(myjob)
             counter += 1
             
-    def act(self, testrun=False, dryrun=False, averageonly=False):
+    def act(self):
         """Submit all job arrays to the teazer cluster.
         
         :param testrun: Perform a test run with only two seeds and `T=1`.
@@ -409,11 +447,12 @@ class GenericSubmitter(object):
         :param dryrun: Don't submit anything, instead print what would be run on the nodes.
         :type dryrun: bool
         """
+        
         for c in self.CppqedObjects:
-            if averageonly:
-                c.submit_average(dryrun=dryrun)
+            if self.options.averageonly:
+                c.submit_average(dryrun=self.options.dryrun)
             else: 
-                c.submit(testrun=testrun,dryrun=dryrun)
-                if dryrun: c.run(dryrun=dryrun)
+                c.submit(testrun=self.options.testrun,dryrun=self.options.dryrun)
+                if self.options.dryrun: c.run(dryrun=self.options.dryrun)
 
 
