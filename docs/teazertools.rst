@@ -117,7 +117,15 @@ The keywords in this section are (optional keywords italic)
   one ensemble with the first value of all range parameters, one with the second value and so on until one
   of the ranges is exhausted (default `True`).
 * *testrun_t*: Use this value as `-T` parameter in testruns (default 1)
-* *testrun_dt*: Use this value as `-Dt` parameter in testruns (default: don't modify -Dt) 
+* *testrun_dt*: Use this value as `-Dt` parameter in testruns (default: don't modify -Dt)
+* *compress*: Compress all trajectories and statevectors. Text files are compressed with bzip2, matlab files are
+  compressed with matlabs own compression method (default `False`).
+* *resume*: Use existing trajectories in the data directory to resume simulations. This is useful for two things: 1. to
+  extend the integration to a larger value of T (existing trajectories are automatically copied to the temporary directory)
+  2. to resume from failure: existing trajectories in the data directory which have the right final time T are untouched, 
+  whereas missing trajectories are submitted again. Note that the averaging is always done over **all** trajectories in the
+  data directory, the user has to make sure they have all the same length (default `False`). 
+
   
 [Averages]
 __________
@@ -164,5 +172,8 @@ The options can be:
   This can be used to test if the command line is correct and the program will run properly.
 * ``--class=CLASS``: Use CLASS as submitter class. This defaults to :class:`teazertools.submitter.GenericSubmitter`,
   and typically CLASS is a subclass of this to extend functionality.
-* ``--debug``: Very verbose debugging output.
+* ``--verbose``: Verbose debugging output.
+* ``--averageonly``: Only submit the job to compute the average expectation values
+* ``--class=CLASS``:  Use CLASS instead of :class:`teazertools.submitter.GenericSubmitter`,
+  typically `CLASS` is a subclass of `GenericSubmitter`
 * ``-h`` or ``--help``: Print help message.
