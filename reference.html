@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="top" title="PyCppQED v0.1.1 documentation" href="index.html" />
     <link rel="next" title="TeazerTools reference" href="reference_teazertools.html" />
-    <link rel="prev" title="TeazerTools" href="teazertools.html" /> 
+    <link rel="prev" title="TeazerTools User Guide" href="teazertools.html" /> 
   </head>
   <body>
     <div class="related">
@@ -40,7 +40,7 @@
           <a href="reference_teazertools.html" title="TeazerTools reference"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="teazertools.html" title="TeazerTools"
+          <a href="teazertools.html" title="TeazerTools User Guide"
              accesskey="P">previous</a> |</li>
         <li><a href="index.html">PyCppQED v0.1.1 documentation</a> &raquo;</li> 
       </ul>
@@ -64,10 +64,10 @@ up specific classes and methods.</p>
 <li><a class="reference internal" href="#module-pycppqed.expvalues" id="id3"><a class="reference internal" href="#module-pycppqed.expvalues" title="pycppqed.expvalues"><tt class="xref py py-mod docutils literal"><span class="pre">pycppqed.expvalues</span></tt></a></a></li>
 <li><a class="reference internal" href="#module-pycppqed.io" id="id4"><a class="reference internal" href="#module-pycppqed.io" title="pycppqed.io"><tt class="xref py py-mod docutils literal"><span class="pre">pycppqed.io</span></tt></a></a></li>
 <li><a class="reference internal" href="#module-pycppqed.initialconditions" id="id5"><a class="reference internal" href="#module-pycppqed.initialconditions" title="pycppqed.initialconditions"><tt class="xref py py-mod docutils literal"><span class="pre">pycppqed.initialconditions</span></tt></a></a></li>
-<li><a class="reference internal" href="#module-pycppqed.quantumsystem" id="id6"><a class="reference internal" href="#module-pycppqed.quantumsystem" title="pycppqed.quantumsystem"><tt class="xref py py-mod docutils literal"><span class="pre">pycppqed.quantumsystem</span></tt></a></a></li>
-<li><a class="reference internal" href="#module-pycppqed.description" id="id7"><a class="reference internal" href="#module-pycppqed.description" title="pycppqed.description"><tt class="xref py py-mod docutils literal"><span class="pre">pycppqed.description</span></tt></a></a></li>
-<li><a class="reference internal" href="#module-pycppqed.visualization" id="id8"><a class="reference internal" href="#module-pycppqed.visualization" title="pycppqed.visualization"><tt class="xref py py-mod docutils literal"><span class="pre">pycppqed.visualization</span></tt></a></a></li>
-<li><a class="reference internal" href="#module-pycppqed.animation" id="id9"><a class="reference internal" href="#module-pycppqed.animation" title="pycppqed.animation"><tt class="xref py py-mod docutils literal"><span class="pre">pycppqed.animation</span></tt></a></a></li>
+<li><a class="reference internal" href="#pycppqed-quantumsystem" id="id6"><tt class="xref py py-mod docutils literal"><span class="pre">pycppqed.quantumsystem</span></tt></a></li>
+<li><a class="reference internal" href="#pycppqed-description" id="id7"><tt class="xref py py-mod docutils literal"><span class="pre">pycppqed.description</span></tt></a></li>
+<li><a class="reference internal" href="#pycppqed-visualization" id="id8"><tt class="xref py py-mod docutils literal"><span class="pre">pycppqed.visualization</span></tt></a></li>
+<li><a class="reference internal" href="#pycppqed-animation" id="id9"><tt class="xref py py-mod docutils literal"><span class="pre">pycppqed.animation</span></tt></a></li>
 </ul>
 </li>
 </ul>
@@ -495,7 +495,7 @@ corresponding <a class="reference internal" href="#pycppqed.statevector.StateVec
 <tt class="descname">animate</tt><big>(</big><em>x=None</em>, <em>y=None</em>, <em>re=False</em>, <em>im=False</em>, <em>abs=True</em><big>)</big><a class="headerlink" href="#pycppqed.statevector.StateVectorTrajectory.animate" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create an interactive animation of this StateVectorTrajectory.</p>
 <p>For more information look into the docstring of
-<a class="reference internal" href="#pycppqed.animation.animate_statevector" title="pycppqed.animation.animate_statevector"><tt class="xref py py-meth docutils literal"><span class="pre">pycppqed.animation.animate_statevector()</span></tt></a>.</p>
+<tt class="xref py py-meth docutils literal"><span class="pre">pycppqed.animation.animate_statevector()</span></tt>.</p>
 </dd></dl>
 
 <dl class="method">
@@ -1003,514 +1003,17 @@ is the Fourier transformed of the following expression:</p>
 </dd></dl>
 
 </div>
-<div class="section" id="module-pycppqed.quantumsystem">
-<span id="pycppqed-quantumsystem"></span><h2><a class="toc-backref" href="#contents"><a class="reference internal" href="#module-pycppqed.quantumsystem" title="pycppqed.quantumsystem"><tt class="xref py py-mod docutils literal"><span class="pre">pycppqed.quantumsystem</span></tt></a></a><a class="headerlink" href="#module-pycppqed.quantumsystem" title="Permalink to this headline">¶</a></h2>
-<p>This module provides classes to represent quantum systems calculated by C++QED.</p>
-<dl class="docutils">
-<dt>Following components are implemented:</dt>
-<dd><ul class="first last simple">
-<li><a class="reference internal" href="#pycppqed.quantumsystem.Particle" title="pycppqed.quantumsystem.Particle"><tt class="xref py py-class docutils literal"><span class="pre">Particle</span></tt></a></li>
-<li><a class="reference internal" href="#pycppqed.quantumsystem.Mode" title="pycppqed.quantumsystem.Mode"><tt class="xref py py-class docutils literal"><span class="pre">Mode</span></tt></a></li>
-</ul>
-</dd>
-</dl>
-<p>Components can be combined to new systems in the class
-<tt class="xref py py-class docutils literal"><span class="pre">QuantumSystemCombound</span></tt>.</p>
-<p>All classes in this module inherit from <a class="reference internal" href="#pycppqed.quantumsystem.QuantumSystem" title="pycppqed.quantumsystem.QuantumSystem"><tt class="xref py py-class docutils literal"><span class="pre">QuantumSystem</span></tt></a>.</p>
-<p># TODO: Improve quantumsystem.py</p>
-<dl class="class">
-<dt id="pycppqed.quantumsystem.CoherentMode">
-<em class="property">class </em><tt class="descclassname">pycppqed.quantumsystem.</tt><tt class="descname">CoherentMode</tt><big>(</big><em>statevector</em>, <em>number=0</em><big>)</big><a class="headerlink" href="#pycppqed.quantumsystem.CoherentMode" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#pycppqed.quantumsystem.QuantumSystem" title="pycppqed.quantumsystem.QuantumSystem"><tt class="xref py py-class docutils literal"><span class="pre">pycppqed.quantumsystem.QuantumSystem</span></tt></a></p>
-<p>A class representing a single mode in a coherent basis.</p>
-<dl class="method">
-<dt id="pycppqed.quantumsystem.CoherentMode.animate">
-<tt class="descname">animate</tt><big>(</big><big>)</big><a class="headerlink" href="#pycppqed.quantumsystem.CoherentMode.animate" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="pycppqed.quantumsystem.CoherentMode.expvalues">
-<tt class="descname">expvalues</tt><big>(</big><em>n=True</em>, <em>a=True</em><big>)</big><a class="headerlink" href="#pycppqed.quantumsystem.CoherentMode.expvalues" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="class">
-<dt id="pycppqed.quantumsystem.Mode">
-<em class="property">class </em><tt class="descclassname">pycppqed.quantumsystem.</tt><tt class="descname">Mode</tt><big>(</big><em>statevector</em>, <em>number=0</em><big>)</big><a class="headerlink" href="#pycppqed.quantumsystem.Mode" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#pycppqed.quantumsystem.QuantumSystem" title="pycppqed.quantumsystem.QuantumSystem"><tt class="xref py py-class docutils literal"><span class="pre">pycppqed.quantumsystem.QuantumSystem</span></tt></a></p>
-<p>A class representing a single mode.</p>
-<dl class="method">
-<dt id="pycppqed.quantumsystem.Mode.expvalues">
-<tt class="descname">expvalues</tt><big>(</big><em>n=True</em>, <em>a=True</em><big>)</big><a class="headerlink" href="#pycppqed.quantumsystem.Mode.expvalues" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculate the default expectation values for this particle.</p>
-<dl class="docutils">
-<dt><em>Arguments</em></dt>
-<dd><ul class="first last">
-<li><dl class="first docutils">
-<dt><em>n</em> (optional)</dt>
-<dd><p class="first last">If True all n related expectation values are calculated. That
-means <img class="math" src="_images/math/07825f9a98b2ef66bc671feb1794935101838c38.png" alt="\langle n \rangle"/> and <img class="math" src="_images/math/b2e4540edac9661f83984f9d677af0e4c258f797.png" alt="Var(n)"/>.
-(Default is True)</p>
-</dd>
-</dl>
-</li>
-<li><dl class="first docutils">
-<dt><em>a</em> (optional)</dt>
-<dd><p class="first last">If True all a related expectation values are calculated. That
-means <img class="math" src="_images/math/ea19850a63159f661a2f2989e39c28c799632204.png" alt="Re(\langle a \rangle)"/> and
-<img class="math" src="_images/math/a9c678e7b32598822647b35891b066779d418ee3.png" alt="Im(\langle a \rangle)"/>. (Default is True)</p>
-</dd>
-</dl>
-</li>
-</ul>
-</dd>
-<dt><em>Returns</em></dt>
-<dd><ul class="first last">
-<li><dl class="first docutils">
-<dt><em>expvalues</em></dt>
-<dd><p class="first last">A <tt class="xref py py-class docutils literal"><span class="pre">pycppqed.expvalues.ExpectationValuesCollection</span></tt>.</p>
-</dd>
-</dl>
-</li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="class">
-<dt id="pycppqed.quantumsystem.Particle">
-<em class="property">class </em><tt class="descclassname">pycppqed.quantumsystem.</tt><tt class="descname">Particle</tt><big>(</big><em>statevector</em>, <em>number=0</em><big>)</big><a class="headerlink" href="#pycppqed.quantumsystem.Particle" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#pycppqed.quantumsystem.QuantumSystem" title="pycppqed.quantumsystem.QuantumSystem"><tt class="xref py py-class docutils literal"><span class="pre">pycppqed.quantumsystem.QuantumSystem</span></tt></a></p>
-<p>A class representing a single particle.</p>
-<dl class="method">
-<dt id="pycppqed.quantumsystem.Particle.expvalues">
-<tt class="descname">expvalues</tt><big>(</big><em>k=True</em>, <em>x=True</em><big>)</big><a class="headerlink" href="#pycppqed.quantumsystem.Particle.expvalues" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculate the default expectation values for this particle.</p>
-<dl class="docutils">
-<dt><em>Arguments</em></dt>
-<dd><ul class="first last">
-<li><dl class="first docutils">
-<dt><em>k</em> (optional)</dt>
-<dd><p class="first last">If True all k related expectation values are calculated. That
-means <img class="math" src="_images/math/db75f70f31e1ce3db28c30d46ab9c50aa4e879a2.png" alt="\langle k \rangle"/> and <img class="math" src="_images/math/d3a50f42e2e3a034140382b5f4cf09bbefe9f844.png" alt="Var(k)"/>.
-(Default is True)</p>
-</dd>
-</dl>
-</li>
-<li><dl class="first docutils">
-<dt><em>x</em> (optional)</dt>
-<dd><p class="first last">If True all x related expectation values are calculated. That
-means <img class="math" src="_images/math/f19d79332370c5814d7b271f70ccf2d8b6690d2f.png" alt="\langle x \rangle"/> and <img class="math" src="_images/math/1eb29f9de3753a59530941141fcb5c7aa3fa2e38.png" alt="\Delta x"/>.
-(Default is True)</p>
-</dd>
-</dl>
-</li>
-</ul>
-</dd>
-<dt><em>Returns</em></dt>
-<dd><ul class="first last">
-<li><dl class="first docutils">
-<dt><em>expvalues</em></dt>
-<dd><p class="first last">A <tt class="xref py py-class docutils literal"><span class="pre">pycppqed.expvalues.ExpectationValuesCollection</span></tt>.</p>
-</dd>
-</dl>
-</li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="class">
-<dt id="pycppqed.quantumsystem.QBit">
-<em class="property">class </em><tt class="descclassname">pycppqed.quantumsystem.</tt><tt class="descname">QBit</tt><big>(</big><em>statevector</em>, <em>number=0</em><big>)</big><a class="headerlink" href="#pycppqed.quantumsystem.QBit" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#pycppqed.quantumsystem.QuantumSystem" title="pycppqed.quantumsystem.QuantumSystem"><tt class="xref py py-class docutils literal"><span class="pre">pycppqed.quantumsystem.QuantumSystem</span></tt></a></p>
-<p>A class representing a single qubit.</p>
-<dl class="method">
-<dt id="pycppqed.quantumsystem.QBit.expvalues">
-<tt class="descname">expvalues</tt><big>(</big><big>)</big><a class="headerlink" href="#pycppqed.quantumsystem.QBit.expvalues" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="class">
-<dt id="pycppqed.quantumsystem.QuantumSystem">
-<em class="property">class </em><tt class="descclassname">pycppqed.quantumsystem.</tt><tt class="descname">QuantumSystem</tt><big>(</big><em>statevector</em>, <em>number=0</em><big>)</big><a class="headerlink" href="#pycppqed.quantumsystem.QuantumSystem" title="Permalink to this definition">¶</a></dt>
-<dd><p>A base class for all other specific quantum system.</p>
-<dl class="method">
-<dt id="pycppqed.quantumsystem.QuantumSystem.expvalues">
-<tt class="descname">expvalues</tt><big>(</big><big>)</big><a class="headerlink" href="#pycppqed.quantumsystem.QuantumSystem.expvalues" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculate the default expectation values for this system.</p>
-<p>This method has to be overridden in all inheriting classes.</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="class">
-<dt id="pycppqed.quantumsystem.QuantumSystemCompound">
-<em class="property">class </em><tt class="descclassname">pycppqed.quantumsystem.</tt><tt class="descname">QuantumSystemCompound</tt><big>(</big><em>statevector</em>, <em>*args</em><big>)</big><a class="headerlink" href="#pycppqed.quantumsystem.QuantumSystemCompound" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#pycppqed.quantumsystem.QuantumSystem" title="pycppqed.quantumsystem.QuantumSystem"><tt class="xref py py-class docutils literal"><span class="pre">pycppqed.quantumsystem.QuantumSystem</span></tt></a></p>
-<p>A class representing a combined quantum system.</p>
-<dl class="docutils">
-<dt><em>Usage</em></dt>
-<dd><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">sv1</span> <span class="o">=</span> <span class="n">StateVector</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span> <span class="n">norm</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">sv2</span> <span class="o">=</span> <span class="n">StateVector</span><span class="p">((</span><span class="mi">4</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span> <span class="n">norm</span> <span class="o">=</span> <span class="bp">True</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">sv</span> <span class="o">=</span> <span class="n">sv1</span> <span class="o">^</span> <span class="n">sv2</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">qs</span> <span class="o">=</span> <span class="n">QuantumSystem</span><span class="p">(</span><span class="n">sv</span><span class="p">,</span> <span class="n">Particle</span><span class="p">,</span> <span class="n">Mode</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">evs</span> <span class="o">=</span> <span class="n">qs</span><span class="o">.</span><span class="n">evs</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">evs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-<span class="go">ExpectationValueCollection(&#39;&lt;k&gt;&#39;, &#39;Var(k)&#39;, &#39;&lt;x&gt;&#39;, &#39;Var(x)&#39;)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="nb">repr</span><span class="p">(</span><span class="n">evs</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-<span class="go">ExpectationValueCollection(&#39;&lt;n&gt;&#39;, &#39;Var(n)&#39;, &#39;&lt;a&gt;&#39;)</span>
-</pre></div>
+<div class="section" id="pycppqed-quantumsystem">
+<h2><a class="toc-backref" href="#contents"><tt class="xref py py-mod docutils literal"><span class="pre">pycppqed.quantumsystem</span></tt></a><a class="headerlink" href="#pycppqed-quantumsystem" title="Permalink to this headline">¶</a></h2>
 </div>
-</dd>
-<dt><em>Arguments</em></dt>
-<dd><ul class="first last">
-<li><dl class="first docutils">
-<dt><em>statevector</em></dt>
-<dd><p class="first last">A <a class="reference internal" href="#pycppqed.statevector.StateVector" title="pycppqed.statevector.StateVector"><tt class="xref py py-class docutils literal"><span class="pre">pycppqed.statevector.StateVector</span></tt></a> or
-<a class="reference internal" href="#pycppqed.statevector.StateVectorTrajectory" title="pycppqed.statevector.StateVectorTrajectory"><tt class="xref py py-class docutils literal"><span class="pre">pycppqed.statevector.StateVectorTrajectory</span></tt></a> describing
-this system.</p>
-</dd>
-</dl>
-</li>
-<li><dl class="first docutils">
-<dt><em>*args</em></dt>
-<dd><p class="first last">Elementary quantum systems which together build this combined
-quantum system.</p>
-</dd>
-</dl>
-</li>
-</ul>
-</dd>
-</dl>
-<dl class="method">
-<dt id="pycppqed.quantumsystem.QuantumSystemCompound.expvalues">
-<tt class="descname">expvalues</tt><big>(</big><em>subsystems=None</em><big>)</big><a class="headerlink" href="#pycppqed.quantumsystem.QuantumSystemCompound.expvalues" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculate the default expectation values for this system.</p>
-<dl class="docutils">
-<dt><em>Arguments</em></dt>
-<dd><ul class="first last">
-<li><dl class="first docutils">
-<dt><em>subsystems</em> (optional)</dt>
-<dd><p class="first last">A list of integers specifying for which subsystems the
-expectation values should be calculated.
-(Default is None which means all subsystems are calculated).</p>
-</dd>
-</dl>
-</li>
-</ul>
-</dd>
-<dt><em>Returns</em></dt>
-<dd><ul class="first last">
-<li><dl class="first docutils">
-<dt><em>expvalues</em></dt>
-<dd><p class="first last">An <tt class="xref py py-class docutils literal"><span class="pre">pycppqed.expvalues.ExpectationValuesCollection</span></tt>.</p>
-</dd>
-</dl>
-</li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
+<div class="section" id="pycppqed-description">
+<h2><a class="toc-backref" href="#contents"><tt class="xref py py-mod docutils literal"><span class="pre">pycppqed.description</span></tt></a><a class="headerlink" href="#pycppqed-description" title="Permalink to this headline">¶</a></h2>
 </div>
-<div class="section" id="module-pycppqed.description">
-<span id="pycppqed-description"></span><h2><a class="toc-backref" href="#contents"><a class="reference internal" href="#module-pycppqed.description" title="pycppqed.description"><tt class="xref py py-mod docutils literal"><span class="pre">pycppqed.description</span></tt></a></a><a class="headerlink" href="#module-pycppqed.description" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
-<dt id="pycppqed.description.Description">
-<em class="property">class </em><tt class="descclassname">pycppqed.description.</tt><tt class="descname">Description</tt><big>(</big><em>commentstr</em><big>)</big><a class="headerlink" href="#pycppqed.description.Description" title="Permalink to this definition">¶</a></dt>
-<dd><p>A class for working with the comment section of a C++QED output file.</p>
-<dl class="docutils">
-<dt><em>Arguments</em></dt>
-<dd><ul class="first last">
-<li><dl class="first docutils">
-<dt><em>commentstr</em></dt>
-<dd><p class="first last">A string following the style of the comment section of C++QED
-output files.</p>
-</dd>
-</dl>
-</li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="class">
-<dt id="pycppqed.description.ExpectationValues">
-<em class="property">class </em><tt class="descclassname">pycppqed.description.</tt><tt class="descname">ExpectationValues</tt><big>(</big><em>datakeystr</em><big>)</big><a class="headerlink" href="#pycppqed.description.ExpectationValues" title="Permalink to this definition">¶</a></dt>
-<dd><p>A class representing the datakey section of C++QED output files.</p>
-</dd></dl>
-
-<dl class="class">
-<dt id="pycppqed.description.ExpectationValuesSubsection">
-<em class="property">class </em><tt class="descclassname">pycppqed.description.</tt><tt class="descname">ExpectationValuesSubsection</tt><big>(</big><em>sectionstr</em><big>)</big><a class="headerlink" href="#pycppqed.description.ExpectationValuesSubsection" title="Permalink to this definition">¶</a></dt>
-<dd><p>A class representing a single set of keys in the datakey section.</p>
-</dd></dl>
-
-<dl class="class">
-<dt id="pycppqed.description.QuantumSystem">
-<em class="property">class </em><tt class="descclassname">pycppqed.description.</tt><tt class="descname">QuantumSystem</tt><big>(</big><em>buf</em><big>)</big><a class="headerlink" href="#pycppqed.description.QuantumSystem" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
+<div class="section" id="pycppqed-visualization">
+<h2><a class="toc-backref" href="#contents"><tt class="xref py py-mod docutils literal"><span class="pre">pycppqed.visualization</span></tt></a><a class="headerlink" href="#pycppqed-visualization" title="Permalink to this headline">¶</a></h2>
 </div>
-<div class="section" id="module-pycppqed.visualization">
-<span id="pycppqed-visualization"></span><h2><a class="toc-backref" href="#contents"><a class="reference internal" href="#module-pycppqed.visualization" title="pycppqed.visualization"><tt class="xref py py-mod docutils literal"><span class="pre">pycppqed.visualization</span></tt></a></a><a class="headerlink" href="#module-pycppqed.visualization" title="Permalink to this headline">¶</a></h2>
-<p>This module provides convenient functions to visualize pycppqed objects.</p>
-<dl class="docutils">
-<dt>Some functions are also available as methods for the specific classes:</dt>
-<dd><ul class="first last simple">
-<li><a class="reference internal" href="#pycppqed.visualization.statevector" title="pycppqed.visualization.statevector"><tt class="xref py py-func docutils literal"><span class="pre">statevector()</span></tt></a></li>
-<li><a class="reference internal" href="#pycppqed.visualization.expvaluetrajectory" title="pycppqed.visualization.expvaluetrajectory"><tt class="xref py py-func docutils literal"><span class="pre">expvaluetrajectory()</span></tt></a></li>
-<li><a class="reference internal" href="#pycppqed.visualization.expvaluecollection" title="pycppqed.visualization.expvaluecollection"><tt class="xref py py-func docutils literal"><span class="pre">expvaluecollection()</span></tt></a></li>
-</ul>
-</dd>
-<dt>Others can be used to easily compare expecation values:</dt>
-<dd><ul class="first last simple">
-<li><a class="reference internal" href="#pycppqed.visualization.compare_expvaluecollections" title="pycppqed.visualization.compare_expvaluecollections"><tt class="xref py py-func docutils literal"><span class="pre">compare_expvaluecollections()</span></tt></a></li>
-</ul>
-</dd>
-</dl>
-<dl class="function">
-<dt id="pycppqed.visualization.compare_expvaluecollections">
-<tt class="descclassname">pycppqed.visualization.</tt><tt class="descname">compare_expvaluecollections</tt><big>(</big><em>coll1</em>, <em>coll2</em>, <em>show=True</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pycppqed.visualization.compare_expvaluecollections" title="Permalink to this definition">¶</a></dt>
-<dd><p>Plot all subsystems of two ExpectationValueCollections.</p>
-<dl class="docutils">
-<dt><em>Arguments</em></dt>
-<dd><ul class="first last">
-<li><dl class="first docutils">
-<dt><em>coll1</em></dt>
-<dd><p class="first last">First <tt class="xref py py-class docutils literal"><span class="pre">pycppqed.expvalues.ExpectationValue.Collection</span></tt>.</p>
-</dd>
-</dl>
-</li>
-<li><dl class="first docutils">
-<dt><em>coll2</em></dt>
-<dd><p class="first last">Second <tt class="xref py py-class docutils literal"><span class="pre">pycppqed.expvalues.ExpectationValue.Collection</span></tt>.</p>
-</dd>
-</dl>
-</li>
-<li><dl class="first docutils">
-<dt><em>show</em> (optional):</dt>
-<dd><p class="first last">If True pylab.show() is called finally. This means a plotting
-window will pop up automatically. (Default is True)</p>
-</dd>
-</dl>
-</li>
-<li><p class="first">Any other arguments that the pylab plotting command can use.</p>
-</li>
-</ul>
-</dd>
-</dl>
-<p>This function allows a fast comparison between two sets of expectation
-values that were obtained by different calculations.</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="pycppqed.visualization.expvaluecollection">
-<tt class="descclassname">pycppqed.visualization.</tt><tt class="descname">expvaluecollection</tt><big>(</big><em>evc</em>, <em>show=True</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pycppqed.visualization.expvaluecollection" title="Permalink to this definition">¶</a></dt>
-<dd><p>Visualize a <a class="reference internal" href="#pycppqed.expvalues.ExpectationValueCollection" title="pycppqed.expvalues.ExpectationValueCollection"><tt class="xref py py-class docutils literal"><span class="pre">pycppqed.expvalues.ExpectationValueCollection</span></tt></a>.</p>
-<dl class="docutils">
-<dt><em>Usage</em></dt>
-<dd><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">T</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">10</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">T</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">T</span><span class="p">))</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">titles</span> <span class="o">=</span> <span class="p">(</span><span class="s">&quot;&lt;x&gt;&quot;</span><span class="p">,</span> <span class="s">&quot;&lt;y&gt;&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">evc</span> <span class="o">=</span> <span class="n">pycppqed</span><span class="o">.</span><span class="n">expvalues</span><span class="o">.</span><span class="n">ExpectationValueCollection</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">titles</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">evc</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
-</pre></div>
-</div>
-</dd>
-<dt><em>Arguments</em></dt>
-<dd><ul class="first last">
-<li><dl class="first docutils">
-<dt><em>evc</em></dt>
-<dd><p class="first last">A <a class="reference internal" href="#pycppqed.expvalues.ExpectationValueCollection" title="pycppqed.expvalues.ExpectationValueCollection"><tt class="xref py py-class docutils literal"><span class="pre">pycppqed.expvalues.ExpectationValueCollection</span></tt></a>.</p>
-</dd>
-</dl>
-</li>
-<li><dl class="first docutils">
-<dt><em>show</em> (optional):</dt>
-<dd><p class="first last">If True pylab.show() is called finally. This means a plotting
-window will pop up automatically. (Default is True)</p>
-</dd>
-</dl>
-</li>
-<li><p class="first">Any other arguments that the pylab plotting command can use.</p>
-</li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="function">
-<dt id="pycppqed.visualization.expvaluetrajectory">
-<tt class="descclassname">pycppqed.visualization.</tt><tt class="descname">expvaluetrajectory</tt><big>(</big><em>evt</em>, <em>show=True</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pycppqed.visualization.expvaluetrajectory" title="Permalink to this definition">¶</a></dt>
-<dd><p>Visualize a <a class="reference internal" href="#pycppqed.expvalues.ExpectationValueTrajectory" title="pycppqed.expvalues.ExpectationValueTrajectory"><tt class="xref py py-class docutils literal"><span class="pre">pycppqed.expvalues.ExpectationValueTrajectory</span></tt></a>.</p>
-<dl class="docutils">
-<dt><em>Usage</em></dt>
-<dd><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">evt</span> <span class="o">=</span> <span class="n">pycppqed</span><span class="o">.</span><span class="n">expvalues</span><span class="o">.</span><span class="n">ExpectationValueTrajectory</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mf">0.4</span><span class="p">))</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">evt</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
-</pre></div>
-</div>
-</dd>
-<dt><em>Arguments</em></dt>
-<dd><ul class="first last">
-<li><dl class="first docutils">
-<dt><em>evt</em></dt>
-<dd><p class="first last">A <a class="reference internal" href="#pycppqed.expvalues.ExpectationValueTrajectory" title="pycppqed.expvalues.ExpectationValueTrajectory"><tt class="xref py py-class docutils literal"><span class="pre">pycppqed.expvalues.ExpectationValueTrajectory</span></tt></a>.</p>
-</dd>
-</dl>
-</li>
-<li><dl class="first docutils">
-<dt><em>show</em> (optional):</dt>
-<dd><p class="first last">If True pylab.show() is called finally. This means a plotting
-window will pop up automatically. (Default is True)</p>
-</dd>
-</dl>
-</li>
-<li><p class="first">Any other arguments that the pylab plotting command can use.</p>
-</li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="function">
-<dt id="pycppqed.visualization.statevector">
-<tt class="descclassname">pycppqed.visualization.</tt><tt class="descname">statevector</tt><big>(</big><em>sv</em>, <em>x=None</em>, <em>y=None</em>, <em>re=False</em>, <em>im=False</em>, <em>abs=True</em>, <em>show=True</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pycppqed.visualization.statevector" title="Permalink to this definition">¶</a></dt>
-<dd><p>Visualize a 2d or 3d <a class="reference internal" href="#pycppqed.statevector.StateVector" title="pycppqed.statevector.StateVector"><tt class="xref py py-class docutils literal"><span class="pre">pycppqed.statevector.StateVector</span></tt></a>.</p>
-<dl class="docutils">
-<dt><em>Usage</em></dt>
-<dd><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">sv</span> <span class="o">=</span> <span class="n">pycppqed</span><span class="o">.</span><span class="n">StateVector</span><span class="p">((</span><span class="mf">0.4</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mf">0.4</span><span class="p">),</span> <span class="n">norm</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">sv</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
-</pre></div>
-</div>
-</dd>
-<dt><em>Arguments</em></dt>
-<dd><ul class="first last">
-<li><dl class="first docutils">
-<dt><em>x</em> (optional)</dt>
-<dd><p class="first last">X-coordinates that should be used for plotting.</p>
-</dd>
-</dl>
-</li>
-<li><dl class="first docutils">
-<dt><em>y</em> (optional)</dt>
-<dd><p class="first last">Y-coordinates that should be used for plotting.</p>
-</dd>
-</dl>
-</li>
-<li><dl class="first docutils">
-<dt><em>re</em> (optional)</dt>
-<dd><p class="first last">If True the real part of the statevector is plotted. (Default
-is False)</p>
-</dd>
-</dl>
-</li>
-<li><dl class="first docutils">
-<dt><em>im</em> (optional)</dt>
-<dd><p class="first last">If True the imaginary part of the state vector is plotted.
-(Default is False)</p>
-</dd>
-</dl>
-</li>
-<li><dl class="first docutils">
-<dt><em>abs</em> (optional):</dt>
-<dd><p class="first last">If True the absolute square of the state vector is plotted.
-(Default is False)</p>
-</dd>
-</dl>
-</li>
-<li><dl class="first docutils">
-<dt><em>show</em> (optional):</dt>
-<dd><p class="first last">If True pylab.show() is called finally. This means a plotting
-window will pop up automatically. (Default is True)</p>
-</dd>
-</dl>
-</li>
-<li><p class="first">Any other arguments that the pylab plotting command can use.</p>
-</li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-</div>
-<div class="section" id="module-pycppqed.animation">
-<span id="pycppqed-animation"></span><h2><a class="toc-backref" href="#contents"><a class="reference internal" href="#module-pycppqed.animation" title="pycppqed.animation"><tt class="xref py py-mod docutils literal"><span class="pre">pycppqed.animation</span></tt></a></a><a class="headerlink" href="#module-pycppqed.animation" title="Permalink to this headline">¶</a></h2>
-<p>This module implements animations with matplotlib.</p>
-<p>The function <a class="reference internal" href="#pycppqed.animation.animate_statevector" title="pycppqed.animation.animate_statevector"><tt class="xref py py-func docutils literal"><span class="pre">animate_statevector()</span></tt></a> provides an easy way to animate
-2D and 3D StateVectorTrajectories. This function can also be accessed through
-<a class="reference internal" href="#pycppqed.statevector.StateVectorTrajectory.animate" title="pycppqed.statevector.StateVectorTrajectory.animate"><tt class="xref py py-meth docutils literal"><span class="pre">pycppqed.statevector.StateVectorTrajectory.animate()</span></tt></a>.</p>
-<dl class="function">
-<dt id="pycppqed.animation.animate_statevector">
-<tt class="descclassname">pycppqed.animation.</tt><tt class="descname">animate_statevector</tt><big>(</big><em>svtraj</em>, <em>x=None</em>, <em>y=None</em>, <em>re=False</em>, <em>im=False</em>, <em>abs=True</em><big>)</big><a class="headerlink" href="#pycppqed.animation.animate_statevector" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create an interactive animation of the given StateVectorTrajectory.</p>
-<dl class="docutils">
-<dt><em>Usage</em></dt>
-<dd><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">svs</span> <span class="o">=</span> <span class="p">[</span><span class="n">pycppqed</span><span class="o">.</span><span class="n">gaussian</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">X</span><span class="p">]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">svtraj</span> <span class="o">=</span> <span class="n">pycppqed</span><span class="o">.</span><span class="n">StateVectorTrajectory</span><span class="p">(</span><span class="n">svs</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">animate_statevector</span><span class="p">(</span><span class="n">svtraj</span><span class="p">)</span>
-</pre></div>
-</div>
-</dd>
-<dt><em>Arguments</em></dt>
-<dd><ul class="first last">
-<li><dl class="first docutils">
-<dt><em>svtraj</em></dt>
-<dd><p class="first last">A <a class="reference internal" href="#pycppqed.statevector.StateVectorTrajectory" title="pycppqed.statevector.StateVectorTrajectory"><tt class="xref py py-class docutils literal"><span class="pre">pycppqed.statevector.StateVectorTrajectory</span></tt></a> that should
-be animated.</p>
-</dd>
-</dl>
-</li>
-<li><dl class="first docutils">
-<dt><em>x</em> (optional)</dt>
-<dd><p class="first last">An array giving the 1st-coordinates of the state vectors.</p>
-</dd>
-</dl>
-</li>
-<li><dl class="first docutils">
-<dt><em>y</em> (optional)</dt>
-<dd><p class="first last">An array giving the 2nd-coordinates of the state vectors.</p>
-</dd>
-</dl>
-</li>
-<li><dl class="first docutils">
-<dt><em>re</em> (optional)</dt>
-<dd><p class="first last">If set True the real part of the state vectors will be animated.
-(Default is False)</p>
-</dd>
-</dl>
-</li>
-<li><dl class="first docutils">
-<dt><em>im</em> (optional)</dt>
-<dd><p class="first last">If set True the imaginary part of the state vectors will be
-animated. (Default is False)</p>
-</dd>
-</dl>
-</li>
-<li><dl class="first docutils">
-<dt><em>abs</em> (optional)</dt>
-<dd><p class="first last">If set True the absolute square of the state vectors will be
-animated. (Default is True)</p>
-</dd>
-</dl>
-</li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
+<div class="section" id="pycppqed-animation">
+<h2><a class="toc-backref" href="#contents"><tt class="xref py py-mod docutils literal"><span class="pre">pycppqed.animation</span></tt></a><a class="headerlink" href="#pycppqed-animation" title="Permalink to this headline">¶</a></h2>
 </div>
 </div>
 
@@ -1527,17 +1030,17 @@ animated. (Default is True)</p>
 <li><a class="reference internal" href="#module-pycppqed.expvalues"><tt class="docutils literal"><span class="pre">pycppqed.expvalues</span></tt></a></li>
 <li><a class="reference internal" href="#module-pycppqed.io"><tt class="docutils literal"><span class="pre">pycppqed.io</span></tt></a></li>
 <li><a class="reference internal" href="#module-pycppqed.initialconditions"><tt class="docutils literal"><span class="pre">pycppqed.initialconditions</span></tt></a></li>
-<li><a class="reference internal" href="#module-pycppqed.quantumsystem"><tt class="docutils literal"><span class="pre">pycppqed.quantumsystem</span></tt></a></li>
-<li><a class="reference internal" href="#module-pycppqed.description"><tt class="docutils literal"><span class="pre">pycppqed.description</span></tt></a></li>
-<li><a class="reference internal" href="#module-pycppqed.visualization"><tt class="docutils literal"><span class="pre">pycppqed.visualization</span></tt></a></li>
-<li><a class="reference internal" href="#module-pycppqed.animation"><tt class="docutils literal"><span class="pre">pycppqed.animation</span></tt></a></li>
+<li><a class="reference internal" href="#pycppqed-quantumsystem"><tt class="docutils literal"><span class="pre">pycppqed.quantumsystem</span></tt></a></li>
+<li><a class="reference internal" href="#pycppqed-description"><tt class="docutils literal"><span class="pre">pycppqed.description</span></tt></a></li>
+<li><a class="reference internal" href="#pycppqed-visualization"><tt class="docutils literal"><span class="pre">pycppqed.visualization</span></tt></a></li>
+<li><a class="reference internal" href="#pycppqed-animation"><tt class="docutils literal"><span class="pre">pycppqed.animation</span></tt></a></li>
 </ul>
 </li>
 </ul>
 
   <h4>Previous topic</h4>
   <p class="topless"><a href="teazertools.html"
-                        title="previous chapter">TeazerTools</a></p>
+                        title="previous chapter">TeazerTools User Guide</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="reference_teazertools.html"
                         title="next chapter">TeazerTools reference</a></p>
@@ -1576,7 +1079,7 @@ animated. (Default is True)</p>
           <a href="reference_teazertools.html" title="TeazerTools reference"
              >next</a> |</li>
         <li class="right" >
-          <a href="teazertools.html" title="TeazerTools"
+          <a href="teazertools.html" title="TeazerTools User Guide"
              >previous</a> |</li>
         <li><a href="index.html">PyCppQED v0.1.1 documentation</a> &raquo;</li> 
       </ul>
