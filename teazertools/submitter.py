@@ -297,13 +297,15 @@ class JobArray(object):
         else:
             seedspec = "1-%s" % len(self.seeds)
         
-        os.environ['JobArray'] = base64.encodestring(pickle.dumps(self,-1)).replace('\n','')
-        logging.debug("in submit:")
-        logging.debug(os.environ['JobArray'])
+        obj = base64.encodestring(pickle.dumps(self,-1)).replace('\n','')
+        logging.debug("String representation of JobArray object:")
+        logging.debug(obj)
         
         command = ['qsub','-terse','-v','JobArray', '-o', logfile, '-N', jobname, '-t', seedspec]
         command.extend(self.default_sub_pars)
         command.append('cppqedjob')
+        if not dryrun:
+            command.append(obj)
         (jobid,err,returncode) = self._execute(command, dryrun, dryrunresult=("100.0",""),
                                                dryrunmessage="Submit command on teazer:")
         if not returncode == 0:

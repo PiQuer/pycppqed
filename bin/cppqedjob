@@ -11,11 +11,11 @@ import warnings
 def main():
     warnings.simplefilter("ignore",FutureWarning)
     warnings.simplefilter("ignore",DeprecationWarning)
-    if not os.environ.has_key('JobArray'):
-        logging.error("Need a JobArray object as environment variable. Note that this script is not intended to be called manually.")
+    if not len(sys.argv)>1:
+        logging.error("Need a JobArray object as commandline argument. Note that this script is not intended to be called manually.")
         sys.exit(1)
-    job = pickle.loads(base64.decodestring(os.environ['JobArray']))
-    logging.getLogger().setLevel(logging.DEBUG)
+    job = pickle.loads(base64.decodestring(sys.argv[1]))
+    logging.getLogger().setLevel(job.loglevel)
     job.run()
 
 
