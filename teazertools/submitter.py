@@ -66,7 +66,6 @@ class JobArray(object):
         self.targetoutputbase=os.path.join(self.datadir,self.basename+'.out')
         self.seeds = seeds
         self.diagnostics = diagnostics
-        self.teazer = False
         self.averageids = averageids
         self.matlab = matlab
         self.average = average
@@ -77,29 +76,30 @@ class JobArray(object):
         self.testrun_dt = None
         self.datafiles = []
         self.default_sub_pars = ['-b','y', '-v','PYTHONPATH','-v','PATH', '-q','all.q','-m','n','-j','yes']
-        self.loglevel = logging.getLogger().getEffectiveLevel() 
+        self.loglevel = logging.getLogger().getEffectiveLevel()
+        self.usetemp = True
+        self.outputdir_is_temp = False
     
     def _prepare_exec(self,seed,dryrun):
         logging.debug("Entering _prepare_exec.")
         if os.environ.has_key('SGE_TASK_ID'):
-            self.teazer = True
             logging.debug("SGE_TASK_ID: "+os.environ['SGE_TASK_ID'])
             logging.debug(repr(self.parameters))
             self.parameters['seed'] = self.seeds[int(os.environ['SGE_TASK_ID'])-1]
-            self.outputdir = tempfile.mkdtemp(prefix=self.basename,dir=self.tempdir)
         else:
             self.parameters['seed'] = self.seeds[seed]
+        if self.usetemp:
+            self.outputdir = tempfile.mkdtemp(prefix=self.basename,dir=self.tempdir)
+            self.outputdir_is_temp = True
+        else:
+            self.outputdir_is_temp = False
         self.command = [self.script]
         for item in self.parameters.items():
             self.command.extend(('--'+item[0],str(item[1])))
-        if self.parameters.has_key('seed'):
-            suffix = '.%s'%self.parameters['seed']
-        else:
-            suffix = ''
-        self.output = os.path.join(self.outputdir,self.basename+'.out'+suffix)
-        self.sv = self.output+'.sv'
-        self.targetoutput = self.targetoutputbase+suffix
-        self.targetsv = self.targetoutput+'.sv'
+        self.targetoutput = self._targetoutput(**self.parameters)
+        self.targetsv = self._targetsv(**self.parameters)
+        self.output = helpers.replace_dirpart(self.targetoutput, self.outputdir)
+        self.sv = helpers.replace_dirpart(self.targetsv, self.outputdir)
         self.datafiles.extend((self.output, self.sv))
         if not dryrun:
             self.command.extend(('--o',self.output))
@@ -147,10 +147,11 @@ class JobArray(object):
     
     def _move_data(self):
         for f in self.datafiles:
-            shutil.move(f, self.datadir)
+            shutil.copy(f, self.datadir)
+            os.remove(f)
     
     def _cleanup(self):
-        if self.teazer:
+        if self.outputdir_is_temp:
             logging.debug("Cleaning up on node, deleting %s."%self.outputdir)
             shutil.rmtree(self.outputdir, ignore_errors=True)
     
@@ -165,14 +166,27 @@ class JobArray(object):
         scipy.io.savemat(self.sv+".mat",{"sv":finalsv}, do_compression=self.compress)
         self.datafiles.extend((self.output+".mat",self.sv+".mat"))
     
+    def _targetoutput(self,seed=None,**kwargs):
+        if seed:
+            return self.targetoutputbase+'.'+str(seed)
+        else:
+            return self.targetoutputbase
+    
+    def _targetsv(self,seed=None,**kwargs):
+        return self._targetoutput(seed=seed)+'.sv'
+    
+    def _find_target_files(self,seed=None,**kwargs):
+        seed = str(seed)
+        (targetoutput, output_compressed) = helpers.check_if_file_exists(self._targetoutput(seed),'.bz2')
+        (targetsv, sv_compressed) = helpers.check_if_file_exists(self._targetsv(seed),'.bz2')
+        return (targetoutput,output_compressed,targetsv,sv_compressed)
+    
+    
     def _check_existing(self,seed):
         seed = str(seed)
-        if os.path.exists(self.targetoutputbase+'.'+seed):
-            target = self.targetoutputbase+'.'+seed
-        elif os.path.exists(self.targetoutputbase+'.'+seed+self.compsuffix):
-            target = self.targetoutputbase+'.'+seed+self.compsuffix
-        else: return False
-        lastT = helpers.cppqed_t(target)
+        (targetoutput,_,targetsv,_) = self._find_target_files(seed)
+        if not targetoutput or not targetsv: return False
+        lastT = helpers.cppqed_t(targetoutput)
         if lastT == None: return False
         if np.less_equal(float(self.parameters['T']),float(lastT)):
             logging.info("Removing seed "+seed+ " from array, found trajectory with T=%f",lastT)
@@ -187,38 +201,40 @@ class JobArray(object):
         self.seeds[:] = [seed for seed in self.seeds if not self._check_existing(seed)]
     
     def _prepare_resume(self):
+        """Puts everything in place to resume a trajectory.
+        Returns True if nothing has to be simulated, returns False otherwise.
+        """
         logging.debug("Entering _prepare_resume")
-        if not self.resume:
+        (targetoutput,output_compressed,targetsv,sv_compressed) = self._find_target_files(**self.parameters)
+        if not self.resume or not (targetoutput and targetsv):
+            if targetoutput:
+                logging.info("Deleting existing trajectory file %s."%targetoutput)
+                os.remove(targetoutput)
+            if targetsv:
+                logging.info("Deleting existing sv file %s."%targetsv)
+                os.remove(targetsv)
             return False
-        if os.path.exists(self.targetoutput):
-            lastT = helpers.cppqed_t(self.targetoutput)
-            target_traj_compressed = False
-        elif os.path.exists(self.targetoutput+self.compsuffix):
-            lastT = helpers.cppqed_t(self.targetoutput+self.compsuffix)
-            target_traj_compressed = True
-            self.targetoutput = self.targetoutput+self.compsuffix
-        else:
+        
+        lastT = helpers.cppqed_t(targetoutput)
+        if lastT == None:
+            logging.info("Found an invalid trajectory file %s."%targetoutput)
             return False
-        if lastT == None: return False
-        logging.debug("Found a trajectory with T=%f"%lastT)
+        logging.info("Found a trajectory with T=%f"%lastT)
         if np.less_equal(float(self.parameters['T']),float(lastT)):
-            logging.debug("Don't need to calculate anything, T=%f."%float(self.parameters['T']))
+            logging.info("Don't need to calculate anything, T=%f."%float(self.parameters['T']))
             return True
-        if os.path.exists(self.targetsv):
-            target_sv_compressed = False
-        elif os.path.exists(self.targetsv+self.compsuffix):
-            target_sv_compressed = True
-            self.targetsv = self.targetsv+self.compsuffix
-        if self.teazer:
-            logging.debug('Moving %s to %s.'%(self.targetoutput,self.outputdir))
-            shutil.copy(self.targetoutput, self.outputdir)
-            logging.debug('Moving %s to %s.'%(self.targetsv,self.outputdir))
-            shutil.copy(self.targetsv, self.outputdir)
-        if target_traj_compressed:
-            logging.debug('Uncompressing %s'%self.output+self.compsuffix)
-            os.system('bunzip2 %s'%self.output+self.compsuffix)
-        if target_sv_compressed:
-            logging.debug('Uncompressing %s'%self.sv+self.compsuffix)
+        if self.usetemp:
+            logging.info('Moving %s to %s.'%(targetoutput,self.outputdir))
+            shutil.copy(targetoutput, self.outputdir)
+            targetoutput = helpers.replace_dirpart(targetoutput, self.outputdir)
+            logging.debug('Moving %s to %s.'%(targetsv,self.outputdir))
+            shutil.copy(targetsv, self.outputdir)
+            targetsv = helpers.replace_dirpart(targetsv, self.outputdir)
+        if output_compressed:
+            logging.info('Uncompressing %s'%targetoutput)
+            os.system('bunzip2 %s'%targetoutput)
+        if sv_compressed:
+            logging.info('Uncompressing %s'%targetsv)
             os.system('bunzip2 %s'%self.sv+self.compsuffix)
         return False
     
@@ -253,7 +269,7 @@ class JobArray(object):
                 self._compress()
             if self.matlab:
                 self._convert_matlab()
-            if self.teazer:
+            if self.usetemp:
                 self._move_data()
         finally:
             self._cleanup()
@@ -440,6 +456,7 @@ class GenericSubmitter(OptionParser, ConfigParser.RawConfigParser):
         myjob.testrun_dt = self.testrun_dt
         myjob.compress = self.compress
         myjob.resume = self.resume
+        myjob.usetemp = self.getboolean('Config','usetemp')
         return myjob
         
     def _combine_pars(self, rangepars):

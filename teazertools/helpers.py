@@ -27,7 +27,27 @@ def mkdir_p(path):
         if exc.errno == errno.EEXIST:
             pass
         else: raise
+        
+def rm_f(path):
+    """Remove a file if it exists, otherwise do nothing
+    """
+    try:
+        os.remove(path)
+    except OSError, exc:
+        if exc.errno == errno.ENOENT:
+            pass
+        else: raise
 
+def replace_dirpart(path,newdir):
+    return os.path.join(newdir,os.path.basename(path))
+     
+def check_if_file_exists(basename,extension):
+    if os.path.exists(basename):
+        return (basename,False)
+    elif os.path.exists(basename+extension):
+        return (basename+extension,True)
+    else:
+        return (None,False)
 
 def generate_filelist(basename,dirname):
     """ This function generates a list of files which start with `basename` and either end with a digit (possibly with an `.bz2` extension)
