@@ -179,6 +179,7 @@ class JobArray(object):
             return True
         else:
             logging.info("Keeping seed "+seed+ " with T=%f.",lastT)
+            return False
         
     def _clean_seedlist(self):
         if not self.resume:
