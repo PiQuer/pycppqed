@@ -43,8 +43,10 @@ class TestSubmitter(unittest.TestCase):
         s = submitter.GenericSubmitter(argv=['submitter', 'test/test.conf'])
         s.act()
         for i in range(4):
-            self.assertEqual(((self.expected_args_regular[i],),{'stdout':subprocess.PIPE,'stderr':subprocess.PIPE}),self.p.call_args_list[2*i])
-            self.assertEqual(((self.expected_args_averaging[i],),{'stdout':subprocess.PIPE,'stderr':subprocess.PIPE}),self.p.call_args_list[2*i+1])
+            arg1 = self.p.call_args_list[2*i][0][0][0:-1]
+            arg2 = self.p.call_args_list[2*i+1][0][0]
+            self.assertEqual(self.expected_args_regular[i],arg1)
+            self.assertEqual(self.expected_args_averaging[i],arg2)
 
 class TestRun(unittest.TestCase):
     
