@@ -58,8 +58,8 @@ class TestRun(unittest.TestCase):
         pars = pickle.load(f)
         f.close()
         self.assertEqual(pars, {'kappa': 0.1, 'dc': 0, 'deltaC': -8, 'seed': 1001, 'T': 0.5, 'Dt': 0.1})
-        qed.load_cppqed('test/output/01/traj/1particle1mode.out.1001')
-        qed.load_statevector('test/output/01/traj/1particle1mode.out.1001.sv')
+        qed.load_cppqed('test/output/01/traj/1particle1mode.out.1001.bz2')
+        qed.load_statevector('test/output/01/traj/1particle1mode.out.1001.sv.bz2')
         
 
                     
