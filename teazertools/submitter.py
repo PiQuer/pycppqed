@@ -394,7 +394,7 @@ class GenericSubmitter(OptionParser, ConfigParser.RawConfigParser):
     """
     def __init__(self, argv=None):
         usage = "usage: %prog [options] configfile"
-        ConfigParser.RawConfigParser.__init__(self, allow_no_value=True)
+        ConfigParser.RawConfigParser.__init__(self)
         OptionParser.__init__(self,usage)
         if argv:
             sys.argv = argv
