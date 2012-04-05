@@ -279,7 +279,7 @@ class JobArray(object):
         :param testrun: Only simulate two seeds and set the parameter `T` to 1.
         :type testrun: bool
         """
-        if testrun and (os.path.exists(self.datadir) or os.path.exists(self.averagedir)):
+        if not dryrun and testrun and (os.path.exists(self.datadir) or os.path.exists(self.averagedir)):
             logging.error("The testrun potentially overwrites data in %s or %s. Will not start testrun while these directories exist."%(self.datadir,self.averagedir))
             sys.exit(1)
         if not dryrun:
