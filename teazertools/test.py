@@ -28,12 +28,13 @@ class TestSubmitter(unittest.TestCase):
         self.expected_args_regular = []
         self.expected_args_averaging = []
         for i in range(4):
-            self.expected_args_regular.append(['qsub', '-terse', '-v', 'JobArray', '-o', 'test/output/%02d/log/$JOB_NAME.$JOB_ID.$TASK_ID.log'%(i+1), 
-                                            '-N', 'Job1particle1mode', '-t', '1-10', '-b', 'y', '-v', 'PYTHONPATH', '-v', 'PATH', '-q', 'all.q', 
+            self.expected_args_regular.append(['qsub', '-terse', '-o', 'test/output/%02d/log/$JOB_NAME.$JOB_ID.$TASK_ID.log'%(i+1), 
+                                            '-N', 'Job1particle1mode', '-t', '1-10', '-b', 'y', '-v', 'PYTHONPATH', '-v', 'PATH', 
                                             '-m', 'n', '-j', 'yes', 'cppqedjob'],)
             self.expected_args_averaging.append(['qsub', '-terse','-o', 'test/output/%02d/log/1particle1mode_mean.log'%(i+1), '-hold_jid', '574599', '-b', 'y', '-v', 'PYTHONPATH', 
-                                           '-v', 'PATH', '-q', 'all.q', '-m', 'n', '-j', 'yes', 'calculate_mean', '--variances=4,8', '--expvals=5,6', 
-                                           '--stdevs=10', '--datadir=test/output/%02d/traj'%(i+1), '--outputdir=test/output/%02d/mean'%(i+1), '1particle1mode'],)
+                                           '-v', 'PATH', '-m', 'n', '-j', 'yes', 'calculate_mean', '--variances', '4,8', '--expvals', '5,6', 
+                                           '--stdevs', '10', '--datadir', 'test/output/%02d/traj'%(i+1), '--outputdir', 'test/output/%02d/mean'%(i+1), 
+                                           '1particle1mode'],)
         self.p = self.popen_patch.start()
     
     def tearDown(self):

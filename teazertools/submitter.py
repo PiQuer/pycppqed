@@ -75,7 +75,7 @@ class JobArray(object):
         self.testrun_t = 1
         self.testrun_dt = None
         self.datafiles = []
-        self.default_sub_pars = ['-b','y', '-v','PYTHONPATH','-v','PATH', '-q','all.q','-m','n','-j','yes']
+        self.default_sub_pars = ['-b','y', '-v','PYTHONPATH','-v','PATH', '-m','n','-j','yes']
         self.loglevel = logging.getLogger().getEffectiveLevel()
         self.usetemp = True
         self.outputdir_is_temp = False
@@ -318,7 +318,7 @@ class JobArray(object):
         logging.debug("String representation of JobArray object:")
         logging.debug(obj)
         
-        command = ['qsub','-terse','-v','JobArray', '-o', logfile, '-N', jobname, '-t', seedspec]
+        command = ['qsub','-terse', '-o', logfile, '-N', jobname, '-t', seedspec]
         command.extend(self.default_sub_pars)
         command.append('cppqedjob')
         if not dryrun:
