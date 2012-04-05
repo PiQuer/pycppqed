@@ -355,9 +355,9 @@ class JobArray(object):
             logging.info("Successfully submitted job id %s." %jobid.rstrip())
         jobid = jobid.split('.')[0]
         if self.C['average']:
-            self.submit_average(holdid=jobid,dryrun=dryrun)
+            self.submit_average(holdid=jobid,dryrun=dryrun,testrun=testrun)
     
-    def submit_average(self,holdid=None,dryrun=False):
+    def submit_average(self,holdid=None,dryrun=False,testrun=False):
         r"""Submit a job to teazer to compute the average expectation values.
         
         :param holdid: Make this job depend on the job array with id `holdid`.
@@ -375,6 +375,7 @@ class JobArray(object):
         command.extend(self.default_sub_pars)
         command.extend(self._dict_to_commandline('-', self.C['qsub']))
         command.extend(self._dict_to_commandline('-', self.C['qsub_average']))
+        command.extend(self._dict_to_commandline('-', self.C['qsub_test']))
         command.append('calculate_mean')
         command.extend(self._dict_to_commandline('--', self.C['averageids']))
         command.extend(('--datadir',self.datadir))
