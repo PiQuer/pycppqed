@@ -1,35 +1,42 @@
 #!/usr/bin/env python
 
 import teazertools.mean as mean
+import optparse
 import getopt, sys
 
 def usage():
     print "Usage: " + sys.argv[0] + " [--outputdir|--datadir|--expvals|--variances|--varmeans|--stdevs|--stdevmeans] basename"
 
 def main():
-    try:
-        opts, args = getopt.getopt(sys.argv[1:], "h", ["outputdir=", "datadir=", "expvals=", "variances=", "varmeans=",
-                                                      "stdevs=", "stdevmeans="])
-    except getopt.GetoptError, err:
-        # print help information and exit:
-        print str(err) # will print something like "option -a not recognized"
-        sys.exit(2)
+    usage = "usage: %prog [options] basename"
+    parser = optparse.OptionParser(usage)
+    parser.add_option("--outputdir", help="Results are written here.")
+    parser.add_option("--datadir", help="Trajectories are read from here.")
+    parser.add_option("--expvals", help="Comma separated list of columns (starting with 1) in trajectory files which correspond to plain expectation values.",
+                      metavar="E1,E2,...")
+    parser.add_option("--variances", help="Comma separated list of columns (starting with 1) in trajectory files which correspond to variances.",
+                      metavar="V1,V2,...")
+    parser.add_option("--stdevs", help="Same as --variances, but for standard deviations.", metavar="S1,S2,...")
+    parser.add_option("--varmeans", help="Comma separated list of the mean values which correspond to the variances V1,V2,... (this defaults to V1-1,V2-1,...)",
+                      metavar="VM1,VM2,...")
+    parser.add_option("--stdevmeans", help="Same as --varmeans, but for means that correspond to standard deviations (this defaults to S1-1,S2-1,...)",
+                      metavar="SM1,SM2,...")
+    
+    (options,args) = parser.parse_args()
+    
     if len(args)<1:
-        usage()
-        sys.exit(2)
+        parser.error("Need basename as commandline argument.")
+    
     kwargs = {}
-    for o, a in opts:
-        if o == "-h":
-            usage()
-            sys.exit(0)
-        elif o == "--outputdir":
-            kwargs['outputdir'] = a
-        elif o == "--datadir":
-            kwargs['datadir'] = a
-        elif o in ("--expvals","--variances","--varmeans","--stdevs","--stdevmeans"):
-            kwargs[o[2:]] = map(int,a.split(','))  
-        else:
-            assert False, "unhandled option"
+    
+    for o in ("outputdir", "datadir"):
+        option = getattr(options,o)
+        if option: kwargs[o] = option
+    
+    for o in ("expvals","variances","varmeans","stdevs","stdevmeans"):
+        option = getattr(options,o)
+        if option: kwargs[o] = map(int,option.split(','))
+    
     basename = args[0]
     
     mean.calculateMeans(basename, **kwargs)
