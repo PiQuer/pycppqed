@@ -425,7 +425,7 @@ class GenericSubmitter(OptionParser, ConfigParser.RawConfigParser):
         self.JobArrayParams['usetemp'] = self.getboolean('Config', 'usetemp')
         self.JobArrayParams['qsub'] = dict(self.items('Qsub'))
         self.JobArrayParams['qsub_traj'] = dict(self.items('QsubTraj'))
-        self.JobArrayParams['qsub_aberage'] = dict(self.items('QsubAverage'))
+        self.JobArrayParams['qsub_average'] = dict(self.items('QsubAverage'))
         self.JobArrayParams['qsub_test'] = dict(self.items('QsubTest'))
         if ConfigParser.RawConfigParser.has_option(self,'Config', 'testrun_dt'):
             self.JobArrayParams['testrun_dt'] = self.getfloat('Config', 'testrun_dt')
