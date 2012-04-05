@@ -300,7 +300,8 @@ class JobArray(object):
         cl = []
         for i in d.items():
             if i[1]:
-                cl.extend((prefix+i[0],str(i[1])))
+                for j in str(i[1]).split(';'):
+                    cl.extend((prefix+i[0],j))
             else:
                 cl.append(prefix+i[0])
         return cl
