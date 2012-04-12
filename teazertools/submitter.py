@@ -435,7 +435,7 @@ class GenericSubmitter(OptionParser, ConfigParser.RawConfigParser):
         
             
     def _jobarray_maker(self, basedir, parameters):
-        myjob = JobArray(self.script,basedir=basedir,seeds=self.seeds,averageids=self.averageids,
+        myjob = JobArray(self.script,basedir=basedir,seeds=self.seeds[:],averageids=self.averageids,
                          parameters=parameters, matlab=self.matlab, average=self.average)
         myjob.testrun_t = self.testrun_t
         myjob.testrun_dt = self.testrun_dt
