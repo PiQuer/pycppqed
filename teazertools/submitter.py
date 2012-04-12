@@ -484,7 +484,7 @@ class GenericSubmitter(OptionParser, ConfigParser.RawConfigParser):
         
             
     def _jobarray_maker(self, basedir, parameters):
-        myjob = JobArray(self.script, basedir=basedir, parameters=parameters, seeds=self.seeds, config=self.JobArrayParams)
+        myjob = JobArray(self.script, basedir=basedir, parameters=parameters, seeds=self.seeds[:], config=self.JobArrayParams)
         return myjob
         
     def _combine_pars(self, rangepars):
