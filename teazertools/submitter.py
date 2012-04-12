@@ -38,18 +38,36 @@ class JobArray(object):
     :type tempdir: str
     :param seeds: A list of seeds which defines the trajectory ensemble.
     :type seeds: list
+    :param config: A dictionary to control various aspects of this class.
+    :type config: dict
+    
+    The possible values in `config` are:
+    
     :param averageids: A dictionary to define which columns of the output files contain expectation values, variances and standard
         deviations.
     :type averageids: dict
+    :param qsub: A dictionary of parameters passed to qsub. Each key:value pair corresponds to a
+        -key value commandline option to qsub.
+    :type qsub: dict
+    :param qsub_traj: Same as `qsub`, but items here are only applied to qsub submissions of trajectory job arrays.
+    :param qsub_average: Same as `qsub`, but items here are only applied to qsub submissions of averaging jobs.
+    :type qsub_average: dict
+    :param qsub_test: Same as `qsub`, but items here are only applied to qsub submission if it is a testrun.
     :param diagnostics: If `True`, print diagnostic messages to log files.
-    :type diagnostics: bool
     :param matlab: If `True`, convert trajectories and state vector files to matlab format.
-    :type matlab: bool
     :param average: If `True`, submit a job which calculates ensemble averages.
-    :type average: bool
+    :param usetemp: Write data to temporary directory first (default True).
+    :param compress: Compress files (default True)
+    :param resume: Resume trajectories (default False)
+    :param testrun_t: Final time to integrate in testruns (default 1)
+    :param testrn_dt: -Dt for testruns (default None)
+    :param combine: If `True`, use all possible combinations of parameters (default True)
     """
-    def __init__(self,script,basename=None,parameters={},basedir='.',tempdir='/tmp',seeds=[1001],
-                 averageids={}, diagnostics=True, matlab=True, average=True):
+    def __init__(self,script,basename=None,parameters={},basedir='.',tempdir='/tmp',seeds=[1001], config={}):
+        self.C = dict(averageids={},qsub={}, qsub_traj={}, qsub_average={}, qsub_test={}, diagnostics=True,
+                      matlab=True, average=True, compress=True, resume=False, testrun_t=1, testrun_dt = None,
+                      usetemp=True, combine=True)
+        self.C.update(config)
         self.script = script
         self.parameters = parameters
         self.basedir=basedir
@@ -65,41 +83,32 @@ class JobArray(object):
             self.basename = basename
         self.targetoutputbase=os.path.join(self.datadir,self.basename+'.out')
         self.seeds = seeds
-        self.diagnostics = diagnostics
-        self.teazer = False
-        self.averageids = averageids
-        self.matlab = matlab
-        self.average = average
-        self.compress = False
         self.compsuffix='.bz2'
-        self.resume = False
-        self.testrun_t = 1
-        self.testrun_dt = None
         self.datafiles = []
-        self.default_sub_pars = ['-b','y', '-v','PYTHONPATH','-v','PATH', '-q','all.q','-m','n','-j','yes']
-        self.loglevel = logging.getLogger().getEffectiveLevel() 
+        self.default_sub_pars = ['-b','y', '-v','PYTHONPATH','-v','PATH', '-m','n','-j','yes']
+        self.loglevel = logging.getLogger().getEffectiveLevel()
+        self.outputdir_is_temp = False
     
     def _prepare_exec(self,seed,dryrun):
         logging.debug("Entering _prepare_exec.")
         if os.environ.has_key('SGE_TASK_ID'):
-            self.teazer = True
             logging.debug("SGE_TASK_ID: "+os.environ['SGE_TASK_ID'])
             logging.debug(repr(self.parameters))
             self.parameters['seed'] = self.seeds[int(os.environ['SGE_TASK_ID'])-1]
-            self.outputdir = tempfile.mkdtemp(prefix=self.basename,dir=self.tempdir)
         else:
             self.parameters['seed'] = self.seeds[seed]
+        if self.C['usetemp']:
+            self.outputdir = tempfile.mkdtemp(prefix=self.basename,dir=self.tempdir)
+            self.outputdir_is_temp = True
+        else:
+            self.outputdir_is_temp = False
         self.command = [self.script]
         for item in self.parameters.items():
             self.command.extend(('--'+item[0],str(item[1])))
-        if self.parameters.has_key('seed'):
-            suffix = '.%s'%self.parameters['seed']
-        else:
-            suffix = ''
-        self.output = os.path.join(self.outputdir,self.basename+'.out'+suffix)
-        self.sv = self.output+'.sv'
-        self.targetoutput = self.targetoutputbase+suffix
-        self.targetsv = self.targetoutput+'.sv'
+        self.targetoutput = self._targetoutput(**self.parameters)
+        self.targetsv = self._targetsv(**self.parameters)
+        self.output = helpers.replace_dirpart(self.targetoutput, self.outputdir)
+        self.sv = helpers.replace_dirpart(self.targetsv, self.outputdir)
         self.datafiles.extend((self.output, self.sv))
         if not dryrun:
             self.command.extend(('--o',self.output))
@@ -147,32 +156,46 @@ class JobArray(object):
     
     def _move_data(self):
         for f in self.datafiles:
-            shutil.move(f, self.datadir)
+            shutil.copy(f, self.datadir)
+            os.remove(f)
     
     def _cleanup(self):
-        if self.teazer:
+        if self.outputdir_is_temp:
             logging.debug("Cleaning up on node, deleting %s."%self.outputdir)
             shutil.rmtree(self.outputdir, ignore_errors=True)
     
     def _convert_matlab(self):
-        if self.compress:
-            suffix = '.bz2'
+        if self.C['compress']:
+            suffix = self.compsuffix
         else:
             suffix = ''
         evs, svs = qed.load_cppqed(self.output+suffix)
         finalsv = qed.load_statevector(self.sv+suffix)
-        scipy.io.savemat(self.output+".mat", {"evs":evs, "svs":svs}, do_compression=self.compress)
-        scipy.io.savemat(self.sv+".mat",{"sv":finalsv}, do_compression=self.compress)
+        scipy.io.savemat(self.output+".mat", {"evs":evs, "svs":svs}, do_compression=self.C['compress'])
+        scipy.io.savemat(self.sv+".mat",{"sv":finalsv}, do_compression=self.C['compress'])
         self.datafiles.extend((self.output+".mat",self.sv+".mat"))
+    
+    def _targetoutput(self,seed=None,**kwargs):
+        if seed:
+            return self.targetoutputbase+'.'+str(seed)
+        else:
+            return self.targetoutputbase
+    
+    def _targetsv(self,seed=None,**kwargs):
+        return self._targetoutput(seed=seed)+'.sv'
+    
+    def _find_target_files(self,seed=None,**kwargs):
+        seed = str(seed)
+        (targetoutput, output_compressed) = helpers.check_if_file_exists(self._targetoutput(seed),'.bz2')
+        (targetsv, sv_compressed) = helpers.check_if_file_exists(self._targetsv(seed),'.bz2')
+        return (targetoutput,output_compressed,targetsv,sv_compressed)
+    
     
     def _check_existing(self,seed):
         seed = str(seed)
-        if os.path.exists(self.targetoutputbase+'.'+seed):
-            target = self.targetoutputbase+'.'+seed
-        elif os.path.exists(self.targetoutputbase+'.'+seed+self.compsuffix):
-            target = self.targetoutputbase+'.'+seed+self.compsuffix
-        else: return False
-        lastT = helpers.cppqed_t(target)
+        (targetoutput,_,targetsv,_) = self._find_target_files(seed)
+        if not targetoutput or not targetsv: return False
+        lastT = helpers.cppqed_t(targetoutput)
         if lastT == None: return False
         if np.less_equal(float(self.parameters['T']),float(lastT)):
             logging.info("Removing seed "+seed+ " from array, found trajectory with T=%f",lastT)
@@ -182,44 +205,46 @@ class JobArray(object):
             return False
         
     def _clean_seedlist(self):
-        if not self.resume:
+        if not self.C['resume']:
             return False
         logging.info("Checking for existing trajectories... this can take a long time")
         self.seeds[:] = [seed for seed in self.seeds if not self._check_existing(seed)]
     
     def _prepare_resume(self):
+        """Puts everything in place to resume a trajectory.
+        Returns True if nothing has to be simulated, returns False otherwise.
+        """
         logging.debug("Entering _prepare_resume")
-        if not self.resume:
+        (targetoutput,output_compressed,targetsv,sv_compressed) = self._find_target_files(**self.parameters)
+        if not self.C['resume'] or not (targetoutput and targetsv):
+            if targetoutput:
+                logging.info("Deleting existing trajectory file %s."%targetoutput)
+                os.remove(targetoutput)
+            if targetsv:
+                logging.info("Deleting existing sv file %s."%targetsv)
+                os.remove(targetsv)
             return False
-        if os.path.exists(self.targetoutput):
-            lastT = helpers.cppqed_t(self.targetoutput)
-            target_traj_compressed = False
-        elif os.path.exists(self.targetoutput+self.compsuffix):
-            lastT = helpers.cppqed_t(self.targetoutput+self.compsuffix)
-            target_traj_compressed = True
-            self.targetoutput = self.targetoutput+self.compsuffix
-        else:
+        
+        lastT = helpers.cppqed_t(targetoutput)
+        if lastT == None:
+            logging.info("Found an invalid trajectory file %s."%targetoutput)
             return False
-        if lastT == None: return False
-        logging.debug("Found a trajectory with T=%f"%lastT)
+        logging.info("Found a trajectory with T=%f"%lastT)
         if np.less_equal(float(self.parameters['T']),float(lastT)):
-            logging.debug("Don't need to calculate anything, T=%f."%float(self.parameters['T']))
+            logging.info("Don't need to calculate anything, T=%f."%float(self.parameters['T']))
             return True
-        if os.path.exists(self.targetsv):
-            target_sv_compressed = False
-        elif os.path.exists(self.targetsv+self.compsuffix):
-            target_sv_compressed = True
-            self.targetsv = self.targetsv+self.compsuffix
-        if self.teazer:
-            logging.debug('Moving %s to %s.'%(self.targetoutput,self.outputdir))
-            shutil.copy(self.targetoutput, self.outputdir)
-            logging.debug('Moving %s to %s.'%(self.targetsv,self.outputdir))
-            shutil.copy(self.targetsv, self.outputdir)
-        if target_traj_compressed:
-            logging.debug('Uncompressing %s'%self.output+self.compsuffix)
-            os.system('bunzip2 %s'%self.output+self.compsuffix)
-        if target_sv_compressed:
-            logging.debug('Uncompressing %s'%self.sv+self.compsuffix)
+        if self.C['usetemp']:
+            logging.info('Moving %s to %s.'%(targetoutput,self.outputdir))
+            shutil.copy(targetoutput, self.outputdir)
+            targetoutput = helpers.replace_dirpart(targetoutput, self.outputdir)
+            logging.debug('Moving %s to %s.'%(targetsv,self.outputdir))
+            shutil.copy(targetsv, self.outputdir)
+            targetsv = helpers.replace_dirpart(targetsv, self.outputdir)
+        if output_compressed:
+            logging.info('Uncompressing %s'%targetoutput)
+            os.system('bunzip2 %s'%targetoutput)
+        if sv_compressed:
+            logging.info('Uncompressing %s'%targetsv)
             os.system('bunzip2 %s'%self.sv+self.compsuffix)
         return False
     
@@ -244,17 +269,17 @@ class JobArray(object):
                 if not os.path.exists(self.datadir): helpers.mkdir_p(self.datadir)
             except OSError: pass
             self._write_parameters()
-            if self.diagnostics: self.diagnostics_before()
+            if self.C['diagnostics']: self.diagnostics_before()
             (std,err,retcode) = self._execute(self.command)
             if not retcode == 0:
                 logging.error("C++QED script failed with exitcode %s:\n%s" % (retcode,err))
                 sys.exit(1)
-            if self.diagnostics: self.diagnostics_after()
-            if self.compress:
+            if self.C['diagnostics']: self.diagnostics_after()
+            if self.C['compress']:
                 self._compress()
-            if self.matlab:
+            if self.C['matlab']:
                 self._convert_matlab()
-            if self.teazer:
+            if self.C['usetemp']:
                 self._move_data()
         finally:
             self._cleanup()
@@ -270,11 +295,21 @@ class JobArray(object):
             (std,err) = p.communicate()
             returncode = p.returncode
         return (std,err,returncode)
+    
+    def _dict_to_commandline(self,prefix,d):
+        cl = []
+        for i in d.items():
+            if i[1]:
+                for j in str(i[1]).split(';'):
+                    cl.extend((prefix+i[0],j))
+            else:
+                cl.append(prefix+i[0])
+        return cl
         
     def submit(self, testrun=False, dryrun=False):
-        """Submit the job array to teazer. Technically this is done by serializing the object, storing it in
-        the environment variable $JobArray and calling the helper script `cppqedjob`. The helper script
-        (running on a node) restores the object from the environment variable and calls :func:`run`.
+        """Submit the job array to teazer. Technically this is done by serializing the object and passing it
+        to the helper script `cppqedjob` as a commandline parameter. The helper script
+        (running on a node) restores the object from the string and calls :func:`run`.
         
         :param testrun: Only simulate two seeds and set the parameter `T` to 1.
         :type testrun: bool
@@ -293,8 +328,8 @@ class JobArray(object):
             return
         if testrun:
             seedspec = "1-%s" % min(2,len(self.seeds))
-            self.parameters['T'] = self.testrun_t
-            if self.testrun_dt: self.parameters['Dt'] = self.testrun_dt
+            self.parameters['T'] = self.C['testrun_t']
+            if self.C['testrun_dt']: self.parameters['Dt'] = self.C['testrun_dt']
         else:
             seedspec = "1-%s" % len(self.seeds)
         
@@ -302,8 +337,12 @@ class JobArray(object):
         logging.debug("String representation of JobArray object:")
         logging.debug(obj)
         
-        command = ['qsub','-terse','-v','JobArray', '-o', logfile, '-N', jobname, '-t', seedspec]
+        command = ['qsub','-terse', '-o', logfile, '-N', jobname, '-t', seedspec]
         command.extend(self.default_sub_pars)
+        command.extend(self._dict_to_commandline('-', self.C['qsub']))
+        command.extend(self._dict_to_commandline('-', self.C['qsub_traj']))
+        if testrun:
+            command.extend(self._dict_to_commandline('-', self.C['qsub_test']))
         command.append('cppqedjob')
         if not dryrun:
             command.append(obj)
@@ -315,10 +354,10 @@ class JobArray(object):
         elif not dryrun:
             logging.info("Successfully submitted job id %s." %jobid.rstrip())
         jobid = jobid.split('.')[0]
-        if self.average:
-            self.submit_average(holdid=jobid,dryrun=dryrun)
+        if self.C['average']:
+            self.submit_average(holdid=jobid,dryrun=dryrun,testrun=testrun)
     
-    def submit_average(self,holdid=None,dryrun=False):
+    def submit_average(self,holdid=None,dryrun=False,testrun=False):
         r"""Submit a job to teazer to compute the average expectation values.
         
         :param holdid: Make this job depend on the job array with id `holdid`.
@@ -334,11 +373,13 @@ class JobArray(object):
         if holdid:
             command.extend(('-hold_jid',holdid))
         command.extend(self.default_sub_pars)
+        command.extend(self._dict_to_commandline('-', self.C['qsub']))
+        command.extend(self._dict_to_commandline('-', self.C['qsub_average']))
+        command.extend(self._dict_to_commandline('-', self.C['qsub_test']))
         command.append('calculate_mean')
-        for item in self.averageids.items():
-            command.append('--'+item[0]+'='+item[1])
-        command.append('--datadir='+self.datadir)
-        command.append('--outputdir='+self.averagedir)
+        command.extend(self._dict_to_commandline('--', self.C['averageids']))
+        command.extend(('--datadir',self.datadir))
+        command.extend(('--outputdir',self.averagedir))
         command.append(self.basename)
         (jobid,err,returncode) = self._execute(command, dryrun, dryrunmessage="Submit command on teazer:")
         if returncode == 0:
@@ -363,6 +404,7 @@ class GenericSubmitter(OptionParser, ConfigParser.RawConfigParser):
         self.optionxform = str
         self.CppqedObjects = []
         self.defaultconfig = os.path.join(os.path.dirname(__file__),'generic_submitter_defaults.conf')
+        self.JobArrayParams = {}
         self.averageids={}
         self._parse_config()
         self._generate_objects()
@@ -372,22 +414,29 @@ class GenericSubmitter(OptionParser, ConfigParser.RawConfigParser):
         self.script = os.path.expanduser(self.get('Config','script'))
         self.read([self.defaultconfig,os.path.expanduser('~/.submitter/generic_submitter.conf'),
                      os.path.expanduser('~/.submitter/'+os.path.basename(self.script)+'.conf'), self.config])
-        self.basedir = os.path.expanduser(self.get('Config', 'basedir'))
-        self.matlab = self.getboolean('Config', 'matlab')
-        self.average = self.getboolean('Config', 'average')
-        self.numericsubdirs = self.getboolean('Config', 'numericsubdirs')
         self.combine = self.getboolean('Config', 'combine')
-        self.testrun_t = self.getfloat('Config', 'testrun_t')
-        self.compress = self.getboolean('Config', 'compress')
-        self.resume = self.getboolean('Config','resume')
+        self.numericsubdirs = self.getboolean('Config', 'numericsubdirs')
+        self.basedir = self.JobArrayParams['basedir'] = os.path.expanduser(self.get('Config', 'basedir'))
+        self.JobArrayParams['matlab'] = self.getboolean('Config', 'matlab')
+        self.average = self.JobArrayParams['average'] = self.getboolean('Config', 'average')
+        self.JobArrayParams['testrun_t'] = self.getfloat('Config', 'testrun_t')
+        self.JobArrayParams['compress'] = self.getboolean('Config', 'compress')
+        self.JobArrayParams['resume'] = self.getboolean('Config','resume')
+        self.JobArrayParams['usetemp'] = self.getboolean('Config', 'usetemp')
+        self.JobArrayParams['qsub'] = dict(self.items('Qsub'))
+        self.JobArrayParams['qsub_traj'] = dict(self.items('QsubTraj'))
+        self.JobArrayParams['qsub_average'] = dict(self.items('QsubAverage'))
+        self.JobArrayParams['qsub_test'] = dict(self.items('QsubTest'))
         if ConfigParser.RawConfigParser.has_option(self,'Config', 'testrun_dt'):
-            self.testrun_dt = self.getfloat('Config', 'testrun_dt')
+            self.JobArrayParams['testrun_dt'] = self.getfloat('Config', 'testrun_dt')
         else:
-            self.testrun_dt = None
+            self.JobArrayParams['testrun_dt'] = None
         
-        if self.average and self.has_section('Averages'):
-            self.averageids = dict(self.items('Averages'))
-        else: self.average = False
+        if self.JobArrayParams['average'] and self.has_section('Averages'):
+            self.JobArrayParams['averageids'] = dict(self.items('Averages'))
+        else: 
+            logging.info('Averaging disabled: no information about output columns available. Please contact documentation about [Averages] section.')
+            self.JobArrayParams['average'] = False
 
         self.seeds = self.get('Config','seeds')
         if self.seeds.isdigit():
@@ -435,12 +484,7 @@ class GenericSubmitter(OptionParser, ConfigParser.RawConfigParser):
         
             
     def _jobarray_maker(self, basedir, parameters):
-        myjob = JobArray(self.script,basedir=basedir,seeds=self.seeds,averageids=self.averageids,
-                         parameters=parameters, matlab=self.matlab, average=self.average)
-        myjob.testrun_t = self.testrun_t
-        myjob.testrun_dt = self.testrun_dt
-        myjob.compress = self.compress
-        myjob.resume = self.resume
+        myjob = JobArray(self.script, basedir=basedir, parameters=parameters, seeds=self.seeds, config=self.JobArrayParams)
         return myjob
         
     def _combine_pars(self, rangepars):
