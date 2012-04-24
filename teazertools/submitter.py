@@ -117,6 +117,7 @@ class JobArray(object):
         """This function is called before the executable is called. It can be overloaded in subclasses.
         The default implementation writes a message with the hostname to the log file.
         """
+        logging.info("Output file is " + self.output)
         logging.info("Job on %s started." % os.uname()[1])
     
     def diagnostics_after(self):
