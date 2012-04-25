@@ -49,7 +49,7 @@ def check_if_file_exists(basename,extension):
     else:
         return (None,False)
 
-def generate_filelist(basename,dirname):
+def generate_filelist(basename,dirname,bz2only=False):
     """ This function generates a list of files which start with `basename` and either end with a digit (possibly with an `.bz2` extension)
     
     :param basename: The files have to begin with this string.
@@ -57,11 +57,14 @@ def generate_filelist(basename,dirname):
     :param dirname: Search in this directory.
     :type dirname: str
     :returns: A list of matching filenames.
+    :param bz2only: Only consider files ending in bz2
+    :type bz2only: bool
     :retval: list
     """
     filelist = [ os.path.join(dirname,x) for x in os.listdir(dirname) if x.startswith(basename) and 
                         ((not x.endswith('.bz2') and x[-1].isdigit()) or (x.endswith('.bz2') and x[-5].isdigit() ))]
     assert filelist != []
+    if bz2only: filelist = [f for f in filelist if f.endswith('.bz2')]
     return filelist
 
 

@@ -2,10 +2,6 @@
 
 import teazertools.mean as mean
 import optparse
-import getopt, sys
-
-def usage():
-    print "Usage: " + sys.argv[0] + " [--outputdir|--datadir|--expvals|--variances|--varmeans|--stdevs|--stdevmeans] basename"
 
 def main():
     usage = "usage: %prog [options] basename"
@@ -21,6 +17,8 @@ def main():
                       metavar="VM1,VM2,...")
     parser.add_option("--stdevmeans", help="Same as --varmeans, but for means that correspond to standard deviations (this defaults to S1-1,S2-1,...)",
                       metavar="SM1,SM2,...")
+    parser.add_option("--bz2only", action="store_true", dest="bz2only", default=False,
+                       help="Only consider files ending in .bz2")
     
     (options,args) = parser.parse_args()
     
@@ -28,7 +26,7 @@ def main():
         parser.error("Need basename as commandline argument.")
     
     kwargs = {}
-    
+    kwargs['bz2only'] = options.bz2only
     for o in ("outputdir", "datadir"):
         option = getattr(options,o)
         if option: kwargs[o] = option

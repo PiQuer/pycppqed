@@ -50,7 +50,7 @@ def calculateRho(basename,dirname='.'):
     return (timevec,rho/len(filelist))
     
 
-def calculateMeans(basename,expvals=[],variances=[],varmeans=[],stdevs=[],stdevmeans=[], datadir='.', outputdir='.', usesaved=True, matlab=True):
+def calculateMeans(basename,expvals=[],variances=[],varmeans=[],stdevs=[],stdevmeans=[], datadir='.', outputdir='.', usesaved=True, matlab=True, bz2only=False):
     '''
     Calculate the mean expectation values, mean variances and mean standard deviations from an
     ensemble of C++QED MCWF trajectories. The results are saved to a file.
@@ -91,7 +91,7 @@ def calculateMeans(basename,expvals=[],variances=[],varmeans=[],stdevs=[],stdevm
         stdevmeans = _shift_indices(stdevs,-1)
     
     # First check if we need to do anything
-    filelist = helpers.generate_filelist(basename,datadir)
+    filelist = helpers.generate_filelist(basename,datadir,bz2only)
     if outputdir:
         datafile = os.path.join(outputdir,basename+".mean.npz")
         matlabfile = os.path.join(outputdir,basename+".mean.mat")
