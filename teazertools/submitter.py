@@ -376,7 +376,8 @@ class JobArray(object):
         command.extend(self.default_sub_pars)
         command.extend(self._dict_to_commandline('-', self.C['qsub']))
         command.extend(self._dict_to_commandline('-', self.C['qsub_average']))
-        command.extend(self._dict_to_commandline('-', self.C['qsub_test']))
+        if testrun:
+            command.extend(self._dict_to_commandline('-', self.C['qsub_test']))
         command.append('calculate_mean')
         command.extend(self._dict_to_commandline('--', self.C['averageids']))
         command.extend(('--datadir',self.datadir))
