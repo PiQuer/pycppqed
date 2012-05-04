@@ -92,6 +92,7 @@ def calculateMeans(basename,expvals=[],variances=[],varmeans=[],stdevs=[],stdevm
     
     # First check if we need to do anything
     filelist = helpers.generate_filelist(basename,datadir,bz2only)
+    print "Found %i files."%len(filelist)
     if outputdir:
         datafile = os.path.join(outputdir,basename+".mean.npz")
         matlabfile = os.path.join(outputdir,basename+".mean.mat")
