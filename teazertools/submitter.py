@@ -273,11 +273,11 @@ class JobArray(object):
                     logging.error("C++QED script failed with exitcode %s:\n%s" % (retcode,err))
                     sys.exit(1)
                 if self.C['diagnostics']: self.diagnostics_after()
+                if self.C['matlab']:
+                    self._convert_matlab()
                 if self.C['compress']:
                     self._compress()
                 self.datafiles.extend((self.output,self.sv))
-                if self.C['matlab']:
-                    self._convert_matlab()
             if self.C['usetemp']:
                 self._move_data()
         finally:
