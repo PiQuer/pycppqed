@@ -106,7 +106,6 @@ class JobArray(object):
         self.targetsv = self._targetsv(**self.parameters)
         self.output = helpers.replace_dirpart(self.targetoutput, self.outputdir)
         self.sv = helpers.replace_dirpart(self.targetsv, self.outputdir)
-        self.datafiles.extend((self.output, self.sv))
         if not dryrun:
             self.command.extend(('--o',self.output))
         
@@ -148,9 +147,10 @@ class JobArray(object):
         scipy.io.savemat(self.parameterfilebase+".mat", numeric)
     
     def _compress(self):
-        for f in self.datafiles:
+        for f in (self.output,self.sv):
             os.system('bzip2 %s'%f)
-        self.datafiles = [f+self.compsuffix for f in self.datafiles]
+        self.output = self.output + self.compsuffix
+        self.sv = self.sv + self.compsuffix
     
     def _move_data(self):
         for f in self.datafiles:
@@ -163,12 +163,8 @@ class JobArray(object):
             shutil.rmtree(self.outputdir, ignore_errors=True)
     
     def _convert_matlab(self):
-        if self.C['compress']:
-            suffix = self.compsuffix
-        else:
-            suffix = ''
-        evs, svs = qed.load_cppqed(self.output+suffix)
-        finalsv = qed.load_statevector(self.sv+suffix)
+        evs, svs = qed.load_cppqed(self.output)
+        finalsv = qed.load_statevector(self.sv)
         scipy.io.savemat(self.output+".mat", {"evs":evs, "svs":svs}, do_compression=self.C['compress'])
         scipy.io.savemat(self.sv+".mat",{"sv":finalsv}, do_compression=self.C['compress'])
         self.datafiles.extend((self.output+".mat",self.sv+".mat"))
@@ -276,11 +272,12 @@ class JobArray(object):
                 if not retcode == 0:
                     logging.error("C++QED script failed with exitcode %s:\n%s" % (retcode,err))
                     sys.exit(1)
-            if self.C['diagnostics']: self.diagnostics_after()
-            if self.C['compress']:
-                self._compress()
-            if self.C['matlab']:
-                self._convert_matlab()
+                if self.C['diagnostics']: self.diagnostics_after()
+                if self.C['compress']:
+                    self._compress()
+                self.datafiles.extend((self.output,self.sv))
+                if self.C['matlab']:
+                    self._convert_matlab()
             if self.C['usetemp']:
                 self._move_data()
         finally:
