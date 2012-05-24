@@ -62,11 +62,12 @@ class JobArray(object):
     :param testrun_t: Final time to integrate in testruns (default 1)
     :param testrn_dt: -Dt for testruns (default None)
     :param combine: If `True`, use all possible combinations of parameters (default True)
+    :param cluster: Each job should calculate this many trajectories (default 1)
     """
     def __init__(self,script,basename=None,parameters={},basedir='.',tempdir='/tmp',seeds=[1001], config={}):
         self.C = dict(averageids={},qsub={}, qsub_traj={}, qsub_average={}, qsub_test={}, diagnostics=True,
                       matlab=True, average=True, compress=True, resume=False, testrun_t=1, testrun_dt = None,
-                      usetemp=True, combine=True)
+                      usetemp=True, combine=True, cluster=1)
         self.C.update(config)
         self.script = script
         self.parameters = parameters
@@ -91,12 +92,8 @@ class JobArray(object):
     
     def _prepare_exec(self,seed,dryrun):
         logging.debug("Entering _prepare_exec.")
-        if os.environ.has_key('SGE_TASK_ID'):
-            logging.debug("SGE_TASK_ID: "+os.environ['SGE_TASK_ID'])
-            logging.debug(repr(self.parameters))
-            self.parameters['seed'] = self.seeds[int(os.environ['SGE_TASK_ID'])-1]
-        else:
-            self.parameters['seed'] = self.seeds[seed]
+        logging.debug(repr(self.parameters))
+        self.parameters['seed'] = seed
         if self.C['usetemp']:
             self.outputdir = tempfile.mkdtemp(prefix=self.basename,dir=self.tempdir)
             self.outputdir_is_temp = True
@@ -260,21 +257,25 @@ class JobArray(object):
         """
         logging.debug("Entering run.")
         try:
-            self._prepare_exec(seed,dryrun)
-            if dryrun:
-                self._execute(self.command, dryrun, dryrunmessage="Executed on a node (with an additional appropriate -o flag):")
-                return
-            if self._prepare_resume():
-                return
-            try:
+            if os.environ.has_key('SGE_TASK_ID'):
+                logging.debug("SGE_TASK_ID: "+os.environ['SGE_TASK_ID'])
+                start = (int(os.environ['SGE_TASK_ID'])-1)*self.C['cluster']
+            else:
+                start = seed
+            for s in self.seeds[start:start+self.C['cluster']]:
+                self._prepare_exec(s,dryrun)
+                if dryrun:
+                    self._execute(self.command, dryrun, dryrunmessage="Executed on a node (with an additional appropriate -o flag):")
+                    return
+                if self._prepare_resume():
+                    return
                 if not os.path.exists(self.datadir): helpers.mkdir_p(self.datadir)
-            except OSError: pass
-            self._write_parameters()
-            if self.C['diagnostics']: self.diagnostics_before()
-            (std,err,retcode) = self._execute(self.command)
-            if not retcode == 0:
-                logging.error("C++QED script failed with exitcode %s:\n%s" % (retcode,err))
-                sys.exit(1)
+                self._write_parameters()
+                if self.C['diagnostics']: self.diagnostics_before()
+                (std,err,retcode) = self._execute(self.command)
+                if not retcode == 0:
+                    logging.error("C++QED script failed with exitcode %s:\n%s" % (retcode,err))
+                    sys.exit(1)
             if self.C['diagnostics']: self.diagnostics_after()
             if self.C['compress']:
                 self._compress()
@@ -327,12 +328,13 @@ class JobArray(object):
         if not self.seeds:
             logging.info('No seeds left to simulate.')
             return
+        numclusters = len(self.seeds)/self.C['cluster']+(len(self.seeds)%self.C['cluster']>0)
         if testrun:
-            seedspec = "1-%s" % min(2,len(self.seeds))
+            seedspec = "1-%s" % min(2,numclusters)
             self.parameters['T'] = self.C['testrun_t']
             if self.C['testrun_dt']: self.parameters['Dt'] = self.C['testrun_dt']
         else:
-            seedspec = "1-%s" % len(self.seeds)
+            seedspec = "1-%s" % numclusters
         
         obj = base64.encodestring(pickle.dumps(self,-1)).replace('\n','')
         logging.debug("String representation of JobArray object:")
@@ -425,6 +427,7 @@ class GenericSubmitter(OptionParser, ConfigParser.RawConfigParser):
         self.JobArrayParams['compress'] = self.getboolean('Config', 'compress')
         self.JobArrayParams['resume'] = self.getboolean('Config','resume')
         self.JobArrayParams['usetemp'] = self.getboolean('Config', 'usetemp')
+        self.JobArrayParams['cluster'] = self.getint('Config', 'cluster')
         self.JobArrayParams['qsub'] = dict(self.items('Qsub'))
         self.JobArrayParams['qsub_traj'] = dict(self.items('QsubTraj'))
         self.JobArrayParams['qsub_average'] = dict(self.items('QsubAverage'))
