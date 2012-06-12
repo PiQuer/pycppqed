@@ -1,8 +1,10 @@
 from distutils.core import setup, Extension, Command
 import unittest
 import numpy as np
+import sys
 
 cio = Extension("pycppqed.cio", sources=["pycppqed/io.c"])
+ciobin = Extension("pycppqed.ciobin", sources=["pycppqed/iobin.cc"], libraries=['boost_serialization'])
 
 class test(Command):
     """
@@ -22,6 +24,12 @@ class test(Command):
         unittest.TextTestRunner(verbosity=2).run(suite)
 
 
+ext_modules = [cio]
+if '--add-iobin' in sys.argv:
+    ext_modules.append(ciobin)
+    sys.argv.remove('--add-iobin')
+
+
 setup(
     name = "PyCppQED",
     version = "0.1.2",
@@ -31,8 +39,8 @@ setup(
     license = "BSD",
     packages = ('pycppqed','teazertools'),
     package_data={'teazertools':['generic_submitter_defaults.conf']},
+    ext_modules = ext_modules,
     scripts=('bin/calculate_mean','bin/cppqedjob','bin/submitter'),
-    ext_modules = [cio],
     cmdclass = {
         "test": test,
         },
