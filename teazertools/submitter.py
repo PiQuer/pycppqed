@@ -247,22 +247,16 @@ class JobArray(object):
             os.system('bunzip2 %s'%self.sv+self.compsuffix)
         return False
     
-    def run(self, seed=0, dryrun=False):
-        """If the environment variable `$SGE_TASK_ID` is set (i.e. we are on a node), simulate the trajectory
-        `self.seeds[$SGE_TASK_ID]`. Otherwise, simulate the trajectory `self.seeds[seed]` locally.
+    def run(self, start=0, dryrun=False):
+        """Simulate the trajectories self.seed[start:start+cluster] where cluster is the number of serial jobs. 
         
-        :param seed: The seed to simulate locally if `$SGE_TASK_ID` is not set.
-        :type seed: int
+        :param start: The start value in the seed list.
+        :type start: int
         :param dryrun: If `True`, don't simulate anything, but print a log message which contains the command that would
             have been run.
         """
         logging.debug("Entering run.")
         try:
-            if os.environ.has_key('SGE_TASK_ID'):
-                logging.debug("SGE_TASK_ID: "+os.environ['SGE_TASK_ID'])
-                start = (int(os.environ['SGE_TASK_ID'])-1)*self.C['cluster']
-            else:
-                start = seed
             for s in self.seeds[start:start+self.C['cluster']]:
                 self._prepare_exec(s,dryrun)
                 if dryrun:
@@ -331,19 +325,21 @@ class JobArray(object):
             logging.info('No seeds left to simulate.')
             return
         numclusters = len(self.seeds)/self.C['cluster']+(len(self.seeds)%self.C['cluster']>0)
+        numjobs = numclusters/self.C['parallel']+(numclusters%self.C['parallel']>0)
         if self.C['binary']: self.parameters['binarySVFile']=''
         if testrun:
-            seedspec = "1-%s" % min(2,numclusters)
+            seedspec = "1-%s" % min(2,numjobs)
             self.parameters['T'] = self.C['testrun_t']
             if self.C['testrun_dt']: self.parameters['Dt'] = self.C['testrun_dt']
         else:
-            seedspec = "1-%s" % numclusters
+            seedspec = "1-%s" % numjobs
         
         obj = base64.encodestring(pickle.dumps(self,-1)).replace('\n','')
         logging.debug("String representation of JobArray object:")
         logging.debug(obj)
         
         command = ['qsub','-terse', '-o', logfile, '-N', jobname, '-t', seedspec]
+        if self.C['parallel']>1: command.extend(('-pe','openmp',str(self.C['parallel'])))
         command.extend(self.default_sub_pars)
         command.extend(self._dict_to_commandline('-', self.C['qsub']))
         command.extend(self._dict_to_commandline('-', self.C['qsub_traj']))
@@ -431,6 +427,7 @@ class GenericSubmitter(OptionParser, ConfigParser.RawConfigParser):
         self.JobArrayParams['resume'] = self.getboolean('Config','resume')
         self.JobArrayParams['usetemp'] = self.getboolean('Config', 'usetemp')
         self.JobArrayParams['cluster'] = self.getint('Config', 'cluster')
+        self.JobArrayParams['parallel'] = self.getint('Config', 'parallel')
         self.JobArrayParams['binary'] = self.getboolean('Config', 'binary')
         self.JobArrayParams['qsub'] = dict(self.items('Qsub'))
         self.JobArrayParams['qsub_traj'] = dict(self.items('QsubTraj'))
