@@ -147,10 +147,13 @@ class JobArray(object):
         scipy.io.savemat(self.parameterfilebase+".mat", numeric)
     
     def _compress(self):
-        for f in (self.output,self.sv):
+        def _bzip2(f):
             os.system('bzip2 %s'%f)
+        _bzip2(self.output)
         self.output = self.output + self.compsuffix
-        self.sv = self.sv + self.compsuffix
+        if not self.C['binary']:
+            _bzip2(self.sv)
+            self.sv = self.sv + self.compsuffix
     
     def _move_data(self):
         for f in self.datafiles:
@@ -176,7 +179,9 @@ class JobArray(object):
             return self.targetoutputbase
     
     def _targetsv(self,seed=None,**kwargs):
-        return self._targetoutput(seed=seed)+'.sv'
+        if self.C['binary']: ext='.svbin'
+        else: ext='.sv' 
+        return self._targetoutput(seed=seed)+ext
     
     def _find_target_files(self,seed=None,**kwargs):
         seed = str(seed)
@@ -326,6 +331,7 @@ class JobArray(object):
             logging.info('No seeds left to simulate.')
             return
         numclusters = len(self.seeds)/self.C['cluster']+(len(self.seeds)%self.C['cluster']>0)
+        if self.C['binary']: self.parameters['binarySVFile']=''
         if testrun:
             seedspec = "1-%s" % min(2,numclusters)
             self.parameters['T'] = self.C['testrun_t']
@@ -425,6 +431,7 @@ class GenericSubmitter(OptionParser, ConfigParser.RawConfigParser):
         self.JobArrayParams['resume'] = self.getboolean('Config','resume')
         self.JobArrayParams['usetemp'] = self.getboolean('Config', 'usetemp')
         self.JobArrayParams['cluster'] = self.getint('Config', 'cluster')
+        self.JobArrayParams['binary'] = self.getboolean('Config', 'binary')
         self.JobArrayParams['qsub'] = dict(self.items('Qsub'))
         self.JobArrayParams['qsub_traj'] = dict(self.items('QsubTraj'))
         self.JobArrayParams['qsub_average'] = dict(self.items('QsubAverage'))
