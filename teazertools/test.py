@@ -53,7 +53,7 @@ class TestRun(unittest.TestCase):
     
     def test01_run(self):
         s = submitter.GenericSubmitter(argv=['submitter', 'test/test.conf'])
-        s.CppqedObjects[0].run()
+        s.CppqedObjects[0].run(start=0)
         f = open('test/output/01/parameters.pkl')
         pars = pickle.load(f)
         f.close()
