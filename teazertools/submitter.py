@@ -196,7 +196,11 @@ class JobArray(object):
         if not targetoutput or not targetsv: return False
         lastT = helpers.cppqed_t(targetoutput)
         if lastT == None: return False
-        if np.less_equal(float(self.parameters['T']),float(lastT)):
+        if self.parameters.has_key('NDt'):
+            T=float(self.parameters['NDt'])*float(self.parameters['Dt'])
+        else:
+            T=float(self.parameters['T']) 
+        if np.less_equal(T,float(lastT)):
             logging.info("Removing seed "+seed+ " from array, found trajectory with T=%f",lastT)
             return True
         else:
