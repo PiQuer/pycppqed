@@ -118,11 +118,11 @@ def calculateMeans(basename,expvals=[],variances=[],varmeans=[],stdevs=[],stdevm
         (evs,qs) = load_cppqed(f)
         evs = evs[:,0:timesteps]
         result[means] += evs[means]/len(filelist)
-        result[stdevs] += (evs[stdevs]+evs[stdevmeans]**2)/len(filelist)
-        result[variances] += (evs[variances]**2+evs[varmeans]**2)/len(filelist)
+        result[variances] += (evs[variances]+evs[varmeans]**2)/len(filelist)
+        result[stdevs] += (evs[stdevs]**2+evs[stdevmeans]**2)/len(filelist)
         del(evs,qs)
-    result[stdevs] = result[stdevs]-result[stdevmeans]**2
-    result[variances] = np.sqrt(result[variances]-result[varmeans]**2)
+    result[variances] = result[variances]-result[varmeans]**2
+    result[stdevs] = np.sqrt(result[stdevs]-result[stdevmeans]**2)
     result = np.transpose(result)
     if outputdir:
         helpers.mkdir_p(outputdir)
