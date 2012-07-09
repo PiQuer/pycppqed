@@ -233,7 +233,7 @@ class JobArray(object):
             logging.info("Found an invalid trajectory file %s."%targetoutput)
             return False
         logging.info("Found a trajectory with T=%f"%lastT)
-        if np.less_equal(float(self.parameters['T']),float(lastT)):
+        if self.parameters.has_key('T') and np.less_equal(float(self.parameters['T']),float(lastT)):
             logging.info("Don't need to calculate anything, T=%f."%float(self.parameters['T']))
             return True
         if self.C['usetemp']:
