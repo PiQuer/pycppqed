@@ -208,7 +208,7 @@ class JobArray(object):
             return False
         
     def _clean_seedlist(self):
-        if not self.C['resume']:
+        if not (self.C['resume'] and self.C['clean_seedlist']):
             return False
         logging.info("Checking for existing trajectories... this can take a long time")
         self.seeds[:] = [seed for seed in self.seeds if not self._check_existing(seed)]
