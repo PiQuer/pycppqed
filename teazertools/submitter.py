@@ -374,7 +374,7 @@ class JobArray(object):
         :returns returncode: qsub return value
         :retval: int
         """
-        logfile = os.path.join(self.logdir,self.basename+'_mean.log')
+        logfile = os.path.join(self.logdir,self.basename+'_mean_$JOB_ID.log')
         command = ['qsub','-terse', '-o', logfile]
         if holdid:
             command.extend(('-hold_jid',holdid))
