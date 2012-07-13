@@ -89,6 +89,7 @@ class JobArray(object):
         self.default_sub_pars = ['-b','y', '-v','PYTHONPATH','-v','PATH', '-m','n','-j','yes']
         self.loglevel = logging.getLogger().getEffectiveLevel()
         self.outputdir_is_temp = False
+        self._warned =False
     
     def _prepare_exec(self,seed,dryrun):
         logging.debug("Entering _prepare_exec.")
@@ -194,18 +195,29 @@ class JobArray(object):
         seed = str(seed)
         (targetoutput,_,targetsv,_) = self._find_target_files(seed)
         if not targetoutput or not targetsv: return False
+        if not self.parameters.has_key('T'):
+            if not self._warned:
+                logging.info("Please specify T. Note that CPPQed ignores T if NDt is given, but the submitter uses it to determine if a seed has to be included or not.")
+                self._warned=True
+            return False
         lastT = helpers.cppqed_t(targetoutput)
-        if lastT == None: return False
-        if self.parameters.has_key('NDt'):
-            T=float(self.parameters['NDt'])*float(self.parameters['Dt'])
-        else:
-            T=float(self.parameters['T']) 
+        if lastT == None:
+            logging.info('Could not read '+targetoutput+', keeping seed'+seed+'.') 
+            return False
+        T=float(self.parameters['T']) 
         if np.less_equal(T,float(lastT)):
             logging.info("Removing seed "+seed+ " from array, found trajectory with T=%f",lastT)
             return True
         else:
-            logging.info("Keeping seed "+seed+ " with T=%f.",lastT)
-            return False
+            if self.parameters.has_key('NDt'):
+                NDt=float(self.parameters['NDt'])
+                Dt=float(self.parameters['Dt'])
+                if not lastT+NDt*Dt==T:
+                    logging.warn("Seed "+seed+ " with T=%f would not reach T=%f with NDt steps. Removing!",(lastT,T))
+                    return True
+            else:
+                logging.info("Keeping seed "+seed+ " with T=%f.",lastT)
+                return False
         
     def _clean_seedlist(self):
         if not (self.C['resume'] and self.C['clean_seedlist']):
