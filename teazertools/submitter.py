@@ -215,9 +215,8 @@ class JobArray(object):
                 if not lastT+NDt*Dt==T:
                     logging.warn("Seed "+seed+ " with T=%f would not reach T=%f with NDt steps. Removing!",(lastT,T))
                     return True
-            else:
-                logging.info("Keeping seed "+seed+ " with T=%f.",lastT)
-                return False
+            logging.info("Keeping seed "+seed+ " with T=%f.",lastT)
+            return False
         
     def _clean_seedlist(self):
         if not (self.C['resume'] and self.C['clean_seedlist']):
