@@ -127,9 +127,10 @@ def calculateMeans(basename,expvals=[],variances=[],varmeans=[],stdevs=[],stdevm
     if outputdir:
         helpers.mkdir_p(outputdir)
         np.savez(datafile,result=result,expvals=np.array(expvals),variances=np.array(variances),
-                     varmeans=np.array(varmeans),stdevs=np.array(stdevs),stdevmeans=np.array(stdevmeans))
+                 varmeans=np.array(varmeans),stdevs=np.array(stdevs),stdevmeans=np.array(stdevmeans),
+                 numtraj=np.array(len(filelist)))
         if matlab:
             scipy.io.savemat(matlabfile,{"result":result,"means":np.array(means)+1,"expvals":np.array(expvals)+1,"variances":np.array(variances)+1,
-                                         "varmeans":np.array(varmeans)+1,"stdevs":np.array(stdevs)+1,"stdevmeans":np.array(stdevmeans)+1})
+                                         "varmeans":np.array(varmeans)+1,"stdevs":np.array(stdevs)+1,"stdevmeans":np.array(stdevmeans)+1,"numtraj":len(filelist)})
     return result
 
