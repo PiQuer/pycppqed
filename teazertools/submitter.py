@@ -149,7 +149,7 @@ class JobArray(object):
     
     def _compress(self):
         def _bzip2(f):
-            os.system('bzip2 %s'%f)
+            os.system('bzip2 -f %s'%f)
         _bzip2(self.output)
         self.output = self.output + self.compsuffix
         if not self.C['binary']:
@@ -256,10 +256,10 @@ class JobArray(object):
             targetsv = helpers.replace_dirpart(targetsv, self.outputdir)
         if output_compressed:
             logging.info('Uncompressing %s'%targetoutput)
-            os.system('bunzip2 %s'%targetoutput)
+            os.system('bunzip2 -k %s'%targetoutput)
         if sv_compressed:
             logging.info('Uncompressing %s'%targetsv)
-            os.system('bunzip2 %s'%self.sv+self.compsuffix)
+            os.system('bunzip2 -k %s'%self.sv+self.compsuffix)
         return False
     
     def run(self, start=0, dryrun=False):
