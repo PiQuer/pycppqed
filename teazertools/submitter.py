@@ -385,8 +385,8 @@ class JobArray(object):
         :returns returncode: qsub return value
         :retval: int
         """
-        logfile = os.path.join(self.logdir,self.basename+'_mean_{basename}_$JOB_ID.log'.format(basename=os.path.basename(self.basedir)))
-        command = ['qsub','-terse', '-o', logfile]
+        logfile = os.path.join(self.logdir,self.basename+'_mean_$JOB_ID.log')
+        command = ['qsub','-terse', '-o', logfile, '-N', 'calculate_mean_{basedir}'.format(basedir=os.path.basename(self.basedir))]
         if holdid:
             command.extend(('-hold_jid',holdid))
         command.extend(self.default_sub_pars)
