@@ -354,6 +354,8 @@ class JobArray(object):
         logging.debug(obj)
         
         command = ['qsub','-terse', '-o', logfile, '-N', jobname, '-t', seedspec]
+        if self.C.get('depend'):
+            command.extend(('-hold_jid',self.C['depend']))
         if self.C['parallel']>1: command.extend(('-pe','openmp',str(self.C['parallel'])))
         command.extend(self.default_sub_pars)
         command.extend(self._dict_to_commandline('-', self.C['qsub']))
@@ -480,6 +482,8 @@ class GenericSubmitter(OptionParser, ConfigParser.RawConfigParser):
                           help="Use CLASS instead of teazertools.submitter.GenericSubmitter, typically CLASS is a subclass of GenericSubmitter")
         self.add_option("--averageonly", action="store_true", dest="averageonly", default=False,
                           help="Only submit the job to compute the average expectation values")
+        self.add_option("--depend", dest="depend", metavar="ID",
+                          help="Make created job array depend on this job ID.")
         self.add_option("--verbose", action="store_true", dest="verbose", default=False,
                           help="Log more output to files.")
         
@@ -501,6 +505,8 @@ class GenericSubmitter(OptionParser, ConfigParser.RawConfigParser):
                 pydevd.settrace()
             except ImportError:
                 logging.error("Pydevd module not found, cannot set breakpoint for external pydevd debugger.")
+        if self.options.depend:
+            self.JobArrayParams['depend'] = self.options.depend
         
         self.config = os.path.expanduser(args[0])
         
