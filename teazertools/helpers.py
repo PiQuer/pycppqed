@@ -4,7 +4,11 @@
 import os
 import errno
 import pycppqed as qed
-import numpy as np
+import warnings
+
+def ignore_warnings():
+    warnings.simplefilter("ignore",FutureWarning)
+    warnings.simplefilter("ignore",DeprecationWarning)
 
 def import_class(s):
     r"""Import a class specified by the string s.
