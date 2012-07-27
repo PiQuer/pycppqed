@@ -206,16 +206,16 @@ class JobArray(object):
             return False
         T=float(self.parameters['T']) 
         if np.less_equal(T,float(lastT)):
-            logging.info("Removing seed "+seed+ " from array, found trajectory with T=%f",lastT)
+            logging.info("Removing seed "+seed+ " from array, found trajectory with T=%f"%lastT)
             return True
         else:
             if self.parameters.has_key('NDt'):
                 NDt=float(self.parameters['NDt'])
                 Dt=float(self.parameters['Dt'])
                 if not lastT+NDt*Dt==T:
-                    logging.warn("Seed "+seed+ " with T=%f would not reach T=%f with NDt steps. Removing!",(lastT,T))
+                    logging.warn("Seed "+seed+ " with T=%f would not reach T=%f with NDt steps. Removing!"%(lastT,T))
                     return True
-            logging.info("Keeping seed "+seed+ " with T=%f.",lastT)
+            logging.info("Keeping seed "+seed+ " with T=%f."%lastT)
             return False
         
     def _clean_seedlist(self):
