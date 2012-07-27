@@ -419,12 +419,12 @@ class GenericSubmitter(OptionParser, ConfigParser.RawConfigParser):
         OptionParser.__init__(self,usage)
         if argv:
             sys.argv = argv
+        self.JobArrayParams = {}
         self._parse_options()
     
         self.optionxform = str
         self.CppqedObjects = []
         self.defaultconfig = os.path.join(os.path.dirname(__file__),'generic_submitter_defaults.conf')
-        self.JobArrayParams = {}
         self.averageids={}
         self._parse_config()
         self._generate_objects()
