@@ -194,7 +194,7 @@ class JobArray(object):
     def _keep_existing(self,seed):
         seed = str(seed)
         (targetoutput,output_compressed,targetsv,sv_compressed) = self._find_target_files(seed)
-        if (not targetoutput or not targetsv) or (output_compressed != sv_compressed):
+        if (not targetoutput or not targetsv) or (output_compressed != self.C['compress']):
             if self.C['require_resume']:
                 logging.info("Removing unfinished or nonexistent seed "+seed+".")
                 return False
@@ -453,7 +453,7 @@ class GenericSubmitter(OptionParser, ConfigParser.RawConfigParser):
         self.JobArrayParams['compress'] = self.getboolean('Config', 'compress')
         self.JobArrayParams['resume'] = self.getboolean('Config','resume')
         self.JobArrayParams['require_resume'] = self.getboolean('Config','require_resume')
-        if self.has_option('Config', 'continue_from'):
+        if self.has_option('continue_from'):
             self.JobArrayParams['continue_from'] = self.getint('Config','continue_from')
         self.JobArrayParams['clean_seedlist'] = self.getboolean('Config', 'clean_seedlist')
         self.JobArrayParams['usetemp'] = self.getboolean('Config', 'usetemp')
