@@ -448,7 +448,7 @@ class GenericSubmitter(OptionParser, ConfigParser.RawConfigParser):
         self.JobArrayParams['resume'] = self.getboolean('Config','resume')
         self.JobArrayParams['require_resume'] = self.getboolean('Config','require_resume')
         if self.has_option('continue_from'):
-            self.JobArrayParams['continue_from'] = self.getint('Config','continue_from')
+            self.JobArrayParams['continue_from'] = self.getfloat('Config','continue_from')
         self.JobArrayParams['clean_seedlist'] = self.getboolean('Config', 'clean_seedlist')
         self.JobArrayParams['usetemp'] = self.getboolean('Config', 'usetemp')
         self.JobArrayParams['cluster'] = self.getint('Config', 'cluster')

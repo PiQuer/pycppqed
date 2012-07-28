@@ -3,7 +3,7 @@
 TeazerTools User Guide
 ======================
 
-This is the documentation of additional tools which aim to simplify C++QED usage on the teazer cluster
+This is the documentation of additional tools which aim to simplify C++QED usage on the teazer or leo3 cluster
 of the Institute for Theoretical Physics (University of Innsbruck).
 
 .. _submitter_documentation:
@@ -15,10 +15,11 @@ Summary
 -------
 
 The submitter framework aims to offer an easy to use interface to generic tasks of
-sending one or several job arrays of C++QED trajectories to the teazer cluster and collecting the results. A configuration
+sending one or several job arrays of C++QED trajectories to an HPC cluster with sun grid engine (qsub) and 
+collecting the results. A configuration
 file defines the name of the script to run, a set of seeds, the location where to save the results and all 
 the relevant parameters for the script. From this information, a job array is created and 
-submitted to the teazer cluster.  The job array simulates all the trajectories corresponding to the set of seeds.
+submitted to the HPC cluster.  The job array simulates all the trajectories corresponding to the set of seeds.
 Optionally, an additional job is submitted, which averages the expectation 
 values over all trajectories. This job depends on the job array, which means it is only executed when the last trajectory
 has finished.
@@ -110,22 +111,41 @@ The keywords in this section are (optional keywords italic)
 * **basedir**: The output data directory structure will be created relative to this path.
 * **seeds**: This specifies the sets of seeds for each trajectory ensemble. This can be single seed number,
   a comma separated list of seeds or a range in matlab syntax (`start:step:stop`).
-* *matlab*: Convert output trajectories and statevectors to matlab format (default `True`)
-* *numericsubdirs*: Instead of descriptive sub-directories which involve the values of the varied parameters,
+* *matlab*: (default `True`) Convert output trajectories and statevectors to matlab format.
+* *numericsubdirs*:  (default `True`) Instead of descriptive sub-directories which involve the values of the varied parameters,
   use numeric sub-directories 01/, 02/ etc. This can be convenient for further data procession. (default `False`)
 * *combine*: If `True`, simulate all possible combinations of parameters with a range. If `False`, simulate
   one ensemble with the first value of all range parameters, one with the second value and so on until one
-  of the ranges is exhausted (default `True`).
-* *testrun_t*: Use this value as `-T` parameter in testruns (default 1)
-* *testrun_dt*: Use this value as `-Dt` parameter in testruns (default: don't modify -Dt)
-* *compress*: Compress all trajectories and statevectors. Text files are compressed with bzip2, matlab files are
-  compressed with matlabs own compression method (default `False`).
-* *resume*: Use existing trajectories in the data directory to resume simulations. This is useful for two things: 1. to
+  of the ranges is exhausted.
+* *testrun_t*: (default 1) Use this value as `-T` parameter in testruns.
+* *testrun_dt*:  (default: don't modify -Dt) Use this value as `-Dt` parameter in testruns.
+* *compress*:  (default `False`) Compress all trajectories and statevectors. Text files are compressed with bzip2, matlab files are
+  compressed with matlabs own compression method. This can also serve as a backup in situations where no temporary
+  directory is used: if a trajectory is continued, the compressed version of the trajectory file is kept until the 
+  calculation was successful, only then is the compressed trajectory file updated.
+* *resume*:  (default `False`) Use existing trajectories in the data directory to resume simulations. This is useful for two things: 1. to
   extend the integration to a larger value of T (existing trajectories are automatically copied to the temporary directory)
   2. to resume from failure: existing trajectories in the data directory which have the right final time T are untouched, 
   whereas missing trajectories are submitted again. Note that the averaging is always done over **all** trajectories in the
-  data directory, the user has to make sure they have all the same length (default `False`). 
-
+  data directory, the user has to make sure they have all the same length. Related options are `clean_seedlist`, `require_resume`
+  and `continue_from`.  
+* *clean_seedlist*: (default `True`) By default, before submitting the job array, all seeds are removed from the job array
+  which have a final time that is already equal to `T`. This means if some trajectories fail one can just re-submit 
+  everything and still only the failed trajectories will be simulated again.
+* *require_resume*: (default `False`) If this is set to `True`, then a trajectory and the corresponding state vector file has to exist in the
+  output directory, otherwise the seed is removed from the job array. The seed is also removed if compression is  activated
+  but the an uncompressed output file is found. This is useful if one wants to continue some trajectories which are already 
+  finished, whereas trajectories still in progress should not be touched.
+* *continue_from*: (default: not set) If this is set to a time, then only those trajectories will be considered for resume
+  which have this final time. One can use this switch if not all trajectories in the output directory are evolved to the same time.   
+* *usetemp*: (default: `True`) Write the output file to a temporary directory on the node first, copy everything to
+  scratch at the end. This is the preferred mode on teazer, whereas on leo3 this should be set to `False`.
+* *cluster*: (default: 1) How many trajectories should be clustered into one job, each job simulates the trajectories one
+  after the other. Use this to avoid scheduling overhead for very short trajectories.
+* *parallel*: (default: 1) How many threads should be spawned. This can be combined with `cluster`. Note that each thread still
+  uses a slot of the scheduler. This option can be used to request that always a complete node should be filled.
+* *binary*: (default: `False`) Use binary output for state vector files. Note that C++Qed has to be built with the `enable-binary-output=yes`
+  if this is set to `True`.   
   
 [Averages]
 __________
@@ -176,4 +196,5 @@ The options can be:
 * ``--averageonly``: Only submit the job to compute the average expectation values
 * ``--class=CLASS``:  Use CLASS instead of :class:`teazertools.submitter.GenericSubmitter`,
   typically `CLASS` is a subclass of `GenericSubmitter`
+* ``--depend=ID``:  Make created job array depend on this job ID.
 * ``-h`` or ``--help``: Print help message.
