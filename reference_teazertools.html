@@ -3,13 +3,16 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>TeazerTools reference &mdash; PyCppQED v0.1.1 documentation</title>
+    <title>TeazerTools reference &mdash; PyCppQED 0.1.1 documentation</title>
+    
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
@@ -22,7 +25,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="PyCppQED v0.1.1 documentation" href="index.html" />
+    <link rel="top" title="PyCppQED 0.1.1 documentation" href="index.html" />
     <link rel="prev" title="PyCppQED Reference" href="reference.html" /> 
   </head>
   <body>
@@ -38,7 +41,7 @@
         <li class="right" >
           <a href="reference.html" title="PyCppQED Reference"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">PyCppQED v0.1.1 documentation</a> &raquo;</li> 
+        <li><a href="index.html">PyCppQED 0.1.1 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -76,7 +79,7 @@
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>testrun</strong> (<em>bool</em>) &#8211; Perform a test run with only two seeds and <cite>T=1</cite>.</li>
 <li><strong>dryrun</strong> (<em>bool</em>) &#8211; Don&#8217;t submit anything, instead print what would be run on the nodes.</li>
 </ul>
@@ -90,7 +93,7 @@
 
 <dl class="class">
 <dt id="teazertools.submitter.JobArray">
-<em class="property">class </em><tt class="descclassname">teazertools.submitter.</tt><tt class="descname">JobArray</tt><big>(</big><em>script, basename=None, parameters={}, basedir='.', tempdir='/tmp', seeds=[1001], averageids={}, diagnostics=True, matlab=True, average=True</em><big>)</big><a class="headerlink" href="#teazertools.submitter.JobArray" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">teazertools.submitter.</tt><tt class="descname">JobArray</tt><big>(</big><em>script, basename=None, parameters={}, basedir='.', tempdir='/tmp', seeds=[1001], config={}</em><big>)</big><a class="headerlink" href="#teazertools.submitter.JobArray" title="Permalink to this definition">¶</a></dt>
 <dd><p>This class represents a job array to simulate a trajectory ensemble. A job array is characterized by
 a set of seeds, one seed for each trajectory, and a set of C++QED parameters identical for all seed. Functions
 are provided to submit the job array to the teazer cluster (test run is possible) or to simulate a specific
@@ -100,18 +103,42 @@ the ensemble averages of expectation values.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>script</strong> (<em>str</em>) &#8211; The name of the executable to call. This has to be an absolute path if it is not in the systems <cite>$PATH</cite>.</li>
 <li><strong>basename</strong> (<em>str</em>) &#8211; The basename for output files. Defaults to the scriptname (without directory part).</li>
 <li><strong>parameters</strong> (<em>dict</em>) &#8211; The C++QED parameters.</li>
 <li><strong>basedir</strong> (<em>str</em>) &#8211; The directory for the output directory structure.</li>
 <li><strong>tempdir</strong> (<em>str</em>) &#8211; A temporary directory for C++QED output (submitted jobs write to local disk, the files are moved at the end)</li>
 <li><strong>seeds</strong> (<em>list</em>) &#8211; A list of seeds which defines the trajectory ensemble.</li>
+<li><strong>config</strong> (<em>dict</em>) &#8211; A dictionary to control various aspects of this class.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>The possible values in <cite>config</cite> are:</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>averageids</strong> (<em>dict</em>) &#8211; A dictionary to define which columns of the output files contain expectation values, variances and standard
 deviations.</li>
-<li><strong>diagnostics</strong> (<em>bool</em>) &#8211; If <cite>True</cite>, print diagnostic messages to log files.</li>
-<li><strong>matlab</strong> (<em>bool</em>) &#8211; If <cite>True</cite>, convert trajectories and state vector files to matlab format.</li>
-<li><strong>average</strong> (<em>bool</em>) &#8211; If <cite>True</cite>, submit a job which calculates ensemble averages.</li>
+<li><strong>qsub</strong> (<em>dict</em>) &#8211; A dictionary of parameters passed to qsub. Each key:value pair corresponds to a
+-key value commandline option to qsub.</li>
+<li><strong>qsub_traj</strong> &#8211; Same as <cite>qsub</cite>, but items here are only applied to qsub submissions of trajectory job arrays.</li>
+<li><strong>qsub_average</strong> (<em>dict</em>) &#8211; Same as <cite>qsub</cite>, but items here are only applied to qsub submissions of averaging jobs.</li>
+<li><strong>qsub_test</strong> &#8211; Same as <cite>qsub</cite>, but items here are only applied to qsub submission if it is a testrun.</li>
+<li><strong>diagnostics</strong> &#8211; If <cite>True</cite>, print diagnostic messages to log files.</li>
+<li><strong>matlab</strong> &#8211; If <cite>True</cite>, convert trajectories and state vector files to matlab format.</li>
+<li><strong>average</strong> &#8211; If <cite>True</cite>, submit a job which calculates ensemble averages.</li>
+<li><strong>usetemp</strong> &#8211; Write data to temporary directory first (default True).</li>
+<li><strong>compress</strong> &#8211; Compress files (default True)</li>
+<li><strong>resume</strong> &#8211; Resume trajectories (default False)</li>
+<li><strong>testrun_t</strong> &#8211; Final time to integrate in testruns (default 1)</li>
+<li><strong>testrn_dt</strong> &#8211; -Dt for testruns (default None)</li>
+<li><strong>combine</strong> &#8211; If <cite>True</cite>, use all possible combinations of parameters (default True)</li>
+<li><strong>cluster</strong> &#8211; Each job should calculate this many trajectories (default 1)</li>
 </ul>
 </td>
 </tr>
@@ -133,15 +160,14 @@ The default implementation writes a message with the hostname to the log file.</
 
 <dl class="method">
 <dt id="teazertools.submitter.JobArray.run">
-<tt class="descname">run</tt><big>(</big><em>seed=0</em>, <em>dryrun=False</em><big>)</big><a class="headerlink" href="#teazertools.submitter.JobArray.run" title="Permalink to this definition">¶</a></dt>
-<dd><p>If the environment variable <cite>$SGE_TASK_ID</cite> is set (i.e. we are on a node), simulate the trajectory
-<cite>self.seeds[$SGE_TASK_ID]</cite>. Otherwise, simulate the trajectory <cite>self.seeds[seed]</cite> locally.</p>
+<tt class="descname">run</tt><big>(</big><em>start=0</em>, <em>dryrun=False</em><big>)</big><a class="headerlink" href="#teazertools.submitter.JobArray.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Simulate the trajectories self.seed[start:start+cluster] where cluster is the number of serial jobs.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>seed</strong> (<em>int</em>) &#8211; The seed to simulate locally if <cite>$SGE_TASK_ID</cite> is not set.</li>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>start</strong> (<em>int</em>) &#8211; The start value in the seed list.</li>
 <li><strong>dryrun</strong> &#8211; If <cite>True</cite>, don&#8217;t simulate anything, but print a log message which contains the command that would
 have been run.</li>
 </ul>
@@ -154,14 +180,14 @@ have been run.</li>
 <dl class="method">
 <dt id="teazertools.submitter.JobArray.submit">
 <tt class="descname">submit</tt><big>(</big><em>testrun=False</em>, <em>dryrun=False</em><big>)</big><a class="headerlink" href="#teazertools.submitter.JobArray.submit" title="Permalink to this definition">¶</a></dt>
-<dd><p>Submit the job array to teazer. Technically this is done by serializing the object, storing it in
-the environment variable $JobArray and calling the helper script <cite>cppqedjob</cite>. The helper script
-(running on a node) restores the object from the environment variable and calls <a class="reference internal" href="#teazertools.submitter.JobArray.run" title="teazertools.submitter.JobArray.run"><tt class="xref py py-func docutils literal"><span class="pre">run()</span></tt></a>.</p>
+<dd><p>Submit the job array to teazer. Technically this is done by serializing the object and passing it
+to the helper script <cite>cppqedjob</cite> as a commandline parameter. The helper script
+(running on a node) restores the object from the string and calls <a class="reference internal" href="#teazertools.submitter.JobArray.run" title="teazertools.submitter.JobArray.run"><tt class="xref py py-func docutils literal"><span class="pre">run()</span></tt></a>.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>testrun</strong> (<em>bool</em>) &#8211; Only simulate two seeds and set the parameter <cite>T</cite> to 1.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>testrun</strong> (<em>bool</em>) &#8211; Only simulate two seeds and set the parameter <cite>T</cite> to 1.</td>
 </tr>
 </tbody>
 </table>
@@ -169,24 +195,24 @@ the environment variable $JobArray and calling the helper script <cite>cppqedjob
 
 <dl class="method">
 <dt id="teazertools.submitter.JobArray.submit_average">
-<tt class="descname">submit_average</tt><big>(</big><em>holdid=None</em>, <em>dryrun=False</em><big>)</big><a class="headerlink" href="#teazertools.submitter.JobArray.submit_average" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">submit_average</tt><big>(</big><em>holdid=None</em>, <em>dryrun=False</em>, <em>testrun=False</em><big>)</big><a class="headerlink" href="#teazertools.submitter.JobArray.submit_average" title="Permalink to this definition">¶</a></dt>
 <dd><p>Submit a job to teazer to compute the average expectation values.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>holdid</strong> (<em>int</em>) &#8211; Make this job depend on the job array with id <cite>holdid</cite>.</li>
 <li><strong>dryrun</strong> (<em>bool</em>) &#8211; If <cite>True</cite>, don&#8217;t submit anything, instead print the command that would
 have been called.</li>
 </ul>
 </td>
 </tr>
-<tr class="field"><th class="field-name" colspan="2">Returns returncode:</th></tr>
-<tr class="field"><td>&nbsp;</td><td class="field-body"><p class="first">qsub return value</p>
+<tr class="field-even field"><th class="field-name" colspan="2">Returns returncode:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first">qsub return value</p>
 </td>
 </tr>
-<tr class="field"><th class="field-name">Retval :</th><td class="field-body"><p class="first last">int</p>
+<tr class="field-odd field"><th class="field-name">Retval :</th><td class="field-body"><p class="first last">int</p>
 </td>
 </tr>
 </tbody>
@@ -207,12 +233,12 @@ have been called.</li>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>filename</strong> (<em>str</em>) &#8211; The name of the file to load.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>filename</strong> (<em>str</em>) &#8211; The name of the file to load.</td>
 </tr>
-<tr class="field"><th class="field-name">Returns:</th><td class="field-body">The last timestep <cite>T</cite> of the trajectory or <cite>None</cite> if the file could
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The last timestep <cite>T</cite> of the trajectory or <cite>None</cite> if the file could
 not be loaded.</td>
 </tr>
-<tr class="field"><th class="field-name">Retval :</th><td class="field-body"><tt class="xref py py-class docutils literal"><span class="pre">numpy.float64</span></tt></td>
+<tr class="field-odd field"><th class="field-name">Retval :</th><td class="field-body"><tt class="xref py py-class docutils literal"><span class="pre">numpy.float64</span></tt></td>
 </tr>
 </tbody>
 </table>
@@ -220,22 +246,23 @@ not be loaded.</td>
 
 <dl class="function">
 <dt id="teazertools.helpers.generate_filelist">
-<tt class="descclassname">teazertools.helpers.</tt><tt class="descname">generate_filelist</tt><big>(</big><em>basename</em>, <em>dirname</em><big>)</big><a class="headerlink" href="#teazertools.helpers.generate_filelist" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">teazertools.helpers.</tt><tt class="descname">generate_filelist</tt><big>(</big><em>basename</em>, <em>dirname</em>, <em>bz2only=False</em><big>)</big><a class="headerlink" href="#teazertools.helpers.generate_filelist" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function generates a list of files which start with <cite>basename</cite> and either end with a digit (possibly with an <cite>.bz2</cite> extension)</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>basename</strong> (<em>str</em>) &#8211; The files have to begin with this string.</li>
 <li><strong>dirname</strong> (<em>str</em>) &#8211; Search in this directory.</li>
+<li><strong>bz2only</strong> (<em>bool</em>) &#8211; Only consider files ending in bz2</li>
 </ul>
 </td>
 </tr>
-<tr class="field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A list of matching filenames.</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A list of matching filenames.</p>
 </td>
 </tr>
-<tr class="field"><th class="field-name">Retval :</th><td class="field-body"><p class="first last">list</p>
+<tr class="field-odd field"><th class="field-name">Retval :</th><td class="field-body"><p class="first last">list</p>
 </td>
 </tr>
 </tbody>
@@ -250,9 +277,9 @@ not be loaded.</td>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>s</strong> &#8211; The name of the class to import, e.g. &#8216;mypackage.mymodule.myclass&#8217;</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>s</strong> &#8211; The name of the class to import, e.g. &#8216;mypackage.mymodule.myclass&#8217;</td>
 </tr>
-<tr class="field"><th class="field-name">Returns:</th><td class="field-body">The class.</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The class.</td>
 </tr>
 </tbody>
 </table>
@@ -266,11 +293,11 @@ not be loaded.</td>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>s</strong> (<em>str</em>) &#8211; A range definition of the form <cite>start:[step:]stop</cite>. Only integers are supported, and <cite>stop</cite> is included.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>s</strong> (<em>str</em>) &#8211; A range definition of the form <cite>start:[step:]stop</cite>. Only integers are supported, and <cite>stop</cite> is included.</td>
 </tr>
-<tr class="field"><th class="field-name">Returns:</th><td class="field-body">A list <cite>[start,...,stop]</cite></td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A list <cite>[start,...,stop]</cite></td>
 </tr>
-<tr class="field"><th class="field-name">Retval :</th><td class="field-body">list</td>
+<tr class="field-odd field"><th class="field-name">Retval :</th><td class="field-body">list</td>
 </tr>
 </tbody>
 </table>
@@ -288,6 +315,12 @@ not be loaded.</td>
 <dd><p>This is an implementation of <tt class="xref py py-class docutils literal"><span class="pre">itertools.product</span></tt>, which is missing in Python 2.4.</p>
 </dd></dl>
 
+<dl class="function">
+<dt id="teazertools.helpers.rm_f">
+<tt class="descclassname">teazertools.helpers.</tt><tt class="descname">rm_f</tt><big>(</big><em>path</em><big>)</big><a class="headerlink" href="#teazertools.helpers.rm_f" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove a file if it exists, otherwise do nothing</p>
+</dd></dl>
+
 </div>
 <div class="section" id="module-teazertools.mean">
 <span id="teazertools-mean"></span><h2><a class="toc-backref" href="#contents"><a class="reference internal" href="#module-teazertools.mean" title="teazertools.mean"><tt class="xref py py-mod docutils literal"><span class="pre">teazertools.mean</span></tt></a></a><a class="headerlink" href="#module-teazertools.mean" title="Permalink to this headline">¶</a></h2>
@@ -296,14 +329,14 @@ the results to a file. It is also possible to convert the results to a format re
 function is <a class="reference internal" href="#teazertools.mean.calculateMeans" title="teazertools.mean.calculateMeans"><tt class="xref py py-func docutils literal"><span class="pre">calculateMeans()</span></tt></a>.</p>
 <dl class="function">
 <dt id="teazertools.mean.calculateMeans">
-<tt class="descclassname">teazertools.mean.</tt><tt class="descname">calculateMeans</tt><big>(</big><em>basename</em>, <em>expvals=</em><span class="optional">[</span><span class="optional">]</span>, <em>variances=</em><span class="optional">[</span><span class="optional">]</span>, <em>varmeans=</em><span class="optional">[</span><span class="optional">]</span>, <em>stdevs=</em><span class="optional">[</span><span class="optional">]</span>, <em>stdevmeans=</em><span class="optional">[</span><span class="optional">]</span>, <em>datadir='.'</em>, <em>outputdir='.'</em>, <em>usesaved=True</em>, <em>matlab=True</em><big>)</big><a class="headerlink" href="#teazertools.mean.calculateMeans" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">teazertools.mean.</tt><tt class="descname">calculateMeans</tt><big>(</big><em>basename</em>, <em>expvals=</em><span class="optional">[</span><span class="optional">]</span>, <em>variances=</em><span class="optional">[</span><span class="optional">]</span>, <em>varmeans=</em><span class="optional">[</span><span class="optional">]</span>, <em>stdevs=</em><span class="optional">[</span><span class="optional">]</span>, <em>stdevmeans=</em><span class="optional">[</span><span class="optional">]</span>, <em>datadir='.'</em>, <em>outputdir='.'</em>, <em>usesaved=True</em>, <em>matlab=True</em>, <em>bz2only=False</em><big>)</big><a class="headerlink" href="#teazertools.mean.calculateMeans" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculate the mean expectation values, mean variances and mean standard deviations from an
 ensemble of C++QED MCWF trajectories. The results are saved to a file.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>basename</strong> (<em>str</em>) &#8211; String with the basename of the files to import, e.g. &#8220;RingCavity&#8221;</li>
 <li><strong>expvals</strong> (<em>list</em>) &#8211; List of indices which contain normal expectation values (Note: first column has index 1)</li>
 <li><strong>variances</strong> &#8211; List of indices which contain variances</li>
@@ -321,10 +354,10 @@ older than the result file and if the set of <cite>expval</cite>, <cite>stdevs</
 </ul>
 </td>
 </tr>
-<tr class="field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">An array containing the averaged expectation values, standard deviations and variances.</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">An array containing the averaged expectation values, standard deviations and variances.</p>
 </td>
 </tr>
-<tr class="field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><tt class="xref py py-class docutils literal"><span class="pre">np.ndarray</span></tt></p>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><tt class="xref py py-class docutils literal"><span class="pre">np.ndarray</span></tt></p>
 </td>
 </tr>
 </tbody>
@@ -340,18 +373,18 @@ equivalent matlab code is found to be orders of magnitude faster because of mult
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>basename</strong> (<em>str</em>) &#8211; String with the basename of the files to import.</li>
 <li><strong>dirname</strong> (<em>str</em>) &#8211; Directory name from which files are imported.</li>
 </ul>
 </td>
 </tr>
-<tr class="field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A tuple <cite>(timevec,rho)</cite>, first entry is the a vector of times at which statevector were printed,
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A tuple <cite>(timevec,rho)</cite>, first entry is the a vector of times at which statevector were printed,
 the second entry is a <tt class="xref py py-class docutils literal"><span class="pre">np.ndarray</span></tt> where each row <cite>i</cite> corresponds to a averaged density matrix at
 time <cite>timevec[i]</cite>.</p>
 </td>
 </tr>
-<tr class="field"><th class="field-name">Retval :</th><td class="field-body"><p class="first last">tuple</p>
+<tr class="field-odd field"><th class="field-name">Retval :</th><td class="field-body"><p class="first last">tuple</p>
 </td>
 </tr>
 </tbody>
@@ -388,7 +421,7 @@ time <cite>timevec[i]</cite>.</p>
 <div id="searchbox" style="display: none">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" size="18" />
+      <input type="text" name="q" />
       <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
@@ -414,12 +447,12 @@ time <cite>timevec[i]</cite>.</p>
         <li class="right" >
           <a href="reference.html" title="PyCppQED Reference"
              >previous</a> |</li>
-        <li><a href="index.html">PyCppQED v0.1.1 documentation</a> &raquo;</li> 
+        <li><a href="index.html">PyCppQED 0.1.1 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
         &copy; Copyright 2009, Sebastian Krämer.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
     </div>
   </body>
 </html>

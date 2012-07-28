@@ -3,13 +3,16 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>PyCppQED User Guide &mdash; PyCppQED v0.1.1 documentation</title>
+    <title>PyCppQED User Guide &mdash; PyCppQED 0.1.1 documentation</title>
+    
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
@@ -22,8 +25,8 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="PyCppQED v0.1.1 documentation" href="index.html" />
-    <link rel="next" title="TeazerTools" href="teazertools.html" />
+    <link rel="top" title="PyCppQED 0.1.1 documentation" href="index.html" />
+    <link rel="next" title="TeazerTools User Guide" href="teazertools.html" />
     <link rel="prev" title="PyCppQED’s documentation" href="index.html" /> 
   </head>
   <body>
@@ -37,12 +40,12 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="teazertools.html" title="TeazerTools"
+          <a href="teazertools.html" title="TeazerTools User Guide"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="index.html" title="PyCppQED’s documentation"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">PyCppQED v0.1.1 documentation</a> &raquo;</li> 
+        <li><a href="index.html">PyCppQED 0.1.1 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -172,7 +175,7 @@ installed:</p>
 <li><a class="reference internal" href="reference.html#module-pycppqed.statevector" title="pycppqed.statevector"><tt class="xref py py-mod docutils literal"><span class="pre">pycppqed.statevector</span></tt></a> implements state vectors.</li>
 <li><a class="reference internal" href="reference.html#module-pycppqed.expvalues" title="pycppqed.expvalues"><tt class="xref py py-mod docutils literal"><span class="pre">pycppqed.expvalues</span></tt></a> implements classes for working with
 expectation values.</li>
-<li><a class="reference internal" href="reference.html#module-pycppqed.quantumsystem" title="pycppqed.quantumsystem"><tt class="xref py py-mod docutils literal"><span class="pre">pycppqed.quantumsystem</span></tt></a> implements classes representing
+<li><tt class="xref py py-mod docutils literal"><span class="pre">pycppqed.quantumsystem</span></tt> implements classes representing
 quantum systems.</li>
 </ul>
 </dd>
@@ -184,8 +187,8 @@ quantum systems.</li>
 <li><p class="first">Everything that has to do with reading and writing C++QED files is in
 the module <a class="reference internal" href="reference.html#module-pycppqed.io" title="pycppqed.io"><tt class="xref py py-mod docutils literal"><span class="pre">pycppqed.io</span></tt></a>.</p>
 </li>
-<li><p class="first">Plotting stuff is in <a class="reference internal" href="reference.html#module-pycppqed.visualization" title="pycppqed.visualization"><tt class="xref py py-mod docutils literal"><span class="pre">pycppqed.visualization</span></tt></a> and animation functions
-are implemented in <a class="reference internal" href="reference.html#module-pycppqed.animation" title="pycppqed.animation"><tt class="xref py py-mod docutils literal"><span class="pre">pycppqed.animation</span></tt></a>.</p>
+<li><p class="first">Plotting stuff is in <tt class="xref py py-mod docutils literal"><span class="pre">pycppqed.visualization</span></tt> and animation functions
+are implemented in <tt class="xref py py-mod docutils literal"><span class="pre">pycppqed.animation</span></tt>.</p>
 </li>
 </ul>
 </div></blockquote>
@@ -289,7 +292,7 @@ in the C++QED output file:</p>
 <div><ul class="simple">
 <li>A <a class="reference internal" href="reference.html#pycppqed.expvalues.ExpectationValueCollection" title="pycppqed.expvalues.ExpectationValueCollection"><tt class="xref py py-class docutils literal"><span class="pre">pycppqed.expvalues.ExpectationValueCollection</span></tt></a> instance which
 holds all expectation values calculated by C++QED.</li>
-<li>A <a class="reference internal" href="reference.html#pycppqed.quantumsystem.QuantumSystemCompound" title="pycppqed.quantumsystem.QuantumSystemCompound"><tt class="xref py py-class docutils literal"><span class="pre">pycppqed.quantumsystem.QuantumSystemCompound</span></tt></a> instance
+<li>A <tt class="xref py py-class docutils literal"><span class="pre">pycppqed.quantumsystem.QuantumSystemCompound</span></tt> instance
 representing the calculated quantum system. This object also stores a
 <a class="reference internal" href="reference.html#pycppqed.statevector.StateVectorTrajectory" title="pycppqed.statevector.StateVectorTrajectory"><tt class="xref py py-class docutils literal"><span class="pre">pycppqed.statevector.StateVectorTrajectory</span></tt></a> instance which holds
 all calculated state vectors.</li>
@@ -388,7 +391,7 @@ build a <a class="reference internal" href="reference.html#pycppqed.statevector.
 <h3><a class="toc-backref" href="#contents">Calculate standard expectation values</a><a class="headerlink" href="#calculate-standard-expectation-values" title="Permalink to this headline">¶</a></h3>
 <p>By <em>standard</em> expectation values we mean values that are also calculated by
 C++QED. Automatic calculation for those is implemented in
-<a class="reference internal" href="reference.html#module-pycppqed.quantumsystem" title="pycppqed.quantumsystem"><tt class="xref py py-mod docutils literal"><span class="pre">pycppqed.quantumsystem</span></tt></a>. All that has to be done is to first create a
+<tt class="xref py py-mod docutils literal"><span class="pre">pycppqed.quantumsystem</span></tt>. All that has to be done is to first create a
 proper quantum system object and then call its <tt class="xref py py-meth docutils literal"><span class="pre">expvalues()</span></tt> method:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">sv</span> <span class="o">=</span> <span class="n">qed</span><span class="o">.</span><span class="n">initialconditions</span><span class="o">.</span><span class="n">gaussian</span><span class="p">(</span><span class="n">x0</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">k0</span><span class="o">=</span><span class="mf">3.2</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span> <span class="n">fin</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">qs</span> <span class="o">=</span> <span class="n">qed</span><span class="o">.</span><span class="n">Particle</span><span class="p">(</span><span class="n">sv</span><span class="p">)</span>
@@ -426,7 +429,7 @@ proper quantum system object and then call its <tt class="xref py py-meth docuti
 <div><div class="math">
 <p><img src="_images/math/9b46486dfd0be3cf3df8f51f85d7b47fe8d678a7.png" alt="\langle \Psi | \hat A (k) | \Psi \rangle =
         \sum_{k_1 k_2} \langle k_1 | \hat A (k) | k_2 \rangle
-        \sum_m \Psi_{k_1 m}^* \Psi_{k_2 m}" /></p>
+        \sum_m \Psi_{k_1 m}^* \Psi_{k_2 m}"/></p>
 </div></div></blockquote>
 <p>That means the expectation value is determined by specifying the quantity
 <img class="math" src="_images/math/16c0f2a02d6eef59acc0e1a35c6424e4238cedf7.png" alt="A_{k_1 k_2} = \langle k_1 | \hat A (k) | k_2 \rangle"/>. E.g. let&#8217;s
@@ -526,7 +529,7 @@ can be used for combined systems:</p>
 </div>
 <img alt="_images/graph_gaussian&amp;mode.png" src="_images/graph_gaussian&amp;mode.png" style="width: 8cm; height: 6cm;" />
 <p>The expectation value classes work equivalent. Maybe also useful is the
-function <a class="reference internal" href="reference.html#pycppqed.visualization.compare_expvaluecollections" title="pycppqed.visualization.compare_expvaluecollections"><tt class="xref py py-func docutils literal"><span class="pre">pycppqed.visualization.compare_expvaluecollections()</span></tt></a>. As its
+function <tt class="xref py py-func docutils literal"><span class="pre">pycppqed.visualization.compare_expvaluecollections()</span></tt>. As its
 name says it is used to compare two sets of expectation values:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">evs</span><span class="p">,</span> <span class="n">qs</span> <span class="o">=</span> <span class="n">qed</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">load_cppqed</span><span class="p">(</span><span class="s">&quot;ring.dat&quot;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">evs_calc</span> <span class="o">=</span> <span class="n">qs</span><span class="o">.</span><span class="n">expvalues</span><span class="p">()</span>
@@ -540,7 +543,7 @@ name says it is used to compare two sets of expectation values:</p>
 <col width="33%" />
 </colgroup>
 <tbody valign="top">
-<tr><td><img alt="expval1" src="_images/graph_expvals1.png" style="width: 5cm; height: 8cm;" /></td>
+<tr class="row-odd"><td><img alt="expval1" src="_images/graph_expvals1.png" style="width: 5cm; height: 8cm;" /></td>
 <td><img alt="expval2" src="_images/graph_expvals2.png" style="width: 5cm; height: 8cm;" /></td>
 <td><img alt="expval3" src="_images/graph_expvals3.png" style="width: 5cm; height: 8cm;" /></td>
 </tr>
@@ -607,7 +610,7 @@ professional looking movies. However, here is the code:</p>
                         title="previous chapter">PyCppQED&#8217;s documentation</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="teazertools.html"
-                        title="next chapter">TeazerTools</a></p>
+                        title="next chapter">TeazerTools User Guide</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="_sources/user_guide.txt"
@@ -616,7 +619,7 @@ professional looking movies. However, here is the code:</p>
 <div id="searchbox" style="display: none">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" size="18" />
+      <input type="text" name="q" />
       <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
@@ -640,17 +643,17 @@ professional looking movies. However, here is the code:</p>
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="teazertools.html" title="TeazerTools"
+          <a href="teazertools.html" title="TeazerTools User Guide"
              >next</a> |</li>
         <li class="right" >
           <a href="index.html" title="PyCppQED’s documentation"
              >previous</a> |</li>
-        <li><a href="index.html">PyCppQED v0.1.1 documentation</a> &raquo;</li> 
+        <li><a href="index.html">PyCppQED 0.1.1 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
         &copy; Copyright 2009, Sebastian Krämer.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
     </div>
   </body>
 </html>

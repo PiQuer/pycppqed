@@ -3,13 +3,16 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>PyCppQED Reference &mdash; PyCppQED v0.1.1 documentation</title>
+    <title>PyCppQED Reference &mdash; PyCppQED 0.1.1 documentation</title>
+    
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
@@ -22,7 +25,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="PyCppQED v0.1.1 documentation" href="index.html" />
+    <link rel="top" title="PyCppQED 0.1.1 documentation" href="index.html" />
     <link rel="next" title="TeazerTools reference" href="reference_teazertools.html" />
     <link rel="prev" title="TeazerTools User Guide" href="teazertools.html" /> 
   </head>
@@ -42,7 +45,7 @@
         <li class="right" >
           <a href="teazertools.html" title="TeazerTools User Guide"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">PyCppQED v0.1.1 documentation</a> &raquo;</li> 
+        <li><a href="index.html">PyCppQED 0.1.1 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -197,7 +200,7 @@ way (Assuming the operator only acts on first subsystem):</p>
 <div><div class="math">
 <p><img src="_images/math/37a82778391e7711b226d52a1a9471e4bc824bd9.png" alt="\langle \Psi | \hat A (k) | \Psi \rangle =
     \sum_k \langle k | \hat A (k) | k \rangle
-    \sum_m \Psi_{k m}^* \Psi_{k m}" /></p>
+    \sum_m \Psi_{k m}^* \Psi_{k m}"/></p>
 </div></div></blockquote>
 <p>Other than the general <a class="reference internal" href="#pycppqed.statevector.StateVector.expvalue" title="pycppqed.statevector.StateVector.expvalue"><tt class="xref py py-meth docutils literal"><span class="pre">expvalue()</span></tt></a> method <a class="reference internal" href="#pycppqed.statevector.StateVector.diagexpvalue" title="pycppqed.statevector.StateVector.diagexpvalue"><tt class="xref py py-meth docutils literal"><span class="pre">diagexpvalue()</span></tt></a>
 only works for diagonal operators and only needs the diagonal elements
@@ -254,7 +257,7 @@ way (Assuming the operator only acts on first subsystem):</p>
 <div><div class="math">
 <p><img src="_images/math/8bcc8acfd64f25543c481c5e3c0ba1e30d3054fe.png" alt="\langle \Psi | \hat A (k) | \Psi \rangle =
     \sum_{k_1 k_2} \langle k_1 | \hat A (k) | k_2 \rangle
-    \sum_m \Psi_{k_1 m}^* \Psi_{k_2 m}" /></p>
+    \sum_m \Psi_{k_1 m}^* \Psi_{k_2 m}"/></p>
 </div></div></blockquote>
 <p>The second sum is exactly what <a class="reference internal" href="#pycppqed.statevector.StateVector.reducesquare" title="pycppqed.statevector.StateVector.reducesquare"><tt class="xref py py-meth docutils literal"><span class="pre">reducesquare()</span></tt></a> does while the
 first expression is the matrix representation of the given operator
@@ -263,8 +266,9 @@ in the same basis as the StateVector.</p>
 
 <dl class="method">
 <dt id="pycppqed.statevector.StateVector.fft">
-<tt class="descname">fft</tt><big>(</big><em>axis=0</em><big>)</big><a class="headerlink" href="#pycppqed.statevector.StateVector.fft" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return a StateVector where the given axis is Fourier transformed.</p>
+<tt class="descname">fft</tt><big>(</big><em>axes=None</em><big>)</big><a class="headerlink" href="#pycppqed.statevector.StateVector.fft" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a StateVector where the given axes are Fourier transformed.
+This is the transformation position space -&gt; momentum space.</p>
 <dl class="docutils">
 <dt><em>Usage</em></dt>
 <dd><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">sv</span> <span class="o">=</span> <span class="n">StateVector</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mf">1.7</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mf">1.7</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span> <span class="n">norm</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
@@ -277,13 +281,21 @@ in the same basis as the StateVector.</p>
 <dd><ul class="first last">
 <li><dl class="first docutils">
 <dt><em>axis</em> (optional)</dt>
-<dd><p class="first last">Axis over which the fft is done. (Default is 0)</p>
+<dd><p class="first last">Sequence of ints, axes over which the fft is done. (Default is all)</p>
 </dd>
 </dl>
 </li>
 </ul>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pycppqed.statevector.StateVector.ifft">
+<tt class="descname">ifft</tt><big>(</big><em>axes=None</em><big>)</big><a class="headerlink" href="#pycppqed.statevector.StateVector.ifft" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a StateVector where the given axes are inversely Fourier transformed.
+This is the transformation momentum space -&gt; position space.</p>
+<p>See <a class="reference internal" href="#pycppqed.statevector.StateVector.fft" title="pycppqed.statevector.StateVector.fft"><tt class="xref py py-func docutils literal"><span class="pre">StateVector.fft()</span></tt></a> for details.</p>
 </dd></dl>
 
 <dl class="method">
@@ -401,7 +413,7 @@ E.g. a StateVector of rank 4 can be reduced to the first two indices:</p>
 <div><div class="math">
 <p><img src="_images/math/cb80a3323370813b8a53f7b84f33d0a8a44a27e3.png" alt="\Psi_{\alpha \beta} = \frac
   {\sum_{\gamma \delta} \Psi_{\alpha \beta \gamma \delta}}
-  {\| \sum_{\gamma \delta} \Psi_{\alpha \beta \gamma \delta} \|}" /></p>
+  {\| \sum_{\gamma \delta} \Psi_{\alpha \beta \gamma \delta} \|}"/></p>
 </div></div></blockquote>
 <p>Reducing is an easy way to find out how subspaces of a high rank
 state vectors behave. Don&#8217;t use reduced StateVectors for calculating
@@ -438,7 +450,7 @@ state vectors):</p>
 <blockquote>
 <div><div class="math">
 <p><img src="_images/math/ae7c9f1cad9b43692d7c6740d477167dacd65a50.png" alt="w_{\alpha_1 \alpha_2} = \sum_\beta \Psi_{\alpha_1 \beta}^*
-                        \Psi_{\alpha_2 \beta}" /></p>
+                        \Psi_{\alpha_2 \beta}"/></p>
 </div></div></blockquote>
 <p>Where <img class="math" src="_images/math/fdb63b9e51abe6bbb16acfb5d7b773ddbb5bf4a8.png" alt="\beta"/> is the reduced index.</p>
 <p>This quantity is useful to calculate expectation values in the
@@ -930,20 +942,20 @@ naming convention <tt class="docutils literal"><span class="pre">{path}_{time}.s
 <blockquote>
 <div><div class="math">
 <p><img src="_images/math/f52af9e4afe49facbf855a2bc5ace5edfb15ab09.png" alt="|\alpha\rangle = e^{-\frac {|\alpha|^2} {2}} \sum_{n=0}^{N}
-                    \frac {\alpha^n} {\sqrt{n!}} |n\rangle" /></p>
+                    \frac {\alpha^n} {\sqrt{n!}} |n\rangle"/></p>
 </div></div></blockquote>
 <p>Calculation is done using the recursive formula:</p>
 <blockquote>
 <div><div class="math">
-<p><img src="_images/math/e633327b3a398cf969722a78af2ebc6935d33661.png" alt="a_0 = e^{- \frac {|\alpha|^2} {2}}" /></p>
+<p><img src="_images/math/e633327b3a398cf969722a78af2ebc6935d33661.png" alt="a_0 = e^{- \frac {|\alpha|^2} {2}}"/></p>
 </div><div class="math">
-<p><img src="_images/math/75970d9b2a8520c166191f04c575c8a5a5de8eab.png" alt="a_n = a_{n-1} * \frac {\alpha} {\sqrt n}" /></p>
+<p><img src="_images/math/75970d9b2a8520c166191f04c575c8a5a5de8eab.png" alt="a_n = a_{n-1} * \frac {\alpha} {\sqrt n}"/></p>
 </div></div></blockquote>
 </dd></dl>
 
 <dl class="function">
 <dt id="pycppqed.initialconditions.gaussian">
-<tt class="descclassname">pycppqed.initialconditions.</tt><tt class="descname">gaussian</tt><big>(</big><em>x0=0</em>, <em>k0=0</em>, <em>sigma=0.5</em>, <em>fin=6</em><big>)</big><a class="headerlink" href="#pycppqed.initialconditions.gaussian" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">pycppqed.initialconditions.</tt><tt class="descname">gaussian</tt><big>(</big><em>x0=0</em>, <em>k0=0</em>, <em>sigma=0.5</em>, <em>fin=6</em>, <em>isItInK=False</em>, <em>cppqed=False</em><big>)</big><a class="headerlink" href="#pycppqed.initialconditions.gaussian" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generate a StateVector with a normal distribution.</p>
 <dl class="docutils">
 <dt><em>Usage</em></dt>
@@ -979,6 +991,19 @@ naming convention <tt class="docutils literal"><span class="pre">{path}_{time}.s
 </dd>
 </dl>
 </li>
+<li><dl class="first docutils">
+<dt><em>isItInK</em> (optional)</dt>
+<dd><p class="first last">if true, sigma is interpreted as width of the wavepacket in k-space</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt><em>cppqed</em> (optional)</dt>
+<dd><p class="first last">C++QED compatibility flag, if set to true then x0 (but not sigma) is expected
+in units of Pi.</p>
+</dd>
+</dl>
+</li>
 </ul>
 </dd>
 <dt><em>Returns</em></dt>
@@ -994,11 +1019,16 @@ gaussian wave packet in the k-space.</p>
 </dd>
 </dl>
 <p>The generated StateVector is normalized and given in the k-space. It
-is the Fourier transformed of the following expression:</p>
+is the discretized and Fourier transformed of the following expression:</p>
 <blockquote>
 <div><div class="math">
-<p><img src="_images/math/846d4e288d972ec275152318f91c3ac5efb8f125.png" alt="\Psi(x) = \frac {1} {\sqrt[4]{2 \pi}} *
-                e^{-\frac {x^2} {4*{\Delta x}^2}}" /></p>
+<p><img src="_images/math/1a24a553594aa8f432d1db9162aa362db9bd58f2.png" alt="\Psi(x) = \frac {1} {\sqrt[4]{2 \pi}} * \frac {1} {\sqrt{\Delta x}}
+                e^{-\frac {x^2} {4*{\Delta x}^2}}*e^{i k_0x}"/></p>
+</div></div></blockquote>
+<p>The discretization is given by:</p>
+<blockquote>
+<div><div class="math">
+<p><img src="_images/math/4d8e523bc1ef0e1ae052e52fdbbcba3afe9e6d33.png" alt="\Psi_j = \sqrt{\frac{L}{N}} \Psi(x_j),\qquad x_j=-\pi,-\pi+dx,...,\pi-dx"/></p>
 </div></div></blockquote>
 </dd></dl>
 
@@ -1052,7 +1082,7 @@ is the Fourier transformed of the following expression:</p>
 <div id="searchbox" style="display: none">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" size="18" />
+      <input type="text" name="q" />
       <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
@@ -1081,12 +1111,12 @@ is the Fourier transformed of the following expression:</p>
         <li class="right" >
           <a href="teazertools.html" title="TeazerTools User Guide"
              >previous</a> |</li>
-        <li><a href="index.html">PyCppQED v0.1.1 documentation</a> &raquo;</li> 
+        <li><a href="index.html">PyCppQED 0.1.1 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
         &copy; Copyright 2009, Sebastian Krämer.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
     </div>
   </body>
 </html>
