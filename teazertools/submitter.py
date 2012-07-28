@@ -215,16 +215,9 @@ class JobArray(object):
             logging.info("Removing seed "+seed+ " from array, found trajectory with T=%f"%lastT)
             return False
         else:
-            if self.parameters.has_key('NDt'):
-                NDt=float(self.parameters['NDt'])
-                Dt=float(self.parameters['Dt'])
-                if not lastT+NDt*Dt==T:
-                    logging.warn("Seed "+seed+ " with T=%f would not reach T=%f with NDt steps. Removing!"%(lastT,T))
-                    return False
-            else:
-                if self.C.get('continue_from') and lastT != self.C.get('continue_from'):
-                    logging.warn("Seed "+seed+" has T=%f, but %f required. Removing!"%(lastT,self.C.get('continue_from')))
-                    return False
+            if self.C.get('continue_from') and lastT != self.C.get('continue_from'):
+                logging.warn("Seed "+seed+" has T=%f, but %f required. Removing!"%(lastT,self.C.get('continue_from')))
+                return False
             logging.info("Keeping seed "+seed+ " with T=%f."%lastT)
             return True
         
