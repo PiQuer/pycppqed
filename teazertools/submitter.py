@@ -191,38 +191,48 @@ class JobArray(object):
         return (targetoutput,output_compressed,targetsv,sv_compressed)
     
     
-    def _check_existing(self,seed):
+    def _keep_existing(self,seed):
         seed = str(seed)
-        (targetoutput,_,targetsv,_) = self._find_target_files(seed)
-        if not targetoutput or not targetsv: return False
+        (targetoutput,output_compressed,targetsv,sv_compressed) = self._find_target_files(seed)
+        if (not targetoutput or not targetsv) or (output_compressed != sv_compressed):
+            if self.C['require_resume']:
+                logging.info("Removing unfinished or nonexistent seed "+seed+".")
+                return False
+            else:
+                logging.info("Keeping unfinished or nonexistent seed "+seed+".")
+                return True
         if not self.parameters.has_key('T'):
             if not self._warned:
-                logging.info("Please specify T. Note that CPPQed ignores T if NDt is given, but the submitter uses it to determine if a seed has to be included or not.")
+                logging.info("Please specify T. Note that CPPQed ignores T if NDt is given, but the submitter uses it to determine if a seed has to be included or not. Keeping all seeds.")
                 self._warned=True
-            return False
+            return True
         lastT = helpers.cppqed_t(targetoutput)
         if lastT == None:
-            logging.info('Could not read '+targetoutput+', keeping seed'+seed+'.') 
-            return False
+            logging.info('Could not read '+targetoutput+', keeping seed '+seed+'.') 
+            return True
         T=float(self.parameters['T']) 
         if np.less_equal(T,float(lastT)):
             logging.info("Removing seed "+seed+ " from array, found trajectory with T=%f"%lastT)
-            return True
+            return False
         else:
             if self.parameters.has_key('NDt'):
                 NDt=float(self.parameters['NDt'])
                 Dt=float(self.parameters['Dt'])
                 if not lastT+NDt*Dt==T:
                     logging.warn("Seed "+seed+ " with T=%f would not reach T=%f with NDt steps. Removing!"%(lastT,T))
-                    return True
+                    return False
+            else:
+                if self.C.get('continue_from') and lastT != self.C.get('continue_from'):
+                    logging.warn("Seed "+seed+" has T=%f, but %f required. Removing!"%(lastT,self.C.get('continue_from')))
+                    return False
             logging.info("Keeping seed "+seed+ " with T=%f."%lastT)
-            return False
+            return True
         
     def _clean_seedlist(self):
         if not (self.C['resume'] and self.C['clean_seedlist']):
             return False
         logging.info("Checking for existing trajectories... this can take a long time")
-        self.seeds[:] = [seed for seed in self.seeds if not self._check_existing(seed)]
+        self.seeds[:] = [seed for seed in self.seeds if self._keep_existing(seed)]
     
     def _prepare_resume(self):
         """Puts everything in place to resume a trajectory.
@@ -442,6 +452,9 @@ class GenericSubmitter(OptionParser, ConfigParser.RawConfigParser):
         self.JobArrayParams['testrun_t'] = self.getfloat('Config', 'testrun_t')
         self.JobArrayParams['compress'] = self.getboolean('Config', 'compress')
         self.JobArrayParams['resume'] = self.getboolean('Config','resume')
+        self.JobArrayParams['require_resume'] = self.getboolean('Config','require_resume')
+        if self.has_option('Config', 'continue_from'):
+            self.JobArrayParams['continue_from'] = self.getint('Config','continue_from')
         self.JobArrayParams['clean_seedlist'] = self.getboolean('Config', 'clean_seedlist')
         self.JobArrayParams['usetemp'] = self.getboolean('Config', 'usetemp')
         self.JobArrayParams['cluster'] = self.getint('Config', 'cluster')
