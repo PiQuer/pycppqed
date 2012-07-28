@@ -349,6 +349,7 @@ class JobArray(object):
             seedspec = "1-%s" % min(2,numjobs)
             self.parameters['T'] = self.C['testrun_t']
             if self.C['testrun_dt']: self.parameters['Dt'] = self.C['testrun_dt']
+            if self.parameters.has_key('NDt'): del(self.parameters['NDt'])
         else:
             seedspec = "1-%s" % numjobs
         
@@ -551,7 +552,7 @@ class GenericSubmitter(OptionParser, ConfigParser.RawConfigParser):
             counter += 1
             
     def act(self):
-        """Submit all job arrays to the teazer cluster.
+        """Submit all job arrays to the hpc cluster.
         
         :param testrun: Perform a test run with only two seeds and `T=1`.
         :type testrun: bool
