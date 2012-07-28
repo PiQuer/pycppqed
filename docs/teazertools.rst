@@ -4,7 +4,7 @@ TeazerTools User Guide
 ======================
 
 This is the documentation of additional tools which aim to simplify C++QED usage on the teazer or leo3 cluster
-of the Institute for Theoretical Physics (University of Innsbruck).
+of the University of Innsbruck.
 
 .. _submitter_documentation:
 
