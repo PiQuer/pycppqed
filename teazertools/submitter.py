@@ -229,7 +229,7 @@ class JobArray(object):
     
     def _prepare_resume(self):
         """Puts everything in place to resume a trajectory.
-        Returns True if nothing has to be simulated, returns False otherwise.
+        Returns False if nothing has to be simulated, returns True otherwise.
         """
         logging.debug("Entering _prepare_resume")
         (targetoutput,output_compressed,targetsv,sv_compressed) = self._find_target_files(**self.parameters)
@@ -240,16 +240,16 @@ class JobArray(object):
             if targetsv:
                 logging.info("Deleting existing sv file %s."%targetsv)
                 os.remove(targetsv)
-            return False
+            return True
         
         lastT = helpers.cppqed_t(targetoutput)
         if lastT == None:
             logging.info("Found an invalid trajectory file %s."%targetoutput)
-            return False
+            return True
         logging.info("Found a trajectory with T=%f"%lastT)
         if self.parameters.has_key('T') and np.less_equal(float(self.parameters['T']),float(lastT)):
             logging.info("Don't need to calculate anything, T=%f."%float(self.parameters['T']))
-            return True
+            return False
         if self.C['usetemp']:
             logging.info('Moving %s to %s.'%(targetoutput,self.outputdir))
             shutil.copy(targetoutput, self.outputdir)
@@ -263,7 +263,7 @@ class JobArray(object):
         if sv_compressed:
             logging.info('Uncompressing %s'%targetsv)
             os.system('bunzip2 -k %s'%self.sv+self.compsuffix)
-        return False
+        return True
     
     def run(self, start=0, dryrun=False):
         """Simulate the trajectories self.seed[start:start+cluster] where cluster is the number of serial jobs. 
@@ -280,7 +280,7 @@ class JobArray(object):
                 if dryrun:
                     self._execute(self.command, dryrun, dryrunmessage="Executed on a node (with an additional appropriate -o flag):")
                     return
-                if self._prepare_resume():
+                if not self._prepare_resume():
                     return
                 if not os.path.exists(self.datadir): helpers.mkdir_p(self.datadir)
                 self._write_parameters()
