@@ -465,7 +465,7 @@ class GenericSubmitter(OptionParser, ConfigParser.RawConfigParser):
         
         if self.JobArrayParams['average'] and self.has_section('Averages'):
             self.JobArrayParams['averageids'] = dict(self.items('Averages'))
-        else: 
+        elif self.JobArrayParams['average']:
             logging.info('Averaging disabled: no information about output columns available. Please contact documentation about [Averages] section.')
             self.JobArrayParams['average'] = False
 
