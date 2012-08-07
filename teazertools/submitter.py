@@ -168,10 +168,14 @@ class JobArray(object):
     
     def _convert_matlab(self):
         evs, svs = qed.load_cppqed(self.output)
-        finalsv = qed.load_statevector(self.sv)
         scipy.io.savemat(self.output+".mat", {"evs":evs, "svs":svs}, do_compression=self.C['compress'])
-        scipy.io.savemat(self.sv+".mat",{"sv":finalsv}, do_compression=self.C['compress'])
-        self.datafiles.extend((self.output+".mat",self.sv+".mat"))
+        self.datafiles.append(self.output+".mat")
+        try:
+            finalsv = qed.load_statevector(self.sv)
+            scipy.io.savemat(self.sv+".mat",{"sv":finalsv}, do_compression=self.C['compress'])
+            self.datafiles.append(self.sv+".mat")
+        except IOError:
+            logging.warn("Could not convert statevector file " + self.sv +", probably it is binary and the C++ extension is not available.")
     
     def _targetoutput(self,seed=None,**kwargs):
         if seed:
