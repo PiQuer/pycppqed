@@ -101,6 +101,8 @@ class JobArray(object):
         else:
             self.outputdir_is_temp = False
         self.command = [self.script]
+        if self.C.get('wrapper'):
+            self.command.insert(0, self.C['wrapper'])
         for item in self.parameters.items():
             self.command.extend(('--'+item[0],str(item[1])))
         self.targetoutput = self._targetoutput(**self.parameters)
@@ -453,6 +455,8 @@ class GenericSubmitter(OptionParser, ConfigParser.RawConfigParser):
         self.JobArrayParams['require_resume'] = self.getboolean('Config','require_resume')
         if ConfigParser.RawConfigParser.has_option(self,'Config','continue_from'):
             self.JobArrayParams['continue_from'] = self.getfloat('Config','continue_from')
+        if ConfigParser.RawConfigParser.has_option(self,'Config','wrapper'):
+            self.JobArrayParams['wrapper'] = self.get('Config','wrapper')
         self.JobArrayParams['clean_seedlist'] = self.getboolean('Config', 'clean_seedlist')
         self.JobArrayParams['usetemp'] = self.getboolean('Config', 'usetemp')
         self.JobArrayParams['cluster'] = self.getint('Config', 'cluster')
