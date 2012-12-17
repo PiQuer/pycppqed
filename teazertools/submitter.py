@@ -101,6 +101,8 @@ class JobArray(object):
         else:
             self.outputdir_is_temp = False
         self.command = [self.script]
+        if self.C.get('wrapper'):
+            self.command.insert(0, self.C['wrapper'])
         for item in self.parameters.items():
             self.command.extend(('--'+item[0],str(item[1])))
         self.targetoutput = self._targetoutput(**self.parameters)
@@ -149,7 +151,7 @@ class JobArray(object):
     
     def _compress(self):
         def _bzip2(f):
-            os.system('bzip2 %s'%f)
+            os.system('bzip2 -f %s'%f)
         _bzip2(self.output)
         self.output = self.output + self.compsuffix
         if not self.C['binary']:
@@ -168,10 +170,14 @@ class JobArray(object):
     
     def _convert_matlab(self):
         evs, svs = qed.load_cppqed(self.output)
-        finalsv = qed.load_statevector(self.sv)
         scipy.io.savemat(self.output+".mat", {"evs":evs, "svs":svs}, do_compression=self.C['compress'])
-        scipy.io.savemat(self.sv+".mat",{"sv":finalsv}, do_compression=self.C['compress'])
-        self.datafiles.extend((self.output+".mat",self.sv+".mat"))
+        self.datafiles.append(self.output+".mat")
+        try:
+            finalsv = qed.load_statevector(self.sv)
+            scipy.io.savemat(self.sv+".mat",{"sv":finalsv}, do_compression=self.C['compress'])
+            self.datafiles.append(self.sv+".mat")
+        except IOError:
+            logging.warn("Could not convert statevector file " + self.sv +", probably it is binary and the C++ extension is not available.")
     
     def _targetoutput(self,seed=None,**kwargs):
         if seed:
@@ -191,42 +197,45 @@ class JobArray(object):
         return (targetoutput,output_compressed,targetsv,sv_compressed)
     
     
-    def _check_existing(self,seed):
+    def _keep_existing(self,seed):
         seed = str(seed)
-        (targetoutput,_,targetsv,_) = self._find_target_files(seed)
-        if not targetoutput or not targetsv: return False
+        (targetoutput,output_compressed,targetsv,sv_compressed) = self._find_target_files(seed)
+        if (not targetoutput or not targetsv) or (output_compressed != self.C['compress']):
+            if self.C['require_resume']:
+                logging.info("Removing unfinished or nonexistent seed "+seed+".")
+                return False
+            else:
+                logging.info("Keeping unfinished or nonexistent seed "+seed+".")
+                return True
         if not self.parameters.has_key('T'):
             if not self._warned:
-                logging.info("Please specify T. Note that CPPQed ignores T if NDt is given, but the submitter uses it to determine if a seed has to be included or not.")
+                logging.info("Please specify T. Note that CPPQed ignores T if NDt is given, but the submitter uses it to determine if a seed has to be included or not. Keeping all seeds.")
                 self._warned=True
-            return False
+            return True
         lastT = helpers.cppqed_t(targetoutput)
         if lastT == None:
-            logging.info('Could not read '+targetoutput+', keeping seed'+seed+'.') 
-            return False
+            logging.info('Could not read '+targetoutput+', keeping seed '+seed+'.') 
+            return True
         T=float(self.parameters['T']) 
         if np.less_equal(T,float(lastT)):
             logging.info("Removing seed "+seed+ " from array, found trajectory with T=%f"%lastT)
-            return True
-        else:
-            if self.parameters.has_key('NDt'):
-                NDt=float(self.parameters['NDt'])
-                Dt=float(self.parameters['Dt'])
-                if not lastT+NDt*Dt==T:
-                    logging.warn("Seed "+seed+ " with T=%f would not reach T=%f with NDt steps. Removing!"%(lastT,T))
-                    return True
-            logging.info("Keeping seed "+seed+ " with T=%f."%lastT)
             return False
+        else:
+            if self.C.get('continue_from') and lastT != self.C.get('continue_from'):
+                logging.warn("Seed "+seed+" has T=%f, but %f required. Removing!"%(lastT,self.C.get('continue_from')))
+                return False
+            logging.info("Keeping seed "+seed+ " with T=%f."%lastT)
+            return True
         
     def _clean_seedlist(self):
         if not (self.C['resume'] and self.C['clean_seedlist']):
             return False
         logging.info("Checking for existing trajectories... this can take a long time")
-        self.seeds[:] = [seed for seed in self.seeds if not self._check_existing(seed)]
+        self.seeds[:] = [seed for seed in self.seeds if self._keep_existing(seed)]
     
     def _prepare_resume(self):
         """Puts everything in place to resume a trajectory.
-        Returns True if nothing has to be simulated, returns False otherwise.
+        Returns False if nothing has to be simulated, returns True otherwise.
         """
         logging.debug("Entering _prepare_resume")
         (targetoutput,output_compressed,targetsv,sv_compressed) = self._find_target_files(**self.parameters)
@@ -237,16 +246,16 @@ class JobArray(object):
             if targetsv:
                 logging.info("Deleting existing sv file %s."%targetsv)
                 os.remove(targetsv)
-            return False
+            return True
         
         lastT = helpers.cppqed_t(targetoutput)
         if lastT == None:
             logging.info("Found an invalid trajectory file %s."%targetoutput)
-            return False
+            return True
         logging.info("Found a trajectory with T=%f"%lastT)
         if self.parameters.has_key('T') and np.less_equal(float(self.parameters['T']),float(lastT)):
             logging.info("Don't need to calculate anything, T=%f."%float(self.parameters['T']))
-            return True
+            return False
         if self.C['usetemp']:
             logging.info('Moving %s to %s.'%(targetoutput,self.outputdir))
             shutil.copy(targetoutput, self.outputdir)
@@ -256,11 +265,11 @@ class JobArray(object):
             targetsv = helpers.replace_dirpart(targetsv, self.outputdir)
         if output_compressed:
             logging.info('Uncompressing %s'%targetoutput)
-            os.system('bunzip2 %s'%targetoutput)
+            os.system('bunzip2 -k %s'%targetoutput)
         if sv_compressed:
             logging.info('Uncompressing %s'%targetsv)
-            os.system('bunzip2 %s'%self.sv+self.compsuffix)
-        return False
+            os.system('bunzip2 -k %s'%self.sv+self.compsuffix)
+        return True
     
     def run(self, start=0, dryrun=False):
         """Simulate the trajectories self.seed[start:start+cluster] where cluster is the number of serial jobs. 
@@ -277,7 +286,7 @@ class JobArray(object):
                 if dryrun:
                     self._execute(self.command, dryrun, dryrunmessage="Executed on a node (with an additional appropriate -o flag):")
                     return
-                if self._prepare_resume():
+                if not self._prepare_resume():
                     return
                 if not os.path.exists(self.datadir): helpers.mkdir_p(self.datadir)
                 self._write_parameters()
@@ -346,6 +355,7 @@ class JobArray(object):
             seedspec = "1-%s" % min(2,numjobs)
             self.parameters['T'] = self.C['testrun_t']
             if self.C['testrun_dt']: self.parameters['Dt'] = self.C['testrun_dt']
+            if self.parameters.has_key('NDt'): del(self.parameters['NDt'])
         else:
             seedspec = "1-%s" % numjobs
         
@@ -354,6 +364,8 @@ class JobArray(object):
         logging.debug(obj)
         
         command = ['qsub','-terse', '-o', logfile, '-N', jobname, '-t', seedspec]
+        if self.C.get('depend'):
+            command.extend(('-hold_jid',self.C['depend']))
         if self.C['parallel']>1: command.extend(('-pe','openmp',str(self.C['parallel'])))
         command.extend(self.default_sub_pars)
         command.extend(self._dict_to_commandline('-', self.C['qsub']))
@@ -386,7 +398,7 @@ class JobArray(object):
         :retval: int
         """
         logfile = os.path.join(self.logdir,self.basename+'_mean_$JOB_ID.log')
-        command = ['qsub','-terse', '-o', logfile]
+        command = ['qsub','-terse', '-o', logfile, '-N', 'calculate_mean_%s'%os.path.basename(self.basedir)]
         if holdid:
             command.extend(('-hold_jid',holdid))
         command.extend(self.default_sub_pars)
@@ -417,12 +429,12 @@ class GenericSubmitter(OptionParser, ConfigParser.RawConfigParser):
         OptionParser.__init__(self,usage)
         if argv:
             sys.argv = argv
+        self.JobArrayParams = {}
         self._parse_options()
     
         self.optionxform = str
         self.CppqedObjects = []
         self.defaultconfig = os.path.join(os.path.dirname(__file__),'generic_submitter_defaults.conf')
-        self.JobArrayParams = {}
         self.averageids={}
         self._parse_config()
         self._generate_objects()
@@ -440,6 +452,11 @@ class GenericSubmitter(OptionParser, ConfigParser.RawConfigParser):
         self.JobArrayParams['testrun_t'] = self.getfloat('Config', 'testrun_t')
         self.JobArrayParams['compress'] = self.getboolean('Config', 'compress')
         self.JobArrayParams['resume'] = self.getboolean('Config','resume')
+        self.JobArrayParams['require_resume'] = self.getboolean('Config','require_resume')
+        if ConfigParser.RawConfigParser.has_option(self,'Config','continue_from'):
+            self.JobArrayParams['continue_from'] = self.getfloat('Config','continue_from')
+        if ConfigParser.RawConfigParser.has_option(self,'Config','wrapper'):
+            self.JobArrayParams['wrapper'] = self.get('Config','wrapper')
         self.JobArrayParams['clean_seedlist'] = self.getboolean('Config', 'clean_seedlist')
         self.JobArrayParams['usetemp'] = self.getboolean('Config', 'usetemp')
         self.JobArrayParams['cluster'] = self.getint('Config', 'cluster')
@@ -456,7 +473,7 @@ class GenericSubmitter(OptionParser, ConfigParser.RawConfigParser):
         
         if self.JobArrayParams['average'] and self.has_section('Averages'):
             self.JobArrayParams['averageids'] = dict(self.items('Averages'))
-        else: 
+        elif self.JobArrayParams['average']:
             logging.info('Averaging disabled: no information about output columns available. Please contact documentation about [Averages] section.')
             self.JobArrayParams['average'] = False
 
@@ -480,6 +497,8 @@ class GenericSubmitter(OptionParser, ConfigParser.RawConfigParser):
                           help="Use CLASS instead of teazertools.submitter.GenericSubmitter, typically CLASS is a subclass of GenericSubmitter")
         self.add_option("--averageonly", action="store_true", dest="averageonly", default=False,
                           help="Only submit the job to compute the average expectation values")
+        self.add_option("--depend", dest="depend", metavar="ID",
+                          help="Make created job array depend on this job ID.")
         self.add_option("--verbose", action="store_true", dest="verbose", default=False,
                           help="Log more output to files.")
         
@@ -501,6 +520,8 @@ class GenericSubmitter(OptionParser, ConfigParser.RawConfigParser):
                 pydevd.settrace()
             except ImportError:
                 logging.error("Pydevd module not found, cannot set breakpoint for external pydevd debugger.")
+        if self.options.depend:
+            self.JobArrayParams['depend'] = self.options.depend
         
         self.config = os.path.expanduser(args[0])
         
@@ -539,7 +560,7 @@ class GenericSubmitter(OptionParser, ConfigParser.RawConfigParser):
             counter += 1
             
     def act(self):
-        """Submit all job arrays to the teazer cluster.
+        """Submit all job arrays to the hpc cluster.
         
         :param testrun: Perform a test run with only two seeds and `T=1`.
         :type testrun: bool
