@@ -2,9 +2,10 @@ from distutils.core import setup, Extension, Command
 import unittest
 import numpy as np
 import sys
+import os
 
 cio = Extension("pycppqed.cio", sources=["pycppqed/io.c"])
-ciobin = Extension("pycppqed.ciobin", sources=["pycppqed/iobin.cc"], libraries=['boost_serialization'])
+ciobin = Extension("pycppqed.ciobin", sources=["pycppqed/iobin.cc"], libraries=['boost_serialization'], library_dirs=os.environ['LD_LIBRARY_PATH'].split(':'))
 
 class test(Command):
     """
@@ -28,6 +29,7 @@ ext_modules = [cio]
 if '--add-iobin' in sys.argv:
     ext_modules.append(ciobin)
     sys.argv.remove('--add-iobin')
+
 
 
 setup(
