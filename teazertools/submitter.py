@@ -327,6 +327,14 @@ class JobArray(object):
             else:
                 cl.append(prefix+i[0])
         return cl
+
+    def _gen_jobname(self):
+        part1,last=os.path.split(self.basedir)
+        part1,second_to_last=os.path.split(part1)
+        name = "Job"+"_"+second_to_last+"_"+last
+        for k in r'@\*?':
+            name.replace(k,'_')
+        return name
         
     def submit(self, testrun=False, dryrun=False):
         """Submit the job array to teazer. Technically this is done by serializing the object and passing it
@@ -342,7 +350,7 @@ class JobArray(object):
         if not dryrun:
             helpers.mkdir_p(self.logdir)
                 
-        jobname = "Job"+self.basename
+        jobname = self._gen_jobname()
         logfile = os.path.join(self.logdir,'$JOB_NAME.$JOB_ID.$TASK_ID.log')
         if not dryrun: self._clean_seedlist()
         if not self.seeds:
