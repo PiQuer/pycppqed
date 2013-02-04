@@ -406,7 +406,7 @@ class JobArray(object):
         :retval: int
         """
         logfile = os.path.join(self.logdir,self.basename+'_mean_$JOB_ID.log')
-        command = ['qsub','-terse', '-o', logfile, '-N', 'calculate_mean_%s'%os.path.basename(self.basedir)]
+        command = ['qsub','-terse', '-o', logfile, '-N', 'calculate_mean_'+self._gen_jobname()]
         if holdid:
             command.extend(('-hold_jid',holdid))
         command.extend(self.default_sub_pars)
