@@ -5,7 +5,11 @@ import sys
 import os
 
 cio = Extension("pycppqed.cio", sources=["pycppqed/io.c"])
-ciobin = Extension("pycppqed.ciobin", sources=["pycppqed/iobin.cc"], libraries=['boost_serialization','blitz'], library_dirs=os.environ['LD_LIBRARY_PATH'].split(':'))
+if os.environ.has_key('LD_LIBRARY_PATH'):
+    library_dirs=os.environ['LD_LIBRARY_PATH'].split(':')
+else:
+    library_dirs=None
+ciobin = Extension("pycppqed.ciobin", sources=["pycppqed/iobin.cc"], libraries=['boost_serialization','blitz'], library_dirs=library_dirs)
 
 class test(Command):
     """
