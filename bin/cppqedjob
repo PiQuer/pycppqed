@@ -23,7 +23,7 @@ def main():
     parallel = job.C['parallel']
     s = int(os.environ['SGE_TASK_ID'])
     for p in range(parallel):
-        start = (s-1)*parallel+p*cluster
+        start = ((s-1)*parallel+p)*cluster
         if start >= len(job.seeds): break
         j = pickle.loads(base64.decodestring(sys.argv[1]))
         worker = threading.Thread(target=j.run, kwargs={'start':start})
