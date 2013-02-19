@@ -5,11 +5,18 @@ import sys
 import os
 
 cio = Extension("pycppqed.cio", sources=["pycppqed/io.c"])
-if os.environ.has_key('LD_LIBRARY_PATH'):
-    library_dirs=os.environ['LD_LIBRARY_PATH'].split(':')
+
+library_dirs_args = filter(lambda s:s.startswith('--library-dirs'), sys.argv)
+if library_dirs_args:
+    library_dirs = []
+    for l in library_dirs_args:
+        library_dirs += l.split('=')[1].split(':')
+    sys.argv.remove(l)
 else:
-    library_dirs=None
-ciobin = Extension("pycppqed.ciobin", sources=["pycppqed/iobin.cc"], libraries=['boost_serialization','blitz'], library_dirs=library_dirs)
+    library_dirs = None
+
+
+ciobin = Extension("pycppqed.ciobin", sources=["pycppqed/iobin.cc"], libraries=['boost_serialization','blitz'], library_dirs=library_dirs, runtime_library_dirs=library_dirs)
 
 class test(Command):
     """
