@@ -103,6 +103,8 @@ class JobArray(object):
         self.command = [self.script]
         if self.C.get('wrapper'):
             self.command.insert(0, self.C['wrapper'])
+	if self.parameters.get('initFile'):
+	    self.parameters['initFile'] = os.path.join(self.C['confpath'],self.parameters['initFile'])
         for item in self.parameters.items():
             self.command.extend(('--'+item[0],str(item[1])))
         self.targetoutput = self._targetoutput(**self.parameters)
@@ -455,6 +457,7 @@ class GenericSubmitter(OptionParser, ConfigParser.RawConfigParser):
         self.combine = self.getboolean('Config', 'combine')
         self.numericsubdirs = self.getboolean('Config', 'numericsubdirs')
         self.basedir = self.JobArrayParams['basedir'] = os.path.expanduser(self.get('Config', 'basedir'))
+        self.JobArrayParams['confpath'] = os.path.dirname(os.path.realpath(self.config))
         self.JobArrayParams['matlab'] = self.getboolean('Config', 'matlab')
         self.average = self.JobArrayParams['average'] = self.getboolean('Config', 'average')
         self.JobArrayParams['testrun_t'] = self.getfloat('Config', 'testrun_t')
