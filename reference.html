@@ -806,7 +806,10 @@ state vectors and information about the calculated system.</p>
 <dd><ul class="first last">
 <li><dl class="first docutils">
 <dt><em>filename</em></dt>
-<dd><p class="first last">Path to the C++QED state vector file that should be loaded.</p>
+<dd><p class="first last">Path to the C++QED state vector file that should be loaded.
+If the filename ends with .svbin, the state vector file is expected to be
+a binary file and a <tt class="xref py py-class docutils literal"><span class="pre">IOError</span></tt> is raised if the required <cite>ciobin</cite> module is not
+available.</p>
 </dd>
 </dl>
 </li>
@@ -839,7 +842,9 @@ state vectors and information about the calculated system.</p>
 <dt><em>Arguments</em></dt>
 <dd><dl class="first last docutils">
 <dt><em>filename</em></dt>
-<dd>Path to the location where the StateVector should be saved to.</dd>
+<dd>Path to the location where the StateVector should be saved to.
+If the filename ends with .svbin, a binary state vector file is written
+and a <tt class="xref py py-class docutils literal"><span class="pre">IOError</span></tt> is raised if the required <cite>ciobin</cite> module is not available.</dd>
 <dt><em>sv</em></dt>
 <dd>A <a class="reference internal" href="#pycppqed.statevector.StateVector" title="pycppqed.statevector.StateVector"><tt class="xref py py-class docutils literal"><span class="pre">pycppqed.statevector.StateVector</span></tt></a> instance.</dd>
 </dl>
@@ -954,6 +959,47 @@ naming convention <tt class="docutils literal"><span class="pre">{path}_{time}.s
 </dd></dl>
 
 <dl class="function">
+<dt id="pycppqed.initialconditions.fock">
+<tt class="descclassname">pycppqed.initialconditions.</tt><tt class="descname">fock</tt><big>(</big><em>dim</em>, <em>i</em><big>)</big><a class="headerlink" href="#pycppqed.initialconditions.fock" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate a Fock space basis vector.</p>
+<dl class="docutils">
+<dt><em>Usage</em></dt>
+<dd><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">sv</span> <span class="o">=</span> <span class="n">fock</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">i</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">sv</span>
+<span class="go">StateVector(8)</span>
+</pre></div>
+</div>
+</dd>
+<dt><em>Arguments</em></dt>
+<dd><ul class="first last">
+<li><dl class="first docutils">
+<dt><em>dim</em></dt>
+<dd><p class="first last">Dimension of the Fock space.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt><em>i</em></dt>
+<dd><p class="first last">Genereate the i-th basis vector</p>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+<dt><em>Returns</em></dt>
+<dd><ul class="first last">
+<li><dl class="first docutils">
+<dt><em>sv</em></dt>
+<dd><p class="first last">A <a class="reference internal" href="#pycppqed.statevector.StateVector" title="pycppqed.statevector.StateVector"><tt class="xref py py-class docutils literal"><span class="pre">pycppqed.statevector.StateVector</span></tt></a>.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
 <dt id="pycppqed.initialconditions.gaussian">
 <tt class="descclassname">pycppqed.initialconditions.</tt><tt class="descname">gaussian</tt><big>(</big><em>x0=0</em>, <em>k0=0</em>, <em>sigma=0.5</em>, <em>fin=6</em>, <em>isItInK=False</em>, <em>cppqed=False</em><big>)</big><a class="headerlink" href="#pycppqed.initialconditions.gaussian" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generate a StateVector with a normal distribution.</p>
@@ -1030,6 +1076,47 @@ is the discretized and Fourier transformed of the following expression:</p>
 <div><div class="math">
 <p><img src="_images/math/4d8e523bc1ef0e1ae052e52fdbbcba3afe9e6d33.png" alt="\Psi_j = \sqrt{\frac{L}{N}} \Psi(x_j),\qquad x_j=-\pi,-\pi+dx,...,\pi-dx"/></p>
 </div></div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="pycppqed.initialconditions.momentum_eigen">
+<tt class="descclassname">pycppqed.initialconditions.</tt><tt class="descname">momentum_eigen</tt><big>(</big><em>k</em>, <em>fin=6</em><big>)</big><a class="headerlink" href="#pycppqed.initialconditions.momentum_eigen" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate a momentum eigenstate with momentum p in a space with finesse fin.</p>
+<dl class="docutils">
+<dt><em>Usage</em></dt>
+<dd><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">sv</span> <span class="o">=</span> <span class="n">momentum_eigen</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">fin</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">sv</span>
+<span class="go">StateVector(16)</span>
+</pre></div>
+</div>
+</dd>
+<dt><em>Arguments</em></dt>
+<dd><ul class="first last">
+<li><dl class="first docutils">
+<dt><em>k</em></dt>
+<dd><p class="first last">Wavenumber of the resulting state.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt><em>fin</em> (optional)</dt>
+<dd><p class="first last">Finesse of the resulting state (default 4).</p>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+<dt><em>Returns</em></dt>
+<dd><ul class="first last">
+<li><dl class="first docutils">
+<dt><em>sv</em></dt>
+<dd><p class="first last">A <a class="reference internal" href="#pycppqed.statevector.StateVector" title="pycppqed.statevector.StateVector"><tt class="xref py py-class docutils literal"><span class="pre">pycppqed.statevector.StateVector</span></tt></a>.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 </div>
@@ -1116,7 +1203,7 @@ is the discretized and Fourier transformed of the following expression:</p>
     </div>
     <div class="footer">
         &copy; Copyright 2009, Sebastian Krämer.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
     </div>
   </body>
 </html>
