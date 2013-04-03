@@ -103,8 +103,10 @@ class JobArray(object):
         self.command = [self.script]
         if self.C.get('wrapper'):
             self.command.insert(0, self.C['wrapper'])
-	if self.parameters.get('initFile'):
-	    self.parameters['initFile'] = os.path.join(self.C['confpath'],self.parameters['initFile'])
+        if self.parameters.get('initFile'):
+            self.parameters['initFile'] = os.path.join(self.C['confpath'],self.parameters['initFile'])
+        if self.parameters.get('externContinue'):
+            self.parameters['externContinue'] = os.path.expanduser(self.parameters['externContinue']).replace('$SEED',seed)
         for item in self.parameters.items():
             self.command.extend(('--'+item[0],str(item[1])))
         self.targetoutput = self._targetoutput(**self.parameters)
