@@ -5,6 +5,7 @@ import os
 import errno
 import pycppqed as qed
 import warnings
+import numpy as np
 
 def ignore_warnings():
     warnings.simplefilter("ignore",FutureWarning)
@@ -93,14 +94,19 @@ def matlab_range_to_list(s):
     :returns: A list `[start,...,stop]`
     :retval: list
     """
-    spec = map(int,s.split(':'))
-    spec[-1] = spec[-1]+1
-    if len(spec)==2:
-        return range(*spec)
-    elif len(spec)==3:
-        return range(spec[0],spec[2],spec[1])
+    spec = map(float,s.split(':'))
+    if len(spec)==3:
+        start,step,stop=spec
+    elif len(spec)==2:
+        start,stop=spec
+        step=1
     else:
         raise ValueError('%s: range specification has to be start:[step:]stop'%s)
+    stop+=step
+    return map(_int_if_int,list(np.arange(start,stop,step)))
+
+def matlab_range_to_string(s,sep=";"):
+    return sep.join(map(str,matlab_range_to_list(s)))
     
 def cppqed_t(filename):
     r"""This helper function returns the last timestep t of a C++QED file.
@@ -116,6 +122,13 @@ def cppqed_t(filename):
     except:
         return None
     return evs[0,-1]
+
+  
+def _int_if_int(i):
+    return int(i) if int(i)==i else i
+
+def range_str(start,stop,step,sep=";"):
+    return sep.join(map(str,map(_int_if_int,list(np.arange(start,stop,step)))))
 
 class VariableParameters(object):
     def __init__(self, parameterValues, parameterGroups=(), combine=False):

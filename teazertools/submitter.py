@@ -547,9 +547,13 @@ class GenericSubmitter(OptionParser, ConfigParser.SafeConfigParser):
         if self.combine: generator = helpers.product(*rangepars)
         else: generator = itertools.izip(*rangepars)
         return generator
-    
+
     def _generate_objects(self):
-        pars = self.items('Parameters')
+        def _expand_ranges(par):
+            if par[1].count(':') in (1,2):
+                return (par[0],helpers.matlab_range_to_string(par[1]))
+            else: return par
+        pars = map(_expand_ranges,self.items('Parameters'))
         singlepars = [i for i in pars if not i[1].count(';')]
         rangepars = [i for i in pars if i[1].count(';')]
         if not rangepars:
