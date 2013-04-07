@@ -64,7 +64,7 @@ class JobArray(object):
     :param combine: If `True`, use all possible combinations of parameters (default True)
     :param cluster: Each job should calculate this many trajectories (default 1)
     """
-    def __init__(self,script,basename=None,parameters={},basedir='.',tempdir='/tmp',seeds=[1001], config={}):
+    def __init__(self,script,basename=None,parameters={},basedir='.',tempdir='/tmp',seeds=[1001], varPars, config={}):
         self.C = dict(averageids={},qsub={}, qsub_traj={}, qsub_average={}, qsub_test={}, diagnostics=True,
                       matlab=True, average=True, compress=True, resume=False, testrun_t=1, testrun_dt = None,
                       usetemp=True, combine=True, cluster=1)
@@ -84,6 +84,7 @@ class JobArray(object):
             self.basename = basename
         self.targetoutputbase=os.path.join(self.datadir,self.basename+'.out')
         self.seeds = seeds
+        self.varPars = varPars
         self.compsuffix='.bz2'
         self.datafiles = []
         self.default_sub_pars = ['-b','y', '-v','PYTHONPATH','-v','PATH', '-m','n','-j','yes']
@@ -449,7 +450,7 @@ class GenericSubmitter(OptionParser, ConfigParser.SafeConfigParser):
         self.defaultconfig = os.path.join(os.path.dirname(__file__),'generic_submitter_defaults.conf')
         self.averageids={}
         self._parse_config()
-        self.varpars = self._generate_objects()
+        self._generate_objects()
         
     def _parse_config(self):
         self.read(self.config)
@@ -539,8 +540,8 @@ class GenericSubmitter(OptionParser, ConfigParser.SafeConfigParser):
         self.config = os.path.expanduser(args[0])
         
             
-    def _jobarray_maker(self, basedir, parameters):
-        myjob = JobArray(self.script, basedir=basedir, parameters=parameters, seeds=self.seeds[:], config=self.JobArrayParams)
+    def _jobarray_maker(self, basedir, parameters, varPars):
+        myjob = JobArray(self.script, basedir=basedir, parameters=parameters, seeds=self.seeds[:], varPars=self.varpars, config=self.JobArrayParams)
         return myjob
         
     def _combine_pars(self, rangepars):
@@ -557,19 +558,18 @@ class GenericSubmitter(OptionParser, ConfigParser.SafeConfigParser):
         singlepars = [i for i in pars if not i[1].count(';') or i[0].startswith('pargroup')]
         rangepars = [i for i in pars if i[1].count(';')]
         pargroups = [i for i in pars if i[0].startswith('pargroup')]
-        varpars = helpers.VariableParameters(parameterValues=dict([(i[0],i[1].split(';')) for i in rangepars]),
+        self.varpars = helpers.VariableParameters(parameterValues=dict([(i[0],i[1].split(';')) for i in rangepars]),
                                              parameterGroups=[i[1].split(',') for i in pargroups])
         self.CppqedObjects = []
-        for counter,parset in enumerate(varpars.parGen(),1):
+        for counter,parset in enumerate(self.varpars.parGen(),1):
             localpars=dict(singlepars)
             localpars.update(parset)
             if self.numericsubdirs and parset:
                 subdir = "%02d"%counter
             else: 
-                subdir = varpars.subdir(parset)
+                subdir = self.varpars.subdir(parset)
             myjob = self._jobarray_maker(os.path.join(self.basedir,subdir), localpars)
             self.CppqedObjects.append(myjob)
-        return varpars
             
     def act(self):
         """Submit all job arrays to the hpc cluster.
