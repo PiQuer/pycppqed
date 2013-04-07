@@ -158,6 +158,9 @@ class VariableParameters(object):
             if subset.get(par) and not parameters[par] in subset[par]: return False
         return True
     def parGen(self, subset={}):
+        if len(self.parameterValues) == 0:
+            yield dict()
+            return
         groupIterators = []
         singleParameters = self.parameterValues.keys()
         for group in self.parameterGroups:
