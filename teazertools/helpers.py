@@ -116,3 +116,42 @@ def cppqed_t(filename):
     except:
         return None
     return evs[0,-1]
+
+class VariableParameters(object):
+    def __init__(self, parameterValues, parameterGroups=(), combine=False):
+        self.parameterValues = parameterValues
+        if not combine:
+            self.parameterGroups = (parameterValues.keys(),)
+        else:
+            self.parameterGroups = parameterGroups
+        self._checkParameterGroups()
+
+    def _checkParameterGroups(self, subset={}):
+        for i in self.parameterGroups:
+            lens = map(len,[self._parameterSubset(p,subset) for p in i])
+            if not lens[:-1]==lens[1:]:
+                raise(ValueError("Error in parameter group {}: not all have same number of entries.".format(i)))
+    def _parameterSubset(self, parName,subset):
+        if not parName in subset.keys(): return self.parameterValues[parName]
+        else: return list(set(self.parameterValues[parName]).intersection(set(subset[parName])))
+    def _parGroupToDict(self,g):
+        return dict(g) if type(g[0]) is tuple else dict((g,))
+    def _filterWithSubset(self,i,subset):
+        parameters = self._parGroupToDict(i)
+        for par in parameters.keys():
+            if subset.get(par) and not parameters[par] in subset[par]: return False
+        return True
+    def parGen(self, subset={}):
+        groupIterators = []
+        singleParameters = self.parameterValues.keys()
+        for group in self.parameterGroups:
+            [singleParameters.remove(parameterName) for parameterName in group]
+            zippedGroup = itertools.izip(*[[(parameterName,v) for v in self._parameterSubset(parameterName,subset)] for parameterName in group])
+            groupIterators.append(itertools.ifilter(lambda i: self._filterWithSubset(i,subset),zippedGroup))
+        for parameterName in singleParameters:
+            groupIterators.append([(parameterName,v) for v in self._parameterSubset(parameterName,subset)])
+        for combination in th.product(*groupIterators):
+            thisCombination = {}
+            for c in combination:
+                thisCombination.update(self._parGroupToDict(c))
+            yield thisCombination
