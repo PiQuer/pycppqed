@@ -7,6 +7,10 @@ import pycppqed as qed
 import warnings
 import numpy as np
 import itertools
+import base64
+import cPickle as pickle
+import logging
+import sys
 
 def ignore_warnings():
     warnings.simplefilter("ignore",FutureWarning)
@@ -131,6 +135,15 @@ def _int_if_int(i):
 def range_str(start,stop,step,sep=";"):
     return sep.join(map(str,map(_int_if_int,list(np.arange(start,stop,step)))))
 
+def retrieveObject(argv):
+    if not len(argv)>1:
+        logging.error("Need a JobArray object as commandline argument. "+\
+                      "Note that this script is not intended to be called manually.")
+        sys.exit(1)
+    job = pickle.loads(base64.decodestring(argv[1]))
+    logging.getLogger().setLevel(job.loglevel)
+    return job
+
 class VariableParameters(object):
     def __init__(self, parameterValues, parameterGroups=(), combine=True):
         self.parameterValues = parameterValues
@@ -161,6 +174,9 @@ class VariableParameters(object):
         if len(self.parameterValues) == 0:
             yield dict()
             return
+        def listify(l):
+            return l if type(l[1]) is list else (l[0],[l[1]])
+        subset = dict(map(listify,subset.items()))
         groupIterators = []
         singleParameters = self.parameterValues.keys()
         for group in self.parameterGroups:

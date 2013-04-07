@@ -3,8 +3,7 @@
 import logging
 import sys
 import os
-import base64
-import cPickle as pickle
+import teazertools.helpers as th
 import teazertools.submitter as submitter
 import warnings
 import threading
@@ -12,12 +11,7 @@ import threading
 def main():
     warnings.simplefilter("ignore",FutureWarning)
     warnings.simplefilter("ignore",DeprecationWarning)
-    if not (len(sys.argv)>1 or os.environ.has_key('SGE_TASK_ID')):
-        logging.error("Need a JobArray object as commandline argument and the variable $SGE_TASK_ID. "+\
-                      "Note that this script is not intended to be called manually.")
-        sys.exit(1)
-    job = pickle.loads(base64.decodestring(sys.argv[1]))
-    logging.getLogger().setLevel(job.loglevel)
+    job = th.retrieveJob(sys.argv)
     logging.debug("SGE_TASK_ID: "+os.environ['SGE_TASK_ID'])
     cluster = job.C['cluster']
     parallel = job.C['parallel']
