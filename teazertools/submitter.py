@@ -462,7 +462,9 @@ class GenericSubmitter(OptionParser, ConfigParser.SafeConfigParser):
         self.basedir = self.JobArrayParams['basedir'] = os.path.expanduser(self.get('Config', 'basedir'))
         self.JobArrayParams['confpath'] = os.path.dirname(os.path.realpath(self.config))
         self.JobArrayParams['matlab'] = self.getboolean('Config', 'matlab')
-        self.average = self.JobArrayParams['average'] = self.getboolean('Config', 'average')
+        self.JobArrayParams['average'] = self.getboolean('Config', 'average')
+        self.JobArrayParams['postprocess'] = self.get('Config', 'postprocess')
+
         self.JobArrayParams['testrun_t'] = self.getfloat('Config', 'testrun_t')
         self.JobArrayParams['compress'] = self.getboolean('Config', 'compress')
         self.JobArrayParams['resume'] = self.getboolean('Config','resume')
