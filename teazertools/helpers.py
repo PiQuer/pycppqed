@@ -6,6 +6,7 @@ import errno
 import pycppqed as qed
 import warnings
 import numpy as np
+import itertools
 
 def ignore_warnings():
     warnings.simplefilter("ignore",FutureWarning)
@@ -131,14 +132,16 @@ def range_str(start,stop,step,sep=";"):
     return sep.join(map(str,map(_int_if_int,list(np.arange(start,stop,step)))))
 
 class VariableParameters(object):
-    def __init__(self, parameterValues, parameterGroups=(), combine=False):
+    def __init__(self, parameterValues, parameterGroups=(), combine=True):
         self.parameterValues = parameterValues
         if not combine:
             self.parameterGroups = (parameterValues.keys(),)
         else:
             self.parameterGroups = parameterGroups
         self._checkParameterGroups()
-
+    @staticmethod
+    def subdir(parSet):
+        return '_'.join(["%s=%s"%i for i in parSet.items()])
     def _checkParameterGroups(self, subset={}):
         for i in self.parameterGroups:
             lens = map(len,[self._parameterSubset(p,subset) for p in i])
@@ -163,7 +166,7 @@ class VariableParameters(object):
             groupIterators.append(itertools.ifilter(lambda i: self._filterWithSubset(i,subset),zippedGroup))
         for parameterName in singleParameters:
             groupIterators.append([(parameterName,v) for v in self._parameterSubset(parameterName,subset)])
-        for combination in th.product(*groupIterators):
+        for combination in product(*groupIterators):
             thisCombination = {}
             for c in combination:
                 thisCombination.update(self._parGroupToDict(c))

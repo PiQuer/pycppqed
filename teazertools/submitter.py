@@ -554,27 +554,24 @@ class GenericSubmitter(OptionParser, ConfigParser.SafeConfigParser):
                 return (par[0],helpers.matlab_range_to_string(par[1]))
             else: return par
         pars = map(_expand_ranges,self.items('Parameters'))
-        singlepars = [i for i in pars if not i[1].count(';')]
+        singlepars = [i for i in pars if not i[1].count(';') or i[0].startswith('pargroup')]
         rangepars = [i for i in pars if i[1].count(';')]
+        pargroups = [i for i in pars if i[0].startswith('pargroup')]
+        varpars = helpers.VariableParameters(parameterValues=dict([(i[0],i[1].split(';')) for i in rangepars]),
+                                             parameterGroups=[i[1].split(',') for i in pargroups])
         if not rangepars:
-            self.CppqedObjects = [self._jobarray_maker(self.basedir,dict(pars))]
+            self.CppqedObjects = [self._jobarray_maker(self.basedir,dict(singlepars))]
             return 
-        expand = lambda x: [(x[0],i) for i in x[1].split(';') if not i == '']
-        # expand: ('parname','val1,val2,val3') -> [('parname',val1),('parname',val2),('parname',val3)]
-        rangepars = map(expand,rangepars)
         self.CppqedObjects = []
-        generator = self._combine_pars(rangepars)
-        counter = 1
-        for parset in generator:
+        for counter,parset in enumerate(varpars.parGen(),1):
             localpars=dict(singlepars)
-            localpars.update(dict(parset))
+            localpars.update(parset)
             if self.numericsubdirs:
                 subdir = "%02d"%counter
             else: 
-                subdir = '_'.join(["%s=%s"%i for i in parset])
+                subdir = varpars.subdir(parset)
             myjob = self._jobarray_maker(os.path.join(self.basedir,subdir), localpars)
             self.CppqedObjects.append(myjob)
-            counter += 1
             
     def act(self):
         """Submit all job arrays to the hpc cluster.
