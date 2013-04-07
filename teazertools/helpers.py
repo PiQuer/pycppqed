@@ -145,16 +145,18 @@ def retrieveObject(argv):
     return job
 
 class VariableParameters(object):
-    def __init__(self, parameterValues, parameterGroups=(), combine=True):
+    def __init__(self, parameterValues=dict(), parameterGroups=(), combine=True):
         self.parameterValues = parameterValues
         if not combine:
             self.parameterGroups = (parameterValues.keys(),)
         else:
             self.parameterGroups = parameterGroups
         self._checkParameterGroups()
-    @staticmethod
-    def subdir(parSet):
-        return '_'.join(["%s=%s"%i for i in parSet.items()])
+    def subdir(self, parSet, numeric=False):
+        if numeric:
+            return "%02d"%(sorted(list(self.parGen())).index(parSet)+1)
+        else:
+            return '_'.join(["%s=%s"%i for i in parSet.items()])
     def _checkParameterGroups(self, subset={}):
         for i in self.parameterGroups:
             lens = map(len,[self._parameterSubset(p,subset) for p in i])

@@ -64,27 +64,29 @@ class JobArray(object):
     :param combine: If `True`, use all possible combinations of parameters (default True)
     :param cluster: Each job should calculate this many trajectories (default 1)
     """
-    def __init__(self,script,basename=None,parameters={},basedir='.',tempdir='/tmp',seeds=[1001], varPars, config={}):
+    def __init__(self,script,basename=None, parSet=dict(), varPars=helpers.VariableParameters(), parameters={},basedir='.',tempdir='/tmp',seeds=[1001], config={}):
         self.C = dict(averageids={},qsub={}, qsub_traj={}, qsub_average={}, qsub_test={}, diagnostics=True,
                       matlab=True, average=True, compress=True, resume=False, testrun_t=1, testrun_dt = None,
                       usetemp=True, combine=True, cluster=1)
         self.C.update(config)
+        self.parSet = parSet
+        self.varPars = varPars
         self.script = script
         self.parameters = parameters
         self.basedir=basedir
-        self.datadir=os.path.join(basedir,'traj')
+        self.subdir=self.varPars.subdir(parSet,numeric=self.C['numericsubdirs'])
+        self.datadir=os.path.join(basedir,self.subdir,'traj')
         self.outputdir=self.datadir
-        self.logdir=os.path.join(basedir,'log')
-        self.averagedir=os.path.join(basedir,'mean')
+        self.logdir=os.path.join(basedir,self.subdir, 'log')
+        self.averagedir=os.path.join(basedir,self.subdir, 'mean')
         self.tempdir=tempdir
-        self.parameterfilebase=os.path.join(basedir,'parameters')
+        self.parameterfilebase=os.path.join(basedir,self.subdir, 'parameters')
         if basename == None:
             self.basename = os.path.basename(script)
         else:
             self.basename = basename
         self.targetoutputbase=os.path.join(self.datadir,self.basename+'.out')
         self.seeds = seeds
-        self.varPars = varPars
         self.compsuffix='.bz2'
         self.datafiles = []
         self.default_sub_pars = ['-b','y', '-v','PYTHONPATH','-v','PATH', '-m','n','-j','yes']
@@ -334,9 +336,8 @@ class JobArray(object):
         return cl
 
     def _gen_jobname(self):
-        part1,last=os.path.split(self.basedir)
-        part1,second_to_last=os.path.split(part1)
-        name = "Job"+"_"+second_to_last+"_"+last
+        part1,second_to_last=os.path.split(self.basedir)
+        name = "Job"+"_"+second_to_last+"_"+self.subdir
         for k in r'@\*?':
             name.replace(k,'_')
         return name
@@ -458,7 +459,7 @@ class GenericSubmitter(OptionParser, ConfigParser.SafeConfigParser):
         self.read([self.defaultconfig,os.path.expanduser('~/.submitter/generic_submitter.conf'),
                      os.path.expanduser('~/.submitter/'+os.path.basename(self.script)+'.conf'), self.config])
         self.combine = self.getboolean('Config', 'combine')
-        self.numericsubdirs = self.getboolean('Config', 'numericsubdirs')
+        self.JobArrayParams['numericsubdirs'] = self.getboolean('Config', 'numericsubdirs')
         self.basedir = self.JobArrayParams['basedir'] = os.path.expanduser(self.get('Config', 'basedir'))
         self.JobArrayParams['confpath'] = os.path.dirname(os.path.realpath(self.config))
         self.JobArrayParams['matlab'] = self.getboolean('Config', 'matlab')
@@ -542,8 +543,8 @@ class GenericSubmitter(OptionParser, ConfigParser.SafeConfigParser):
         self.config = os.path.expanduser(args[0])
         
             
-    def _jobarray_maker(self, basedir, parameters, varPars):
-        myjob = JobArray(self.script, basedir=basedir, parameters=parameters, seeds=self.seeds[:], varPars=self.varpars, config=self.JobArrayParams)
+    def _jobarray_maker(self, basedir, parameters, parSet):
+        myjob = JobArray(self.script, basedir=basedir, parameters=parameters, seeds=self.seeds[:], parSet=parSet, varPars=self.varpars, config=self.JobArrayParams)
         return myjob
         
     def _combine_pars(self, rangepars):
@@ -563,14 +564,10 @@ class GenericSubmitter(OptionParser, ConfigParser.SafeConfigParser):
         self.varpars = helpers.VariableParameters(parameterValues=dict([(i[0],i[1].split(';')) for i in rangepars]),
                                              parameterGroups=[i[1].split(',') for i in pargroups])
         self.CppqedObjects = []
-        for counter,parset in enumerate(self.varpars.parGen(),1):
+        for parSet in self.varpars.parGen():
             localpars=dict(singlepars)
-            localpars.update(parset)
-            if self.numericsubdirs and parset:
-                subdir = "%02d"%counter
-            else: 
-                subdir = self.varpars.subdir(parset)
-            myjob = self._jobarray_maker(os.path.join(self.basedir,subdir), localpars)
+            localpars.update(parSet)
+            myjob = self._jobarray_maker(self.basedir, localpars, parSet)
             self.CppqedObjects.append(myjob)
             
     def act(self):
