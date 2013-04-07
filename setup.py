@@ -11,7 +11,7 @@ if library_dirs_args:
     library_dirs = []
     for l in library_dirs_args:
         library_dirs += l.split('=')[1].split(':')
-    sys.argv.remove(l)
+        sys.argv.remove(l)
 else:
     library_dirs = None
 
