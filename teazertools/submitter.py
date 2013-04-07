@@ -431,13 +431,13 @@ class JobArray(object):
             sys.exit(1)
         return returncode
 
-class GenericSubmitter(OptionParser, ConfigParser.RawConfigParser):
+class GenericSubmitter(OptionParser, ConfigParser.SafeConfigParser):
     """ This class generates various :class:`JobArray` objects from a configuration file. For the syntax and usage, see
     :ref:`submitter_documentation`.
     """
     def __init__(self, argv=None):
         usage = "usage: %prog [options] configfile"
-        ConfigParser.RawConfigParser.__init__(self)
+        ConfigParser.SafeConfigParser.__init__(self)
         OptionParser.__init__(self,usage)
         if argv:
             sys.argv = argv
@@ -466,9 +466,9 @@ class GenericSubmitter(OptionParser, ConfigParser.RawConfigParser):
         self.JobArrayParams['compress'] = self.getboolean('Config', 'compress')
         self.JobArrayParams['resume'] = self.getboolean('Config','resume')
         self.JobArrayParams['require_resume'] = self.getboolean('Config','require_resume')
-        if ConfigParser.RawConfigParser.has_option(self,'Config','continue_from'):
+        if ConfigParser.SafeConfigParser.has_option(self,'Config','continue_from'):
             self.JobArrayParams['continue_from'] = self.getfloat('Config','continue_from')
-        if ConfigParser.RawConfigParser.has_option(self,'Config','wrapper'):
+        if ConfigParser.SafeConfigParser.has_option(self,'Config','wrapper'):
             self.JobArrayParams['wrapper'] = self.get('Config','wrapper')
         self.JobArrayParams['clean_seedlist'] = self.getboolean('Config', 'clean_seedlist')
         self.JobArrayParams['usetemp'] = self.getboolean('Config', 'usetemp')
@@ -479,7 +479,7 @@ class GenericSubmitter(OptionParser, ConfigParser.RawConfigParser):
         self.JobArrayParams['qsub_traj'] = dict(self.items('QsubTraj'))
         self.JobArrayParams['qsub_average'] = dict(self.items('QsubAverage'))
         self.JobArrayParams['qsub_test'] = dict(self.items('QsubTest'))
-        if ConfigParser.RawConfigParser.has_option(self,'Config', 'testrun_dt'):
+        if ConfigParser.SafeConfigParser.has_option(self,'Config', 'testrun_dt'):
             self.JobArrayParams['testrun_dt'] = self.getfloat('Config', 'testrun_dt')
         else:
             self.JobArrayParams['testrun_dt'] = None
