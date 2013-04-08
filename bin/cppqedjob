@@ -11,7 +11,7 @@ import threading
 def main():
     warnings.simplefilter("ignore",FutureWarning)
     warnings.simplefilter("ignore",DeprecationWarning)
-    job = th.retrieveJob(sys.argv)
+    job = th.retrieveObject(sys.argv)
     logging.debug("SGE_TASK_ID: "+os.environ['SGE_TASK_ID'])
     cluster = job.C['cluster']
     parallel = job.C['parallel']
@@ -19,7 +19,7 @@ def main():
     for p in range(parallel):
         start = ((s-1)*parallel+p)*cluster
         if start >= len(job.seeds): break
-        j = th.retrieveJob(sys.argv)
+        j = th.retrieveObject(sys.argv)
         worker = threading.Thread(target=j.run, kwargs={'start':start})
         worker.start()
 

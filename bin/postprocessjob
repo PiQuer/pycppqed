@@ -11,7 +11,7 @@ import threading
 def main():
     warnings.simplefilter("ignore",FutureWarning)
     warnings.simplefilter("ignore",DeprecationWarning)
-    job = th.retrieveJob(sys.argv)
+    job = th.retrieveObject(sys.argv)
     if job.C['postprocess'] == '':
         logging.debug("No simulation class for postprocessing given.")
     SimulationClass = th.import_class(job.C['postprocess'])
