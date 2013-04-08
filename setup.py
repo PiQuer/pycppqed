@@ -53,7 +53,7 @@ setup(
     packages = ('pycppqed','teazertools'),
     package_data={'teazertools':['generic_submitter_defaults.conf']},
     ext_modules = ext_modules,
-    scripts=('bin/calculate_mean','bin/cppqedjob','bin/submitter'),
+    scripts=('bin/calculate_mean','bin/cppqedjob','bin/postprocessjob','bin/submitter'),
     cmdclass = {
         "test": test,
         },
