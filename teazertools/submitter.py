@@ -586,7 +586,7 @@ class GenericSubmitter(OptionParser, ConfigParser.SafeConfigParser):
                 return (par[0],helpers.matlab_range_to_string(par[1]))
             else: return par
         pars = map(_expand_ranges,self.items('Parameters'))
-        singlepars = [i for i in pars if not i[1].count(';') or i[0].startswith('pargroup')]
+        singlepars = [i for i in pars if (not i[1].count(';')) or i[0].startswith('pargroup')]
         rangepars = [i for i in pars if i[1].count(';')]
         pargroups = [i for i in pars if i[0].startswith('pargroup')]
         self.varpars = helpers.VariableParameters(parameterValues=dict([(i[0],i[1].split(';')) for i in rangepars]),
