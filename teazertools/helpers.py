@@ -169,8 +169,7 @@ class VariableParameters(object):
         else: return list(set(self.parameterValues[parName]).intersection(set(subset[parName])))
     def _parGroupToDict(self,g):
         return dict(g) if type(g[0]) is tuple else dict((g,))
-    def _filterWithSubset(self,i,subset):
-        parameters = self._parGroupToDict(i)
+    def _filterWithSubset(self,parameters,subset):
         for par in parameters.keys():
             if subset.get(par) and not parameters[par] in subset[par]: return False
         return True
@@ -185,12 +184,14 @@ class VariableParameters(object):
         singleParameters = self.parameterValues.keys()
         for group in self.parameterGroups:
             [singleParameters.remove(parameterName) for parameterName in group]
-            zippedGroup = itertools.izip(*[[(parameterName,v) for v in self._parameterSubset(parameterName,subset)] for parameterName in group])
-            groupIterators.append(itertools.ifilter(lambda i: self._filterWithSubset(i,subset),zippedGroup))
+            zippedGroup = itertools.izip(*[[(parameterName,v) for v in self.parameterValues[parameterName]] for parameterName in group])
+            groupIterators.append(zippedGroup)
+            #groupIterators.append(itertools.ifilter(lambda i: self._filterWithSubset(i,subset),zippedGroup))
         for parameterName in singleParameters:
-            groupIterators.append([(parameterName,v) for v in self._parameterSubset(parameterName,subset)])
+            groupIterators.append([(parameterName,v) for v in self.parameterValues[parameterName]])
         for combination in product(*groupIterators):
             thisCombination = {}
             for c in combination:
                 thisCombination.update(self._parGroupToDict(c))
-            yield thisCombination
+            if self._filterWithSubset(thisCombination,subset):
+                yield thisCombination
