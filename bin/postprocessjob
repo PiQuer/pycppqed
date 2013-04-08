@@ -15,7 +15,7 @@ def main():
     if job.C['postprocess'] == '':
         logging.debug("No simulation class for postprocessing given.")
     SimulationClass = th.import_class(job.C['postprocess'])
-    sim = SimulationClass(basename=job.basename, varPars=job.varPars, numericsubdirs=job.C['numericsubdirs'])
+    sim = SimulationClass(basename=job.basename, varPars=job.varPars, datapath=job.basedir, numericsubdirs=job.C['numericsubdirs'])
     sim.postprocess(subset=job.parSet)
 
 if __name__ == '__main__':
