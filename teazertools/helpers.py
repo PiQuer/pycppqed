@@ -91,7 +91,7 @@ def product(*args, **kwds):
         yield tuple(prod)
         
         
-def matlab_range_to_list(s):
+def string_range_to_list(s):
     """ Generate a list from a matlab-style range definition.
     
     :param s: A range definition of the form `start:[step:]stop`. Only integers are supported, and `stop` is included.
@@ -107,11 +107,13 @@ def matlab_range_to_list(s):
         step=1
     else:
         raise ValueError('%s: range specification has to be start:[step:]stop'%s)
-    stop+=step
-    return map(_int_if_int,list(np.arange(start,stop,step)))
+    return range_to_list(start,stop,step)
 
-def matlab_range_to_string(s,sep=";"):
-    return sep.join(map(str,matlab_range_to_list(s)))
+def range_to_list(start,stop,step=1):
+    return map(_int_if_int,list(np.arange(start,stop+step,step)))
+
+def string_range_to_string(s,sep=";"):
+    return sep.join(map(str,string_range_to_list(s)))
     
 def cppqed_t(filename):
     r"""This helper function returns the last timestep t of a C++QED file.

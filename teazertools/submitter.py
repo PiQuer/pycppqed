@@ -528,7 +528,7 @@ class GenericSubmitter(OptionParser, ConfigParser.SafeConfigParser):
         elif self.seeds.count(';'):
             self.seeds = map(int,self.seeds.split(';'))
         elif self.seeds.count(':'):
-            self.seeds = helpers.matlab_range_to_list(self.seeds)
+            self.seeds = helpers.string_range_to_list(self.seeds)
         else:
             raise ValueError('Could not evaluate seeds specification %s.' %self.seeds)
     
@@ -583,7 +583,7 @@ class GenericSubmitter(OptionParser, ConfigParser.SafeConfigParser):
     def _generate_objects(self):
         def _expand_ranges(par):
             if par[1].count(':') in (1,2):
-                return (par[0],helpers.matlab_range_to_string(par[1]))
+                return (par[0],helpers.string_range_to_string(par[1]))
             else: return par
         pars = map(_expand_ranges,self.items('Parameters'))
         singlepars = [i for i in pars if not (i[1].count(';') or i[0].startswith('pargroup'))]

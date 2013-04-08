@@ -8,6 +8,7 @@ from pycppqed.io import load_cppqed
 import numpy as np
 import scipy.io
 import helpers
+import logging
 
 def _genuine_timesteps(evs):
     """ This function determines of how many time steps a trajectory consists. Because of a time-fuzziness in
@@ -92,7 +93,7 @@ def calculateMeans(basename,expvals=[],variances=[],varmeans=[],stdevs=[],stdevm
     
     # First check if we need to do anything
     filelist = helpers.generate_filelist(basename,datadir,bz2only)
-    print "Found %i files."%len(filelist)
+    logging.info("Found %i files."%len(filelist))
     if outputdir:
         datafile = os.path.join(outputdir,basename+".mean.npz")
         matlabfile = os.path.join(outputdir,basename+".mean.mat")
@@ -104,19 +105,17 @@ def calculateMeans(basename,expvals=[],variances=[],varmeans=[],stdevs=[],stdevm
                     and np.array_equal(np.array(varmeans),saved['varmeans']) \
                     and np.array_equal(np.array(stdevs),saved['stdevs']) \
                     and np.array_equal(np.array(stdevmeans),saved['stdevmeans']):
+                        logging.info("Using saved file.")
                         return saved['result']
 
     # initialize result with the zero and the correct shape, the times in the first row
     (evs,_)= load_cppqed(filelist[0])
-    timesteps = _genuine_timesteps(evs)
-    evs = evs[:,0:timesteps]
     result = np.zeros(evs.shape)
     result[0,:]=evs[0,:]
     means = expvals+varmeans+stdevmeans
     for f in filelist:
-        print f
+        logging.debug(f)
         (evs,qs) = load_cppqed(f)
-        evs = evs[:,0:timesteps]
         result[means] += evs[means]/len(filelist)
         result[variances] += (evs[variances]+evs[varmeans]**2)/len(filelist)
         result[stdevs] += (evs[stdevs]**2+evs[stdevmeans]**2)/len(filelist)
