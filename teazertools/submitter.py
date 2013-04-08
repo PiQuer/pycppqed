@@ -589,7 +589,7 @@ class GenericSubmitter(OptionParser, ConfigParser.SafeConfigParser):
         singlepars = [i for i in pars if not (i[1].count(';') or i[0].startswith('pargroup'))]
         rangepars = [i for i in pars if i[1].count(';')]
         pargroups = [i for i in pars if i[0].startswith('pargroup')]
-        self.varpars = helpers.VariableParameters(parameterValues=dict([(i[0],i[1].split(';')) for i in rangepars]),
+        self.varpars = helpers.VariableParameters(parameterValues=dict([(i[0],[e for e in i[1].split(';') if not e=='']) for i in rangepars]),
                                              parameterGroups=[i[1].split(',') for i in pargroups])
         self.CppqedObjects = []
         for parSet in self.varpars.parGen():
