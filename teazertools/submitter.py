@@ -341,7 +341,13 @@ class JobArray(object):
         for k in r'@\*?':
             name.replace(k,'_')
         return name
-        
+
+    def _base64(self):
+        obj = base64.encodestring(pickle.dumps(self,-1)).replace('\n','')
+        logging.debug("String representation of JobArray object:")
+        logging.debug(obj)
+        return obj
+
     def submit(self, testrun=False, dryrun=False):
         """Submit the job array to teazer. Technically this is done by serializing the object and passing it
         to the helper script `cppqedjob` as a commandline parameter. The helper script
@@ -373,9 +379,7 @@ class JobArray(object):
         else:
             seedspec = "1-%s" % numjobs
         
-        obj = base64.encodestring(pickle.dumps(self,-1)).replace('\n','')
-        logging.debug("String representation of JobArray object:")
-        logging.debug(obj)
+        obj = self._base64()
         
         command = ['qsub','-terse', '-o', logfile, '-N', jobname, '-t', seedspec]
         if self.C.get('depend'):
@@ -399,7 +403,31 @@ class JobArray(object):
         jobid = jobid.split('.')[0]
         if self.C['average']:
             self.submit_average(holdid=jobid,dryrun=dryrun,testrun=testrun)
-    
+        if self.C['postprocess']:
+            self.submit_postprocess(holdid=jobid,dryrun=dryrun,testrun=testrun)
+
+    def submit_postprocess(self, holdid=None, dryrun=False, testrun=False):
+        logfile = os.path.join(self.logdir,self.basename+'_postprocess_$JOB_ID.log')
+        obj = self._base64()
+        command = ['qsub','-terse', '-o', logfile, '-N', 'postprocess_'+self._gen_jobname()]
+        if holdid:
+            command.extend(('-hold_jid',holdid))
+        command.extend(self.default_sub_pars)
+        command.extend(self._dict_to_commandline('-', self.C['qsub']))
+        command.extend(self._dict_to_commandline('-', self.C['qsub_average']))
+        if testrun:
+            command.extend(self._dict_to_commandline('-', self.C['qsub_test']))
+        command.append('postprocessjob')
+        if not dryrun:
+            command.append(obj)
+        (jobid,err,returncode) = self._execute(command, dryrun, dryrunresult=("100.0",""),
+                                               dryrunmessage="Submit command on teazer:")
+        if not returncode == 0:
+            logging.error("Submit script failed.\n%s"%err)
+            sys.exit(1)
+        elif not dryrun:
+            logging.info("Successfully submitted job id %s." %jobid.rstrip())
+
     def submit_average(self,holdid=None,dryrun=False,testrun=False):
         r"""Submit a job to teazer to compute the average expectation values.
         
