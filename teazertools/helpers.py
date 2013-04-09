@@ -173,7 +173,8 @@ class VariableParameters(object):
         for par in parameters.keys():
             if subset.get(par) and not parameters[par] in subset[par]: return False
         return True
-    def parGen(self, subset={}):
+    def parGen(self, subset=None):
+        if subset is None: subset={}
         if len(self.parameterValues) == 0:
             yield dict()
             return
