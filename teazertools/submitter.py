@@ -542,6 +542,8 @@ class GenericSubmitter(OptionParser, ConfigParser.SafeConfigParser):
                           help="Use CLASS instead of teazertools.submitter.GenericSubmitter, typically CLASS is a subclass of GenericSubmitter")
         self.add_option("--averageonly", action="store_true", dest="averageonly", default=False,
                           help="Only submit the job to compute the average expectation values")
+        self.add_option("--postprocessonly", action="store_true", dest="postprocessonly", default=False,
+                          help="Only submit the job which executes the postprocess method.")
         self.add_option("--depend", dest="depend", metavar="ID",
                           help="Make created job array depend on this job ID.")
         self.add_option("--verbose", action="store_true", dest="verbose", default=False,
@@ -610,6 +612,8 @@ class GenericSubmitter(OptionParser, ConfigParser.SafeConfigParser):
         for c in self.CppqedObjects:
             if self.options.averageonly:
                 c.submit_average(dryrun=self.options.dryrun)
+            elif self.options.postprocessonly:
+                c.submit_postprocess(dryrun=self.options.dryrun)
             else: 
                 c.submit(testrun=self.options.testrun,dryrun=self.options.dryrun)
                 if self.options.dryrun: c.run(dryrun=self.options.dryrun)
