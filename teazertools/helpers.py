@@ -170,17 +170,23 @@ class VariableParameters(object):
     def _parGroupToDict(self,g):
         return dict(g) if type(g[0]) is tuple else dict((g,))
     def _filterWithSubset(self,parameters,subset):
-        for par in parameters.keys():
-            if subset.get(par) and not parameters[par] in subset[par]: return False
-        return True
+        def listify(l):
+            return l if type(l[1]) is list else (l[0],[l[1]])
+        if type(subset) is dict: subset=[subset]
+        for s in subset:
+            s = dict(map(listify,s.items()))
+            keep=True
+            for par in parameters.keys():
+                if s.get(par) and not parameters[par] in s[par]: 
+                    keep=False
+                    break
+            if keep: return True
+        return False
     def parGen(self, subset=None):
         if subset is None: subset={}
         if len(self.parameterValues) == 0:
             yield dict()
             return
-        def listify(l):
-            return l if type(l[1]) is list else (l[0],[l[1]])
-        subset = dict(map(listify,subset.items()))
         groupIterators = []
         singleParameters = self.parameterValues.keys()
         for group in self.parameterGroups:
