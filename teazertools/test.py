@@ -11,11 +11,11 @@ import pycppqed as qed
 class TestMean(unittest.TestCase):
 
     def test01_calculateMeans1(self):
-        result = mean.calculateMeans("test1", expvals=[], variances=[4], stdevs=[6], datadir='test/',usesaved=False,outputdir=None)
+        result = mean.calculateMeans("test1", expvals=[], variances=[4], stdevs=[6], datadir='test/',outputdir=None)
         self.assertTrue(np.allclose(result,np.load('test/test1expected.npy')))
     
     def test02_calculateMeans2(self):
-        result = mean.calculateMeans("test2", expvals=[3,5], variances=[4], stdevs=[6], datadir='test/',usesaved=False,outputdir=None)
+        result = mean.calculateMeans("test2", expvals=[3,5], variances=[4], stdevs=[6], datadir='test/',outputdir=None)
         self.assertTrue(np.allclose(result,np.load('test/test2expected.npy')))
 
 class TestSubmitter(unittest.TestCase):

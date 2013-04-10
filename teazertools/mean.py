@@ -2,6 +2,7 @@
 the results to a file. It is also possible to convert the results to a format readable by matlab. The main
 function is :func:`calculateMeans`.
 """
+from __future__ import division
 
 import os
 from pycppqed.io import load_cppqed
@@ -9,6 +10,7 @@ import numpy as np
 import scipy.io
 import helpers
 import logging
+
 
 def _genuine_timesteps(evs):
     """ This function determines of how many time steps a trajectory consists. Because of a time-fuzziness in
@@ -51,7 +53,7 @@ def calculateRho(basename,dirname='.'):
     return (timevec,rho/len(filelist))
     
 
-def calculateMeans(basename,expvals=[],variances=[],varmeans=[],stdevs=[],stdevmeans=[], datadir='.', outputdir='.', usesaved=True, matlab=True, bz2only=False):
+def calculateMeans(basename,evslist=None,expvals=[],variances=[],varmeans=[],stdevs=[],stdevmeans=[], datadir='.', outputdir='.', matlab=True, bz2only=False):
     '''
     Calculate the mean expectation values, mean variances and mean standard deviations from an
     ensemble of C++QED MCWF trajectories. The results are saved to a file.
@@ -74,15 +76,11 @@ def calculateMeans(basename,expvals=[],variances=[],varmeans=[],stdevs=[],stdevm
     :type datadir: str
     :param outputdir: Directory name where output is written to. If this is `None`, don't write anny output.
     :type outputdir: str
-    :param usesaved: If true, only calculate the results if they have not been calculated before, otherwise try to load
-        results from the output directory. Previously calculated results are only used if all trajectory files are
-        older than the result file and if the set of `expval`, `stdevs`, `variances` etc is identical.
-    :type usesaved:
     :param matlab: Also convert results to matlab format and save a .mat file.
     :returns: An array containing the averaged expectation values, standard deviations and variances.
     :rtype: :class:`np.ndarray`
     '''
-    
+
     for l in (expvals,variances,varmeans,stdevs,stdevmeans):
         l[:] = _shift_indices(l, -1)
     
@@ -90,36 +88,31 @@ def calculateMeans(basename,expvals=[],variances=[],varmeans=[],stdevs=[],stdevm
         varmeans = _shift_indices(variances,-1)
     if stdevs and stdevmeans == []:
         stdevmeans = _shift_indices(stdevs,-1)
-    
-    # First check if we need to do anything
-    filelist = helpers.generate_filelist(basename,datadir,bz2only)
-    logging.info("Found %i files."%len(filelist))
+
     if outputdir:
         datafile = os.path.join(outputdir,basename+".mean.npz")
         matlabfile = os.path.join(outputdir,basename+".mean.mat")
-        if os.path.exists(datafile) and usesaved:
-            if max(map(os.path.getmtime,filelist))<os.path.getmtime(datafile):
-                saved = np.load(datafile)
-                if np.array_equal(np.array(expvals),saved['expvals']) \
-                    and np.array_equal(np.array(variances),saved['variances']) \
-                    and np.array_equal(np.array(varmeans),saved['varmeans']) \
-                    and np.array_equal(np.array(stdevs),saved['stdevs']) \
-                    and np.array_equal(np.array(stdevmeans),saved['stdevmeans']):
-                        logging.info("Using saved file.")
-                        return saved['result']
 
     # initialize result with the zero and the correct shape, the times in the first row
-    (evs,_)= load_cppqed(filelist[0])
+    if evslist is None:
+        filelist = helpers.generate_filelist(basename,datadir,bz2only)
+        logging.info("Found %i files."%len(filelist))
+        (evs,_)= load_cppqed(filelist[0])
+    else:
+        evs = evslist[0]
     result = np.zeros(evs.shape)
     result[0,:]=evs[0,:]
     means = expvals+varmeans+stdevmeans
-    for f in filelist:
-        logging.debug(f)
-        (evs,qs) = load_cppqed(f)
-        result[means] += evs[means]/len(filelist)
-        result[variances] += (evs[variances]+evs[varmeans]**2)/len(filelist)
-        result[stdevs] += (evs[stdevs]**2+evs[stdevmeans]**2)/len(filelist)
-        del(evs,qs)
+    
+    iterator = filelist if evslist is None else evslist
+    numtraj = len(filelist) if evslist is None else len(evslist)
+    for evs in iterator:
+        if type(evs) is str:
+            logging.debug(evs)
+            evs,_ = load_cppqed(evs)
+        result[means] += evs[means]/numtraj
+        result[variances] += (evs[variances]+evs[varmeans]**2)/numtraj
+        result[stdevs] += (evs[stdevs]**2+evs[stdevmeans]**2)/numtraj
     result[variances] = result[variances]-result[varmeans]**2
     result[stdevs] = np.sqrt(result[stdevs]-result[stdevmeans]**2)
     result = np.transpose(result)
@@ -127,9 +120,9 @@ def calculateMeans(basename,expvals=[],variances=[],varmeans=[],stdevs=[],stdevm
         helpers.mkdir_p(outputdir)
         np.savez(datafile,result=result,expvals=np.array(expvals),variances=np.array(variances),
                  varmeans=np.array(varmeans),stdevs=np.array(stdevs),stdevmeans=np.array(stdevmeans),
-                 numtraj=np.array(len(filelist)))
+                 numtraj=np.array(numtraj))
         if matlab:
             scipy.io.savemat(matlabfile,{"result":result,"means":np.array(means)+1,"expvals":np.array(expvals)+1,"variances":np.array(variances)+1,
-                                         "varmeans":np.array(varmeans)+1,"stdevs":np.array(stdevs)+1,"stdevmeans":np.array(stdevmeans)+1,"numtraj":len(filelist)})
+                                         "varmeans":np.array(varmeans)+1,"stdevs":np.array(stdevs)+1,"stdevmeans":np.array(stdevmeans)+1,"numtraj":numtraj})
     return result
 
