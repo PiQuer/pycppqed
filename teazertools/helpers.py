@@ -154,6 +154,7 @@ class VariableParameters(object):
         else:
             self.parameterGroups = parameterGroups
         self._checkParameterGroups()
+        self.default_subset=dict()
     def subdir(self, parSet, numeric=False):
         if numeric:
             return "%02d"%(sorted(list(self.parGen())).index(parSet)+1)
@@ -200,5 +201,5 @@ class VariableParameters(object):
             thisCombination = {}
             for c in combination:
                 thisCombination.update(self._parGroupToDict(c))
-            if self._filterWithSubset(thisCombination,subset):
+            if self._filterWithSubset(thisCombination,subset) and self._filterWithSubset(thisCombination,self.default_subset):
                 yield thisCombination
