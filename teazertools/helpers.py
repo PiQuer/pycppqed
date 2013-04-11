@@ -158,7 +158,7 @@ class VariableParameters(object):
         if numeric:
             return "%02d"%(sorted(list(self.parGen())).index(parSet)+1)
         else:
-            return '_'.join(["%s=%s"%i for i in parSet.items()])
+            return '_'.join(["{}={}".format(key,parSet[key]) for key in sorted(parSet.keys())])
     def _checkParameterGroups(self, subset={}):
         for i in self.parameterGroups:
             lens = map(len,[self._parameterSubset(p,subset) for p in i])
