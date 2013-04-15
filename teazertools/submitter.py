@@ -16,6 +16,7 @@ import sys
 import base64
 import pycppqed as qed
 import numpy as np
+import ast
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 
@@ -546,6 +547,7 @@ class GenericSubmitter(OptionParser, ConfigParser.SafeConfigParser):
                           help="Only submit the job which executes the postprocess method.")
         self.add_option("--depend", dest="depend", metavar="ID",
                           help="Make created job array depend on this job ID.")
+        self.add_option("--subset", dest="subset", metavar="SUBSET", help="Specify a subset of Parameters.", default=None)
         self.add_option("--verbose", action="store_true", dest="verbose", default=False,
                           help="Log more output to files.")
         
@@ -569,7 +571,9 @@ class GenericSubmitter(OptionParser, ConfigParser.SafeConfigParser):
                 logging.error("Pydevd module not found, cannot set breakpoint for external pydevd debugger.")
         if self.options.depend:
             self.JobArrayParams['depend'] = self.options.depend
-        
+
+        self.subset = ast.literal_eval(self.options.subset) if not self.options.subset is None else None
+
         self.config = os.path.expanduser(args[0])
         
             
@@ -594,7 +598,7 @@ class GenericSubmitter(OptionParser, ConfigParser.SafeConfigParser):
         self.varpars = helpers.VariableParameters(parameterValues=dict([(i[0],[e for e in i[1].split(';') if not e=='']) for i in rangepars]),
                                              parameterGroups=[i[1].split(',') for i in pargroups])
         self.CppqedObjects = []
-        for parSet in self.varpars.parGen():
+        for parSet in self.varpars.parGen(subset=self.subset):
             localpars=dict(singlepars)
             localpars.update(parSet)
             myjob = self._jobarray_maker(self.basedir, localpars, parSet)
