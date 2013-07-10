@@ -168,7 +168,7 @@ def _open_possibly_bz2(filename):
     else:
         return open(filename)
 
-def load_cppqed(filename):
+def load_cppqed(filename, maxevs=None):
     """
     Load a C++QED output file from the given location.
 
@@ -197,6 +197,7 @@ def load_cppqed(filename):
         ev = []
         for part in parts:
             ev.extend(map(float, part.split()))
+        if not maxevs is None: ev = ev[:maxevs]
         evs.append(ev)
     def sv_handler(svstr):
         t = evs[-1][0]

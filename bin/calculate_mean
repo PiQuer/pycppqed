@@ -19,6 +19,7 @@ def main():
                       metavar="SM1,SM2,...")
     parser.add_option("--bz2only", action="store_true", dest="bz2only", default=False,
                        help="Only consider files ending in .bz2")
+    parser.add_option("--maxevs", help="maximum number of expectation values per line",metavar="MAX",default=None,type="int")
     
     (options,args) = parser.parse_args()
     
@@ -37,7 +38,7 @@ def main():
     
     basename = args[0]
     
-    mean.calculateMeans(basename, **kwargs)
+    mean.calculateMeans(basename, maxevs=options.maxevs, **kwargs)
 
 
 if __name__ == '__main__':

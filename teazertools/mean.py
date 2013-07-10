@@ -53,7 +53,7 @@ def calculateRho(basename,dirname='.'):
     return (timevec,rho/len(filelist))
     
 
-def calculateMeans(basename,evslist=None,expvals=[],variances=[],varmeans=[],stdevs=[],stdevmeans=[], datadir='.', outputdir='.', matlab=True, bz2only=False):
+def calculateMeans(basename,evslist=None,expvals=[],variances=[],varmeans=[],stdevs=[],stdevmeans=[], datadir='.', outputdir='.', matlab=True, bz2only=False, maxevs=None):
     '''
     Calculate the mean expectation values, mean variances and mean standard deviations from an
     ensemble of C++QED MCWF trajectories. The results are saved to a file.
@@ -77,6 +77,7 @@ def calculateMeans(basename,evslist=None,expvals=[],variances=[],varmeans=[],std
     :param outputdir: Directory name where output is written to. If this is `None`, don't write anny output.
     :type outputdir: str
     :param matlab: Also convert results to matlab format and save a .mat file.
+    :param maxevs: maximum expectation values to read from each line
     :returns: An array containing the averaged expectation values, standard deviations and variances.
     :rtype: :class:`np.ndarray`
     '''
@@ -97,7 +98,7 @@ def calculateMeans(basename,evslist=None,expvals=[],variances=[],varmeans=[],std
     if evslist is None:
         filelist = helpers.generate_filelist(basename,datadir,bz2only)
         logging.info("Found %i files."%len(filelist))
-        (evs,_)= load_cppqed(filelist[0])
+        (evs,_)= load_cppqed(filelist[0],maxevs)
     else:
         evs = evslist[0]
     result = np.zeros(evs.shape)
@@ -109,7 +110,7 @@ def calculateMeans(basename,evslist=None,expvals=[],variances=[],varmeans=[],std
     for evs in iterator:
         if type(evs) is str:
             logging.debug(evs)
-            evs,_ = load_cppqed(evs)
+            evs,_ = load_cppqed(evs,maxevs)
         result[means] += evs[means]/numtraj
         result[variances] += (evs[variances]+evs[varmeans]**2)/numtraj
         result[stdevs] += (evs[stdevs]**2+evs[stdevmeans]**2)/numtraj
