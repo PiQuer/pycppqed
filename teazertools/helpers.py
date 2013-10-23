@@ -150,6 +150,8 @@ def retrieveObject(argv):
     return job
 
 class VariableParameters(object):
+    r"""This class represents a group of parameters to iterate over. It is one of the central classes of the :mod:`teazertools.submitter`.
+    """
     def __init__(self, parameterValues=dict(), parameterGroups=(), combine=True):
         self.parameterValues = parameterValues
         if not combine:
