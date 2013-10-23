@@ -112,11 +112,11 @@ The keywords in this section are (optional keywords italic)
 * **seeds**: This specifies the sets of seeds for each trajectory ensemble. This can be single seed number,
   a comma separated list of seeds or a range in matlab syntax (`start:step:stop`).
 * *matlab*: (default `True`) Convert output trajectories and statevectors to matlab format.
+* *average*: (default `True`) Calculate the averages of the expectation values (see :ref:`averages_ref`)
+* *postprocess*: (default unset) name of a python class to perform more complex postprocessing of the data on the cluster 
+  (see :ref:`postprocessing_ref`)
 * *numericsubdirs*:  (default `True`) Instead of descriptive sub-directories which involve the values of the varied parameters,
   use numeric sub-directories 01/, 02/ etc. This can be convenient for further data procession. (default `False`)
-* *combine*: If `True`, simulate all possible combinations of parameters with a range. If `False`, simulate
-  one ensemble with the first value of all range parameters, one with the second value and so on until one
-  of the ranges is exhausted.
 * *testrun_t*: (default 1) Use this value as `-T` parameter in testruns.
 * *testrun_dt*:  (default: don't modify -Dt) Use this value as `-Dt` parameter in testruns.
 * *compress*:  (default `False`) Compress all trajectories and statevectors. Text files are compressed with bzip2, matlab files are
@@ -146,7 +146,9 @@ The keywords in this section are (optional keywords italic)
   uses a slot of the scheduler. This option can be used to request that always a complete node should be filled.
 * *binary*: (default: `False`) Use binary output for state vector files. Note that C++Qed has to be built with the `enable-binary-output=yes`
   if this is set to `True`.   
-  
+
+.. _averages_ref:
+
 [Averages]
 __________
   
@@ -171,8 +173,48 @@ list of the correct positions.
 ____________
 
 Every `key=value` pair in this section will be passed on to the C++QED script as a ``--key value`` command line
-parameter. The `value` can also be a range (a semicolon separated list of values). In this case, a trajectory ensemble
-will be submitted for each value (or combination of values if several parameters have a range).
+parameter. The `value` can also be a range (a semicolon separated list of values or in Matlab syntax ``start:step:stop``). 
+In this case, a trajectory ensemble will be submitted for each value (or combination of values if several parameters have a range).
+
+You can refer to other values in the same configuration file by using `key=%(other_key)s`.
+
+Parameters can be grouped. The values in each group are iterated ``in parallel``, that means there have to be the same
+amount of values for each parameter within a group. Between different groups, all possible combinations of parameters are
+generated. To define parameter groups, use `pargroupN=key1,key2,...`, where N is a number. For example, for a detuning scan
+of a ring parameter with sine and cosine mode, one could use in the parameters section of the configuration file::
+
+	[Parameters]
+	pargroup1=deltaCSin,deltaCCos
+	pargroup2=UnotSin,UnotCos
+	deltaCSin=-8.5:0.5:-4.5
+	deltaCCos=%(deltaCSin)s
+	UnotSin=-2.5;-3.5
+	UnotCos=%(UnotSin)s
+	...
+
+The definitions of the pargroups guarantee that the detuning and U0 is always the same for sine and the cosine mode in each run. 
+The submitter will iterate over all detunings between -8.5 and -4.5 in steps of 0.5, and for each detuning it will use the two values of -2.5 and
+-3.5 for U0. 
+
+.. _postprocessing_ref :
+
+Further postprocessing
+______________________  
+
+The method described in :ref:`averages_ref` is usually enough to calculate averages of the expectation values. However, sometimes
+it is convenient to use the cluster for more involved postprocessing of the data. With the `postprocess` configuration parameter one
+can name a python class. This class will be imported and an object will be generated on the executing node with the following signature:
+
+	PostprocessingClass(basename, varPars, datapath, numericsubdirs)
+
+* `basename` is the basename of all trajectory files.
+* `varPars` is a :class:`teazertools.helpers.VariableParameters` object
+* `datapath` is the path to the data, below which all the parameter set subdirectories reside
+* `numericsubdirs` is a flag which indicates if the subdirectories are numeric or descriptive
+
+The class has to implement a member function `postprocess` which takes an argument `subset`. This `subset` is a dictionary which
+specifies a subset of all possible parameter values (see :meth:`teazertools.helpers.VariableParameters.parGen`). Upon successful creation of
+the object, the member funciton `postprocess` is called.
 
 Installation and Usage
 ----------------------
@@ -193,8 +235,10 @@ The options can be:
 * ``--class=CLASS``: Use CLASS as submitter class. This defaults to :class:`teazertools.submitter.GenericSubmitter`,
   and typically CLASS is a subclass of this to extend functionality.
 * ``--verbose``: Verbose debugging output.
-* ``--averageonly``: Only submit the job to compute the average expectation values
+* ``--averageonly``: Only submit the job to compute the average expectation values (see :ref:`averages_ref`)
+* ``--postprocessonly``: Only submit the job to do the advanced postprocessing (see :ref:`postprocessing_ref`)
 * ``--class=CLASS``:  Use CLASS instead of :class:`teazertools.submitter.GenericSubmitter`,
   typically `CLASS` is a subclass of `GenericSubmitter`
 * ``--depend=ID``:  Make created job array depend on this job ID.
+* ``--subset=SUBSET``: a string describing a python dict to restrict all possible parameter values to the given subset, e.g. `{'par1':[1,2,3]}`
 * ``-h`` or ``--help``: Print help message.
