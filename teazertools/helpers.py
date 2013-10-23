@@ -1,4 +1,4 @@
-""" This module defines some helper functions.
+""" This module defines some helper functions and the class :class:`VariableParameters`.
 """
 
 import os
@@ -150,7 +150,29 @@ def retrieveObject(argv):
     return job
 
 class VariableParameters(object):
-    r"""This class represents a group of parameters to iterate over. It is one of the central classes of the :mod:`teazertools.submitter`.
+    r"""This class represents a group of parameters to iterate over. It is one of the central classes of the :mod:`teazertools.submitter`,
+    as it allows to specify parameter sweeps and allows slicing (e.g. keeping one parameter constant while sweeping the other).
+    
+    Parameters can be grouped together with `parameterGroups`. Within each group of parameters, the values are iterated in parallel. If not
+    all parameters within one group have the same amount of values, `ValueError` is raised.
+    Between different groups of parameters, all possible combinations are generated. By default, each parameter
+    is in a group of its own.
+    
+    Example:
+    
+        >>> import teazertools.helpers as helpers
+        >>> varPars=helpers.VariableParameters(parameterValues=dict(par1=[1,2],par2=[3,4],par3=[5,6]),parameterGroups=[['par1','par2']])
+        >>> list(varPars.parGen())
+        [{'par1': 1, 'par2': 3, 'par3': 5},
+        {'par1': 1, 'par2': 3, 'par3': 6},
+        {'par1': 2, 'par2': 4, 'par3': 5},
+        {'par1': 2, 'par2': 4, 'par3': 6}]
+
+    :param parameterValues: Dictionary of the structure `{par1:[val1,val2,...], par2:[val1,val2,...], ...}`
+    :type parameterValues: dict
+    :param parameterGroups: List of the structure `[[par1,par2,...],[par3,par4,...],...]`
+    :param combine: Convenience parameter. If set to `False`, all parameters are put into one single group automatically.
+    :type combine:bool 
     """
     def __init__(self, parameterValues=dict(), parameterGroups=(), combine=True):
         self.parameterValues = parameterValues
@@ -161,6 +183,15 @@ class VariableParameters(object):
         self._checkParameterGroups()
         self.default_subset=dict()
     def subdir(self, parSet, numeric=False):
+        r"""Give the subdirectory name for a given parSet, either numeric (if `numeric=True`) or descriptive.
+        
+        :param parSet: the parameter set
+        :type parSet: dict
+        :param numeric: return numeric subdir if `True`
+        :type numeric: bool
+        :returns: the name of the subdirectory
+        :retval: str
+        """
         if numeric:
             return "%02d"%(sorted(list(self.parGen())).index(parSet)+1)
         else:
@@ -189,6 +220,32 @@ class VariableParameters(object):
             if keep: return True
         return False
     def parGen(self, subset=None):
+        r"""Iterator over all parameter sets. Slicing is possible with the `subset parameter`.
+        
+        Example:
+        
+            >>> import teazertools.helpers as helpers
+            >>> varPars=helpers.VariableParameters(parameterValues=dict(par1=[1,2,3,4],par2=[-1,-2,-3,-4],par3=[5,6]),parameterGroups=[['par1','par2']])
+            >>> list(varPars.parGen())
+            [{'par1': 1, 'par2': -1, 'par3': 5},
+            {'par1': 1, 'par2': -1, 'par3': 6},
+            {'par1': 2, 'par2': -2, 'par3': 5},
+            {'par1': 2, 'par2': -2, 'par3': 6},
+            {'par1': 3, 'par2': -3, 'par3': 5},
+            {'par1': 3, 'par2': -3, 'par3': 6},
+            {'par1': 4, 'par2': -4, 'par3': 5},
+            {'par1': 4, 'par2': -4, 'par3': 6}]
+            >>> list(varPars.parGen(subset=dict(par1=1)))
+            [{'par1': 1, 'par2': -1, 'par3': 5}, {'par1': 1, 'par2': -1, 'par3': 6}]
+            >>> list(varPars.parGen(subset=dict(par1=[2,3],par3=5)))
+            [{'par1': 2, 'par2': -2, 'par3': 5}, {'par1': 3, 'par2': -3, 'par3': 5}]
+        
+        :param subset: A subset to which the list of parameter sets is restrained.
+        :type subset: dict
+        :returns: Iterator over parameter sets (dictionaries).
+        :retval: iterator
+         
+        """
         if subset is None: subset={}
         if len(self.parameterValues) == 0:
             yield dict()
