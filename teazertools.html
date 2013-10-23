@@ -151,11 +151,11 @@ trajectory and log files.</li>
 <li><strong>seeds</strong>: This specifies the sets of seeds for each trajectory ensemble. This can be single seed number,
 a comma separated list of seeds or a range in matlab syntax (<cite>start:step:stop</cite>).</li>
 <li><em>matlab</em>: (default <cite>True</cite>) Convert output trajectories and statevectors to matlab format.</li>
+<li><em>average</em>: (default <cite>True</cite>) Calculate the averages of the expectation values (see <a class="reference internal" href="#averages-ref"><em>[Averages]</em></a>)</li>
+<li><em>postprocess</em>: (default unset) name of a python class to perform more complex postprocessing of the data on the cluster
+(see <a class="reference internal" href="#postprocessing-ref"><em>Further postprocessing</em></a>)</li>
 <li><em>numericsubdirs</em>:  (default <cite>True</cite>) Instead of descriptive sub-directories which involve the values of the varied parameters,
 use numeric sub-directories 01/, 02/ etc. This can be convenient for further data procession. (default <cite>False</cite>)</li>
-<li><em>combine</em>: If <cite>True</cite>, simulate all possible combinations of parameters with a range. If <cite>False</cite>, simulate
-one ensemble with the first value of all range parameters, one with the second value and so on until one
-of the ranges is exhausted.</li>
 <li><em>testrun_t</em>: (default 1) Use this value as <cite>-T</cite> parameter in testruns.</li>
 <li><em>testrun_dt</em>:  (default: don&#8217;t modify -Dt) Use this value as <cite>-Dt</cite> parameter in testruns.</li>
 <li><em>compress</em>:  (default <cite>False</cite>) Compress all trajectories and statevectors. Text files are compressed with bzip2, matlab files are
@@ -188,7 +188,7 @@ if this is set to <cite>True</cite>.</li>
 </ul>
 </div>
 <div class="section" id="averages">
-<h4>[Averages]<a class="headerlink" href="#averages" title="Permalink to this headline">¶</a></h4>
+<span id="averages-ref"></span><h4>[Averages]<a class="headerlink" href="#averages" title="Permalink to this headline">¶</a></h4>
 <p>In order to calculate the averaged expectation values correctly, the script has to know which columns
 correspond to regular expectation values, variations and standard deviations, respectively. Column numbering
 starts with 1.</p>
@@ -208,8 +208,42 @@ list of the correct positions.</p>
 <div class="section" id="parameters">
 <h4>[Parameters]<a class="headerlink" href="#parameters" title="Permalink to this headline">¶</a></h4>
 <p>Every <cite>key=value</cite> pair in this section will be passed on to the C++QED script as a <tt class="docutils literal"><span class="pre">--key</span> <span class="pre">value</span></tt> command line
-parameter. The <cite>value</cite> can also be a range (a semicolon separated list of values). In this case, a trajectory ensemble
-will be submitted for each value (or combination of values if several parameters have a range).</p>
+parameter. The <cite>value</cite> can also be a range (a semicolon separated list of values or in Matlab syntax <tt class="docutils literal"><span class="pre">start:step:stop</span></tt>).
+In this case, a trajectory ensemble will be submitted for each value (or combination of values if several parameters have a range).</p>
+<p>You can refer to other values in the same configuration file by using <cite>key=%(other_key)s</cite>.</p>
+<p>Parameters can be grouped. The values in each group are iterated <tt class="docutils literal"><span class="pre">in</span> <span class="pre">parallel</span></tt>, that means there have to be the same
+amount of values for each parameter within a group. Between different groups, all possible combinations of parameters are
+generated. To define parameter groups, use <cite>pargroupN=key1,key2,...</cite>, where N is a number. For example, for a detuning scan
+of a ring parameter with sine and cosine mode, one could use in the parameters section of the configuration file:</p>
+<div class="highlight-python"><pre>[Parameters]
+pargroup1=deltaCSin,deltaCCos
+pargroup2=UnotSin,UnotCos
+deltaCSin=-8.5:0.5:-4.5
+deltaCCos=%(deltaCSin)s
+UnotSin=-2.5;-3.5
+UnotCos=%(UnotSin)s
+...</pre>
+</div>
+<p>The definitions of the pargroups guarantee that the detuning and U0 is always the same for sine and the cosine mode in each run.
+The submitter will iterate over all detunings between -8.5 and -4.5 in steps of 0.5, and for each detuning it will use the two values of -2.5 and
+-3.5 for U0.</p>
+</div>
+<div class="section" id="further-postprocessing">
+<span id="postprocessing-ref"></span><h4>Further postprocessing<a class="headerlink" href="#further-postprocessing" title="Permalink to this headline">¶</a></h4>
+<p>The method described in <a class="reference internal" href="#averages-ref"><em>[Averages]</em></a> is usually enough to calculate averages of the expectation values. However, sometimes
+it is convenient to use the cluster for more involved postprocessing of the data. With the <cite>postprocess</cite> configuration parameter one
+can name a python class. This class will be imported and an object will be generated on the executing node with the following signature:</p>
+<blockquote>
+<div>PostprocessingClass(basename, varPars, datapath, numericsubdirs)</div></blockquote>
+<ul class="simple">
+<li><cite>basename</cite> is the basename of all trajectory files.</li>
+<li><cite>varPars</cite> is a <a class="reference internal" href="reference_teazertools.html#teazertools.helpers.VariableParameters" title="teazertools.helpers.VariableParameters"><tt class="xref py py-class docutils literal"><span class="pre">teazertools.helpers.VariableParameters</span></tt></a> object</li>
+<li><cite>datapath</cite> is the path to the data, below which all the parameter set subdirectories reside</li>
+<li><cite>numericsubdirs</cite> is a flag which indicates if the subdirectories are numeric or descriptive</li>
+</ul>
+<p>The class has to implement a member function <cite>postprocess</cite> which takes an argument <cite>subset</cite>. This <cite>subset</cite> is a dictionary which
+specifies a subset of all possible parameter values (see <a class="reference internal" href="reference_teazertools.html#teazertools.helpers.VariableParameters.parGen" title="teazertools.helpers.VariableParameters.parGen"><tt class="xref py py-meth docutils literal"><span class="pre">teazertools.helpers.VariableParameters.parGen()</span></tt></a>). Upon successful creation of
+the object, the member funciton <cite>postprocess</cite> is called.</p>
 </div>
 </div>
 <div class="section" id="installation-and-usage">
@@ -229,10 +263,12 @@ This can be used to test if the command line is correct and the program will run
 <li><tt class="docutils literal"><span class="pre">--class=CLASS</span></tt>: Use CLASS as submitter class. This defaults to <a class="reference internal" href="reference_teazertools.html#teazertools.submitter.GenericSubmitter" title="teazertools.submitter.GenericSubmitter"><tt class="xref py py-class docutils literal"><span class="pre">teazertools.submitter.GenericSubmitter</span></tt></a>,
 and typically CLASS is a subclass of this to extend functionality.</li>
 <li><tt class="docutils literal"><span class="pre">--verbose</span></tt>: Verbose debugging output.</li>
-<li><tt class="docutils literal"><span class="pre">--averageonly</span></tt>: Only submit the job to compute the average expectation values</li>
+<li><tt class="docutils literal"><span class="pre">--averageonly</span></tt>: Only submit the job to compute the average expectation values (see <a class="reference internal" href="#averages-ref"><em>[Averages]</em></a>)</li>
+<li><tt class="docutils literal"><span class="pre">--postprocessonly</span></tt>: Only submit the job to do the advanced postprocessing (see <a class="reference internal" href="#postprocessing-ref"><em>Further postprocessing</em></a>)</li>
 <li><tt class="docutils literal"><span class="pre">--class=CLASS</span></tt>:  Use CLASS instead of <a class="reference internal" href="reference_teazertools.html#teazertools.submitter.GenericSubmitter" title="teazertools.submitter.GenericSubmitter"><tt class="xref py py-class docutils literal"><span class="pre">teazertools.submitter.GenericSubmitter</span></tt></a>,
 typically <cite>CLASS</cite> is a subclass of <cite>GenericSubmitter</cite></li>
 <li><tt class="docutils literal"><span class="pre">--depend=ID</span></tt>:  Make created job array depend on this job ID.</li>
+<li><tt class="docutils literal"><span class="pre">--subset=SUBSET</span></tt>: a string describing a python dict to restrict all possible parameter values to the given subset, e.g. <cite>{&#8216;par1&#8217;:[1,2,3]}</cite></li>
 <li><tt class="docutils literal"><span class="pre">-h</span></tt> or <tt class="docutils literal"><span class="pre">--help</span></tt>: Print help message.</li>
 </ul>
 </div>
@@ -255,6 +291,7 @@ typically <cite>CLASS</cite> is a subclass of <cite>GenericSubmitter</cite></li>
 <li><a class="reference internal" href="#config">[Config]</a></li>
 <li><a class="reference internal" href="#averages">[Averages]</a></li>
 <li><a class="reference internal" href="#parameters">[Parameters]</a></li>
+<li><a class="reference internal" href="#further-postprocessing">Further postprocessing</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#installation-and-usage">Installation and Usage</a></li>

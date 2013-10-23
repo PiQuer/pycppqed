@@ -93,7 +93,7 @@
 
 <dl class="class">
 <dt id="teazertools.submitter.JobArray">
-<em class="property">class </em><tt class="descclassname">teazertools.submitter.</tt><tt class="descname">JobArray</tt><big>(</big><em>script, basename=None, parameters={}, basedir='.', tempdir='/tmp', seeds=[1001], config={}</em><big>)</big><a class="headerlink" href="#teazertools.submitter.JobArray" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">teazertools.submitter.</tt><tt class="descname">JobArray</tt><big>(</big><em>script, basename=None, parSet={}, varPars=None, parameters={}, basedir='.', tempdir='/tmp', seeds=[1001], config={}</em><big>)</big><a class="headerlink" href="#teazertools.submitter.JobArray" title="Permalink to this definition">¶</a></dt>
 <dd><p>This class represents a job array to simulate a trajectory ensemble. A job array is characterized by
 a set of seeds, one seed for each trajectory, and a set of C++QED parameters identical for all seed. Functions
 are provided to submit the job array to the teazer cluster (test run is possible) or to simulate a specific
@@ -137,7 +137,6 @@ deviations.</li>
 <li><strong>resume</strong> &#8211; Resume trajectories (default False)</li>
 <li><strong>testrun_t</strong> &#8211; Final time to integrate in testruns (default 1)</li>
 <li><strong>testrn_dt</strong> &#8211; -Dt for testruns (default None)</li>
-<li><strong>combine</strong> &#8211; If <cite>True</cite>, use all possible combinations of parameters (default True)</li>
 <li><strong>cluster</strong> &#8211; Each job should calculate this many trajectories (default 1)</li>
 </ul>
 </td>
@@ -224,7 +223,102 @@ have been called.</li>
 </div>
 <div class="section" id="module-teazertools.helpers">
 <span id="teazertools-helpers"></span><h2><a class="toc-backref" href="#contents"><a class="reference internal" href="#module-teazertools.helpers" title="teazertools.helpers"><tt class="xref py py-mod docutils literal"><span class="pre">teazertools.helpers</span></tt></a></a><a class="headerlink" href="#module-teazertools.helpers" title="Permalink to this headline">¶</a></h2>
-<p>This module defines some helper functions.</p>
+<p>This module defines some helper functions and the class <a class="reference internal" href="#teazertools.helpers.VariableParameters" title="teazertools.helpers.VariableParameters"><tt class="xref py py-class docutils literal"><span class="pre">VariableParameters</span></tt></a>.</p>
+<dl class="class">
+<dt id="teazertools.helpers.VariableParameters">
+<em class="property">class </em><tt class="descclassname">teazertools.helpers.</tt><tt class="descname">VariableParameters</tt><big>(</big><em>parameterValues={}</em>, <em>parameterGroups=()</em>, <em>combine=True</em><big>)</big><a class="headerlink" href="#teazertools.helpers.VariableParameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class represents a group of parameters to iterate over. It is one of the central classes of the <a class="reference internal" href="#module-teazertools.submitter" title="teazertools.submitter"><tt class="xref py py-mod docutils literal"><span class="pre">teazertools.submitter</span></tt></a>,
+as it allows to specify parameter sweeps and allows slicing (e.g. keeping one parameter constant while sweeping the other).</p>
+<p>Parameters can be grouped together with <cite>parameterGroups</cite>. Within each group of parameters, the values are iterated in parallel. If not
+all parameters within one group have the same amount of values, <cite>ValueError</cite> is raised.
+Between different groups of parameters, all possible combinations are generated. By default, each parameter
+is in a group of its own.</p>
+<p>Example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">teazertools.helpers</span> <span class="kn">as</span> <span class="nn">helpers</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">varPars</span><span class="o">=</span><span class="n">helpers</span><span class="o">.</span><span class="n">VariableParameters</span><span class="p">(</span><span class="n">parameterValues</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">par1</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">],</span><span class="n">par2</span><span class="o">=</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">],</span><span class="n">par3</span><span class="o">=</span><span class="p">[</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">]),</span><span class="n">parameterGroups</span><span class="o">=</span><span class="p">[[</span><span class="s">&#39;par1&#39;</span><span class="p">,</span><span class="s">&#39;par2&#39;</span><span class="p">]])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">list</span><span class="p">(</span><span class="n">varPars</span><span class="o">.</span><span class="n">parGen</span><span class="p">())</span>
+<span class="go">[{&#39;par1&#39;: 1, &#39;par2&#39;: 3, &#39;par3&#39;: 5},</span>
+<span class="go">{&#39;par1&#39;: 1, &#39;par2&#39;: 3, &#39;par3&#39;: 6},</span>
+<span class="go">{&#39;par1&#39;: 2, &#39;par2&#39;: 4, &#39;par3&#39;: 5},</span>
+<span class="go">{&#39;par1&#39;: 2, &#39;par2&#39;: 4, &#39;par3&#39;: 6}]</span>
+</pre></div>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>parameterValues</strong> (<em>dict</em>) &#8211; Dictionary of the structure <cite>{par1:[val1,val2,...], par2:[val1,val2,...], ...}</cite></li>
+<li><strong>parameterGroups</strong> &#8211; List of the structure <cite>[[par1,par2,...],[par3,par4,...],...]</cite></li>
+<li><strong>combine</strong> &#8211; Convenience parameter. If set to <cite>False</cite>, all parameters are put into one single group automatically.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>:type combine:bool</p>
+<dl class="method">
+<dt id="teazertools.helpers.VariableParameters.parGen">
+<tt class="descname">parGen</tt><big>(</big><em>subset=None</em><big>)</big><a class="headerlink" href="#teazertools.helpers.VariableParameters.parGen" title="Permalink to this definition">¶</a></dt>
+<dd><p>Iterator over all parameter sets. Slicing is possible with the <cite>subset parameter</cite>.</p>
+<p>Example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">teazertools.helpers</span> <span class="kn">as</span> <span class="nn">helpers</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">varPars</span><span class="o">=</span><span class="n">helpers</span><span class="o">.</span><span class="n">VariableParameters</span><span class="p">(</span><span class="n">parameterValues</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">par1</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">],</span><span class="n">par2</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span><span class="o">-</span><span class="mi">4</span><span class="p">],</span><span class="n">par3</span><span class="o">=</span><span class="p">[</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">]),</span><span class="n">parameterGroups</span><span class="o">=</span><span class="p">[[</span><span class="s">&#39;par1&#39;</span><span class="p">,</span><span class="s">&#39;par2&#39;</span><span class="p">]])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">list</span><span class="p">(</span><span class="n">varPars</span><span class="o">.</span><span class="n">parGen</span><span class="p">())</span>
+<span class="go">[{&#39;par1&#39;: 1, &#39;par2&#39;: -1, &#39;par3&#39;: 5},</span>
+<span class="go">{&#39;par1&#39;: 1, &#39;par2&#39;: -1, &#39;par3&#39;: 6},</span>
+<span class="go">{&#39;par1&#39;: 2, &#39;par2&#39;: -2, &#39;par3&#39;: 5},</span>
+<span class="go">{&#39;par1&#39;: 2, &#39;par2&#39;: -2, &#39;par3&#39;: 6},</span>
+<span class="go">{&#39;par1&#39;: 3, &#39;par2&#39;: -3, &#39;par3&#39;: 5},</span>
+<span class="go">{&#39;par1&#39;: 3, &#39;par2&#39;: -3, &#39;par3&#39;: 6},</span>
+<span class="go">{&#39;par1&#39;: 4, &#39;par2&#39;: -4, &#39;par3&#39;: 5},</span>
+<span class="go">{&#39;par1&#39;: 4, &#39;par2&#39;: -4, &#39;par3&#39;: 6}]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">list</span><span class="p">(</span><span class="n">varPars</span><span class="o">.</span><span class="n">parGen</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">par1</span><span class="o">=</span><span class="mi">1</span><span class="p">)))</span>
+<span class="go">[{&#39;par1&#39;: 1, &#39;par2&#39;: -1, &#39;par3&#39;: 5}, {&#39;par1&#39;: 1, &#39;par2&#39;: -1, &#39;par3&#39;: 6}]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">list</span><span class="p">(</span><span class="n">varPars</span><span class="o">.</span><span class="n">parGen</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">par1</span><span class="o">=</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">],</span><span class="n">par3</span><span class="o">=</span><span class="mi">5</span><span class="p">)))</span>
+<span class="go">[{&#39;par1&#39;: 2, &#39;par2&#39;: -2, &#39;par3&#39;: 5}, {&#39;par1&#39;: 3, &#39;par2&#39;: -3, &#39;par3&#39;: 5}]</span>
+</pre></div>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>subset</strong> (<em>dict</em>) &#8211; A subset to which the list of parameter sets is restrained.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Iterator over parameter sets (dictionaries).</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Retval :</th><td class="field-body">iterator</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="teazertools.helpers.VariableParameters.subdir">
+<tt class="descname">subdir</tt><big>(</big><em>parSet</em>, <em>numeric=False</em><big>)</big><a class="headerlink" href="#teazertools.helpers.VariableParameters.subdir" title="Permalink to this definition">¶</a></dt>
+<dd><p>Give the subdirectory name for a given parSet, either numeric (if <cite>numeric=True</cite>) or descriptive.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>parSet</strong> (<em>dict</em>) &#8211; the parameter set</li>
+<li><strong>numeric</strong> (<em>bool</em>) &#8211; return numeric subdir if <cite>True</cite></li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">the name of the subdirectory</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Retval :</th><td class="field-body"><p class="first last">str</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
 <dl class="function">
 <dt id="teazertools.helpers.cppqed_t">
 <tt class="descclassname">teazertools.helpers.</tt><tt class="descname">cppqed_t</tt><big>(</big><em>filename</em><big>)</big><a class="headerlink" href="#teazertools.helpers.cppqed_t" title="Permalink to this definition">¶</a></dt>
@@ -286,24 +380,6 @@ not be loaded.</td>
 </dd></dl>
 
 <dl class="function">
-<dt id="teazertools.helpers.matlab_range_to_list">
-<tt class="descclassname">teazertools.helpers.</tt><tt class="descname">matlab_range_to_list</tt><big>(</big><em>s</em><big>)</big><a class="headerlink" href="#teazertools.helpers.matlab_range_to_list" title="Permalink to this definition">¶</a></dt>
-<dd><p>Generate a list from a matlab-style range definition.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>s</strong> (<em>str</em>) &#8211; A range definition of the form <cite>start:[step:]stop</cite>. Only integers are supported, and <cite>stop</cite> is included.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A list <cite>[start,...,stop]</cite></td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Retval :</th><td class="field-body">list</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
 <dt id="teazertools.helpers.mkdir_p">
 <tt class="descclassname">teazertools.helpers.</tt><tt class="descname">mkdir_p</tt><big>(</big><em>path</em><big>)</big><a class="headerlink" href="#teazertools.helpers.mkdir_p" title="Permalink to this definition">¶</a></dt>
 <dd><p><a class="reference external" href="http://stackoverflow.com/questions/600268/mkdir-p-functionality-in-python">http://stackoverflow.com/questions/600268/mkdir-p-functionality-in-python</a></p>
@@ -321,6 +397,24 @@ not be loaded.</td>
 <dd><p>Remove a file if it exists, otherwise do nothing</p>
 </dd></dl>
 
+<dl class="function">
+<dt id="teazertools.helpers.string_range_to_list">
+<tt class="descclassname">teazertools.helpers.</tt><tt class="descname">string_range_to_list</tt><big>(</big><em>s</em><big>)</big><a class="headerlink" href="#teazertools.helpers.string_range_to_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate a list from a matlab-style range definition.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>s</strong> (<em>str</em>) &#8211; A range definition of the form <cite>start:[step:]stop</cite>. Only integers are supported, and <cite>stop</cite> is included.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A list <cite>[start,...,stop]</cite></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Retval :</th><td class="field-body">list</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 </div>
 <div class="section" id="module-teazertools.mean">
 <span id="teazertools-mean"></span><h2><a class="toc-backref" href="#contents"><a class="reference internal" href="#module-teazertools.mean" title="teazertools.mean"><tt class="xref py py-mod docutils literal"><span class="pre">teazertools.mean</span></tt></a></a><a class="headerlink" href="#module-teazertools.mean" title="Permalink to this headline">¶</a></h2>
@@ -329,7 +423,7 @@ the results to a file. It is also possible to convert the results to a format re
 function is <a class="reference internal" href="#teazertools.mean.calculateMeans" title="teazertools.mean.calculateMeans"><tt class="xref py py-func docutils literal"><span class="pre">calculateMeans()</span></tt></a>.</p>
 <dl class="function">
 <dt id="teazertools.mean.calculateMeans">
-<tt class="descclassname">teazertools.mean.</tt><tt class="descname">calculateMeans</tt><big>(</big><em>basename</em>, <em>expvals=</em><span class="optional">[</span><span class="optional">]</span>, <em>variances=</em><span class="optional">[</span><span class="optional">]</span>, <em>varmeans=</em><span class="optional">[</span><span class="optional">]</span>, <em>stdevs=</em><span class="optional">[</span><span class="optional">]</span>, <em>stdevmeans=</em><span class="optional">[</span><span class="optional">]</span>, <em>datadir='.'</em>, <em>outputdir='.'</em>, <em>usesaved=True</em>, <em>matlab=True</em>, <em>bz2only=False</em><big>)</big><a class="headerlink" href="#teazertools.mean.calculateMeans" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">teazertools.mean.</tt><tt class="descname">calculateMeans</tt><big>(</big><em>basename</em>, <em>evslist=None</em>, <em>expvals=</em><span class="optional">[</span><span class="optional">]</span>, <em>variances=</em><span class="optional">[</span><span class="optional">]</span>, <em>varmeans=</em><span class="optional">[</span><span class="optional">]</span>, <em>stdevs=</em><span class="optional">[</span><span class="optional">]</span>, <em>stdevmeans=</em><span class="optional">[</span><span class="optional">]</span>, <em>datadir='.'</em>, <em>outputdir='.'</em>, <em>matlab=True</em>, <em>bz2only=False</em><big>)</big><a class="headerlink" href="#teazertools.mean.calculateMeans" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculate the mean expectation values, mean variances and mean standard deviations from an
 ensemble of C++QED MCWF trajectories. The results are saved to a file.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -347,9 +441,6 @@ are expected in the column just before each variance, respectively.</li>
 <li><strong>stdevmeans</strong> (<em>list</em>) &#8211; See <cite>varmeans</cite></li>
 <li><strong>datadir</strong> (<em>str</em>) &#8211; Directory name from which files are loaded.</li>
 <li><strong>outputdir</strong> (<em>str</em>) &#8211; Directory name where output is written to. If this is <cite>None</cite>, don&#8217;t write anny output.</li>
-<li><strong>usesaved</strong> &#8211; If true, only calculate the results if they have not been calculated before, otherwise try to load
-results from the output directory. Previously calculated results are only used if all trajectory files are
-older than the result file and if the set of <cite>expval</cite>, <cite>stdevs</cite>, <cite>variances</cite> etc is identical.</li>
 <li><strong>matlab</strong> &#8211; Also convert results to matlab format and save a .mat file.</li>
 </ul>
 </td>
