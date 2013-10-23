@@ -110,7 +110,10 @@ def string_range_to_list(s):
     return range_to_list(start,stop,step)
 
 def range_to_list(start,stop,step=1):
-    return map(_int_if_int,list(np.arange(start,stop+step,step)))
+    result = map(_int_if_int,list(np.arange(start,stop+step,step)))
+    while result[-1]>stop:
+        result.pop()
+    return result
 
 def string_range_to_string(s,sep=";"):
     return sep.join(map(str,string_range_to_list(s)))
