@@ -62,16 +62,15 @@ class JobArray(object):
     :param resume: Resume trajectories (default False)
     :param testrun_t: Final time to integrate in testruns (default 1)
     :param testrn_dt: -Dt for testruns (default None)
-    :param combine: If `True`, use all possible combinations of parameters (default True)
     :param cluster: Each job should calculate this many trajectories (default 1)
     """
-    def __init__(self,script,basename=None, parSet=dict(), varPars=helpers.VariableParameters(), parameters={},basedir='.',tempdir='/tmp',seeds=[1001], config={}):
+    def __init__(self,script,basename=None, parSet=dict(), varPars=None, parameters={},basedir='.',tempdir='/tmp',seeds=[1001], config={}):
         self.C = dict(averageids={},qsub={}, qsub_traj={}, qsub_average={}, qsub_test={}, diagnostics=True,
                       matlab=True, average=True, compress=True, resume=False, testrun_t=1, testrun_dt = None,
-                      usetemp=True, combine=True, cluster=1)
+                      usetemp=True, cluster=1)
         self.C.update(config)
         self.parSet = parSet
-        self.varPars = varPars
+        self.varPars = varPars if not varPars is None else helpers.VariableParameters()
         self.script = script
         self.parameters = parameters
         self.basedir=basedir
@@ -487,7 +486,6 @@ class GenericSubmitter(OptionParser, ConfigParser.SafeConfigParser):
         self.script = os.path.expanduser(self.get('Config','script'))
         self.read([self.defaultconfig,os.path.expanduser('~/.submitter/generic_submitter.conf'),
                      os.path.expanduser('~/.submitter/'+os.path.basename(self.script)+'.conf'), self.config])
-        self.combine = self.getboolean('Config', 'combine')
         self.JobArrayParams['numericsubdirs'] = self.getboolean('Config', 'numericsubdirs')
         self.basedir = self.JobArrayParams['basedir'] = os.path.expanduser(self.get('Config', 'basedir'))
         self.JobArrayParams['confpath'] = os.path.dirname(os.path.realpath(self.config))
@@ -580,11 +578,6 @@ class GenericSubmitter(OptionParser, ConfigParser.SafeConfigParser):
     def _jobarray_maker(self, basedir, parameters, parSet):
         myjob = JobArray(self.script, basedir=basedir, parameters=parameters, seeds=self.seeds[:], parSet=parSet, varPars=self.varpars, config=self.JobArrayParams)
         return myjob
-        
-    def _combine_pars(self, rangepars):
-        if self.combine: generator = helpers.product(*rangepars)
-        else: generator = itertools.izip(*rangepars)
-        return generator
 
     def _generate_objects(self):
         def _expand_ranges(par):
