@@ -111,7 +111,7 @@ def string_range_to_list(s):
 
 def range_to_list(start,stop,step=1):
     result = map(_int_if_int,list(np.arange(start,stop+step,step)))
-    while result[-1]>stop:
+    while result[-1]>stop and not np.allclose(result[-1],stop):
         result.pop()
     return result
 
