@@ -4,20 +4,6 @@ import numpy as np
 import sys
 import os
 
-cio = Extension("pycppqed.cio", sources=["pycppqed/io.c"])
-
-library_dirs_args = filter(lambda s:s.startswith('--library-dirs'), sys.argv)
-if library_dirs_args:
-    library_dirs = []
-    for l in library_dirs_args:
-        library_dirs += l.split('=')[1].split(':')
-        sys.argv.remove(l)
-else:
-    library_dirs = None
-
-
-ciobin = Extension("pycppqed.ciobin", sources=["pycppqed/iobin.cc"], libraries=['boost_serialization','blitz'], library_dirs=library_dirs, runtime_library_dirs=library_dirs)
-
 class test(Command):
     """
     Run all available tests of pycppqed.
@@ -36,13 +22,6 @@ class test(Command):
         unittest.TextTestRunner(verbosity=2).run(suite)
 
 
-ext_modules = [cio]
-if '--add-iobin' in sys.argv:
-    ext_modules.append(ciobin)
-    sys.argv.remove('--add-iobin')
-
-
-
 setup(
     name = "PyCppQED",
     version = "0.1.2",
@@ -52,7 +31,6 @@ setup(
     license = "BSD",
     packages = ('pycppqed','teazertools'),
     package_data={'teazertools':['generic_submitter_defaults.conf']},
-    ext_modules = ext_modules,
     scripts=('bin/calculate_mean','bin/cppqedjob','bin/postprocessjob','bin/submitter'),
     cmdclass = {
         "test": test,
