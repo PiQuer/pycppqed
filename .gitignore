@@ -7,3 +7,4 @@ MANIFEST
 .*
 *.so
 teazertools/test/output/
+*.kdev4
