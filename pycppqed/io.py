@@ -19,9 +19,9 @@ except:
     print "C extension for 'io.py' is not used ..."
     cio = None
 try:
-    import ciobin
+    import cpypyqed.io as ciobin
 except:
-    print "C++ extension to support binary statevector files not available..."
+    print "C++QED python extension to support binary statevector files not available..."
     ciobin = None
 
 def _blitz2numpy(blitzstr):
@@ -173,7 +173,7 @@ def load_cppqed(filename, maxevs=None):
     Load a C++QED output file from the given location.
 
     *Usage*
-        >>> evs, svs = load_cppqed("ring.dat")
+        >>> evs = load_cppqed("ring.dat")
 
     *Arguments*
         * *filename*
@@ -183,14 +183,11 @@ def load_cppqed(filename, maxevs=None):
         * *evs*
             A :class:`pycppqed.expvalues.ExpectationValueCollection` holding
             all expectation values.
-        * *svs*
-            A :class:`pycppqed.statevector.StateVectorTrajectory` holding all
-            state vectors and information about the calculated system.
+
     """
     # Define handlers for state vector strings and expectation values strings.
     head = []
     evs = [] # Expectation values
-    svs = [] # State vectors
     basis = [None] # Holds last basis vector
     def ev_handler(evstr):
         parts = evstr.split("\t")
@@ -200,9 +197,7 @@ def load_cppqed(filename, maxevs=None):
         if not maxevs is None: ev = ev[:maxevs]
         evs.append(ev)
     def sv_handler(svstr):
-        t = evs[-1][0]
-        data = _blitz2numpy(svstr)
-        svs.append(statevector.StateVector(data, t, basis=basis[0]))
+      pass
     def basis_handler(header, svstr):
         pos1 = header.find("SYS<")+4
         pos2 = header.find(">", pos1)
@@ -228,11 +223,10 @@ def load_cppqed(filename, maxevs=None):
                 states
     _parse_cppqed(filename, head.append, ev_handler, sv_handler, basis_handler)
     evs = numpy.array(evs).swapaxes(0,1)
-    svstraj = statevector.StateVectorTrajectory(svs)
     time = evs[0,:]
     titles = []
     evstraj = expvalues.ExpectationValueCollection(evs, time=time, copy=False)
-    return evstraj, svstraj
+    return evstraj
 
 def load_statevector(filename):
     """
@@ -244,33 +238,18 @@ def load_statevector(filename):
     *Arguments*
         * *filename*
             Path to the C++QED state vector file that should be loaded.
-            If the filename ends with .svbin, the state vector file is expected to be
-            a binary file and a :class:`IOError` is raised if the required `ciobin` module is not
+            :class:`IOError` is raised if the required `cpypyqed.io` module is not
             available.
 
     *Returns*
         * *sv*
-            A :class:`pycppqed.statevector.StateVector` instance.
+            A :class:`pycppqed.statevector.StateVectorTrajectory` instance.
     """
-    if filename.endswith(".svbin"):
-        if ciobin:
-            (ba,t,_) = ciobin.parse(open(filename,'rb').read())
-            return statevector.StateVector(ba,t)
-        else:
-            raise IOError("C++ extension to support binary statevector files not available...")
-    f = _open_possibly_bz2(filename)
-    buf = f.read()
-    f.close()
-    if buf.startswith("# "): # Syntax of old statevector files.
-        commentstr, datastr = buf.split("\n", 1)
+    if ciobin:
+      (states, times) = ciobin.read(filename)[1:]
+      return statevector.StateVectorTrajectory(states,times)
     else:
-        datastr, commentstr = buf.rstrip(" \n\t").rsplit("\n", 1)
-        datastr = datastr.split('#',1)[0]
-        if not commentstr.startswith("# "):
-            raise ValueError("Not a valid statevector file.")
-    time = commentstr[2:commentstr.find(" ", 3)]
-    ba = _blitz2numpy(datastr)
-    return statevector.StateVector(ba, float(time))
+      raise IOError("C++ extension to support binary statevector files not available...")
 
 def save_statevector(filename, sv):
     """
@@ -289,16 +268,12 @@ def save_statevector(filename, sv):
         *sv*
             A :class:`pycppqed.statevector.StateVector` instance.
     """
-    if filename.endswith(".svbin"):
-        if ciobin:
-            ciobin.write(filename,sv,sv.time)
-            return
-        else:
-            raise IOError("C++ extension to support binary statevector files not available...")
-    f = open(filename, "w")
-    f.write(_numpy2blitz(sv))
-    f.write("\n# %s 1\n" % sv.time)
-    f.close()
+
+    if ciobin:
+        ciobin.write(filename,sv,sv.time)
+        return
+    else:
+        raise IOError("C++ extension to support binary statevector files not available...")
 
 def split_cppqed(readpath, writepath, header=True):
     """
